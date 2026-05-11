@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 type Size = 'sm' | 'md' | 'lg' | 'xl'
 
 type Props = {
@@ -29,9 +31,11 @@ export default function Avatar({ src, name, size = 'md', className = '' }: Props
       `}
     >
       {src ? (
-        <img
+        <Image
           src={src}
-          alt={name}
+          alt={name ?? ''}
+          width={96}
+          height={96}
           className="w-full h-full rounded-full object-cover"
         />
       ) : (

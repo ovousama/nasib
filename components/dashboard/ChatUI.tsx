@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { sendMessage, confirmMeeting, declineMeeting } from '@/app/dashboard/actions'
 import type { Message, MeetingRequest, ConnectionDetail } from '@/lib/database'
@@ -203,7 +202,6 @@ function MeetingCard({
 }
 
 export default function ChatUI({ connection, initialMessages, initialMeetings, currentUserId, checkinDone }: Props) {
-  const router = useRouter()
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [meetings, setMeetings] = useState<MeetingRequest[]>(initialMeetings)
   const [input, setInput] = useState('')

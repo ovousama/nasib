@@ -12,12 +12,6 @@ function StatCard({
   href: string
   color?: 'green' | 'amber' | 'blue' | 'gray'
 }) {
-  const colors = {
-    green: 'bg-[#F5E6F2] text-[#AF4D98] border-[#AF4D98]/20',
-    amber: 'bg-amber-50 text-amber-700 border-amber-100',
-    blue: 'bg-blue-50 text-blue-700 border-blue-100',
-    gray: 'bg-[#FDFAF7] text-[#1A1A1A] border-[#EBEBEB]',
-  }
   return (
     <Link href={href} className="bg-white rounded-2xl p-5 shadow-sm border border-[#EBEBEB] hover:border-[#AF4D98] transition-colors block">
       <p className="text-sm text-[#6B6B6B] mb-1">{label}</p>

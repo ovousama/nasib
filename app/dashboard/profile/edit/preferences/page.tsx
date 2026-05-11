@@ -19,6 +19,7 @@ export default function EditPreferencesPage() {
   const [spouseAgeMax, setSpouseAgeMax] = useState<number | ''>('')
   const [dealbreakers, setDealbreakers] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()

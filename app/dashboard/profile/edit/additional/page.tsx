@@ -185,6 +185,7 @@ export default function EditAdditionalPage() {
   const [householdResponsibilitiesVision, setHouseholdResponsibilitiesVision] = useState('')
   const [travelImportance, setTravelImportance] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()

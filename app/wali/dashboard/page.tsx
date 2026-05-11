@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import {
   getWaliForCurrentUser,
@@ -71,9 +72,11 @@ export default async function WaliDashboardPage() {
         <div className="bg-white rounded-2xl p-5 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
           <div className="flex items-start gap-4">
             {sisterProfile.photo_urls?.[0] ? (
-              <img
+              <Image
                 src={sisterProfile.photo_urls[0]}
                 alt={sisterFirstName}
+                width={56}
+                height={56}
                 className="w-14 h-14 rounded-full object-cover ring-2 ring-white shadow-sm flex-shrink-0"
               />
             ) : (
@@ -136,7 +139,7 @@ export default async function WaliDashboardPage() {
                 <div key={match.id} className="bg-white rounded-2xl p-4 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
                   <div className="flex items-start gap-3">
                     {b?.photo_url ? (
-                      <img src={b.photo_url} alt={brotherFirst} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                      <Image src={b.photo_url} alt={brotherFirst} width={40} height={40} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
                     ) : (
                       <div className="w-10 h-10 rounded-xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] font-semibold text-sm flex-shrink-0">
                         {brotherFirst[0]?.toUpperCase()}
@@ -182,7 +185,7 @@ export default async function WaliDashboardPage() {
                 <div key={interest.id} className="bg-white rounded-2xl p-4 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
                   <div className="flex items-start gap-3 mb-3">
                     {op?.photo_url ? (
-                      <img src={op.photo_url} alt={op.full_name} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                      <Image src={op.photo_url} alt={op.full_name} width={40} height={40} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
                     ) : (
                       <div className="w-10 h-10 rounded-xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] font-semibold text-sm flex-shrink-0">
                         {(op?.full_name ?? 'B')[0]?.toUpperCase()}

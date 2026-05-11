@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import {
   expressInterest,
@@ -196,9 +197,11 @@ export default function BrotherDashboard({
           </div>
           <div className="ml-4 flex-shrink-0">
             {brotherProfile.photo_url ? (
-              <img
+              <Image
                 src={brotherProfile.photo_url}
                 alt={firstName}
+                width={64}
+                height={64}
                 className="w-16 h-16 rounded-full object-cover ring-2 ring-white/30"
               />
             ) : (
@@ -222,7 +225,7 @@ export default function BrotherDashboard({
                   <div key={interest.id} className="bg-white rounded-2xl p-5 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200">
                     <div className="flex items-start gap-3 mb-3">
                       {op?.photo_url ? (
-                        <img src={op.photo_url} alt={op.full_name} className="w-14 h-14 rounded-2xl object-cover flex-shrink-0" />
+                        <Image src={op.photo_url} alt={op.full_name} width={56} height={56} className="w-14 h-14 rounded-2xl object-cover flex-shrink-0" />
                       ) : (
                         <div className="w-14 h-14 rounded-2xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-semibold flex-shrink-0">
                           {(op?.full_name ?? 'S')[0]?.toUpperCase()}

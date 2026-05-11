@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
 
 export default function EditPhotoPage() {
@@ -14,6 +15,7 @@ export default function EditPhotoPage() {
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()
@@ -106,7 +108,7 @@ export default function EditPhotoPage() {
           <div className="mb-6">
             <p className="text-sm font-medium text-[#1A1A1A] mb-2">Current Photo</p>
             <div className="w-32 h-32 rounded-xl overflow-hidden border border-[#EBEBEB]">
-              <img src={currentPhotoUrl} alt="Current profile photo" className="w-full h-full object-cover" />
+              <Image src={currentPhotoUrl} alt="Current profile photo" width={128} height={128} className="w-full h-full object-cover" />
             </div>
           </div>
         )}

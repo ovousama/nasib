@@ -20,7 +20,6 @@ export default function EditReferencePage() {
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<'success' | 'error' | null>(null)
 
-  const [userId, setUserId] = useState<string>('')
   const [reference, setReference] = useState<Reference | null>(null)
 
   const [refereeName, setRefereeName] = useState('')
@@ -28,12 +27,12 @@ export default function EditReferencePage() {
   const [refereeEmail, setRefereeEmail] = useState('')
   const [refereePhone, setRefereePhone] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
-      setUserId(user.id)
       const { data: profile } = await supabase.from('profiles').select('gender').eq('id', user.id).single()
       if (!profile) { router.push('/auth/login'); return }
       const { data } = await supabase.from('references').select('id, referee_name, referee_relationship, referee_email, referee_phone, questionnaire_completed_at').eq('profile_id', user.id).single()

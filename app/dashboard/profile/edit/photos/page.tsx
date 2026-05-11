@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
 
 const MAX_PHOTOS = 5
@@ -17,6 +18,7 @@ export default function EditPhotosPage() {
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()
@@ -127,7 +129,7 @@ export default function EditPhotosPage() {
         <div className="grid grid-cols-3 gap-3 mb-4">
           {photoUrls.map((url, index) => (
             <div key={url + index} className="relative aspect-square rounded-xl overflow-hidden border border-[#EBEBEB]">
-              <img src={url} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+              <Image src={url} alt={`Photo ${index + 1}`} width={200} height={200} className="w-full h-full object-cover" />
               <button
                 type="button"
                 onClick={() => removePhoto(index)}

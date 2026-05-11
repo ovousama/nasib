@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getProfile, getPublicBrotherProfile, getPublicSisterProfile } from '@/lib/database'
 
@@ -79,9 +80,11 @@ export default async function PublicProfilePage({ params }: Props) {
 
         <div className="flex items-end gap-4">
           {photoUrl ? (
-            <img
+            <Image
               src={photoUrl}
               alt={name}
+              width={80}
+              height={80}
               className="w-20 h-20 rounded-2xl object-cover ring-2 ring-white/30 flex-shrink-0"
             />
           ) : (

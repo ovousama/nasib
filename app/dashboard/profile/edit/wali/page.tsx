@@ -22,6 +22,7 @@ export default function EditWaliPage() {
   const [phone, setPhone] = useState('')
   const [preferredContactMethod, setPreferredContactMethod] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()

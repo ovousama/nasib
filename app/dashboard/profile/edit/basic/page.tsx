@@ -19,6 +19,7 @@ export default function EditBasicPage() {
   const [ethnicity, setEthnicity] = useState('')
   const [languages, setLanguages] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()

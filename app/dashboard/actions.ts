@@ -32,7 +32,6 @@ export async function expressInterest(brotherId: string, sisterId: string, intro
   if (!user) return { error: 'Not authenticated' }
 
   const isBrother = user.id === brotherId
-  const gender: GenderType = isBrother ? 'brother' : 'sister'
   const connCol = isBrother ? 'brother_id' : 'sister_id'
 
   // Check if active connection already exists between this pair

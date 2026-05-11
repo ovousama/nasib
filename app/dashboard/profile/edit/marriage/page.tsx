@@ -40,6 +40,7 @@ export default function EditMarriagePage() {
   const [wantsChildren, setWantsChildren] = useState<boolean | null>(null)
   const [timelineToMarry, setTimelineToMarry] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()

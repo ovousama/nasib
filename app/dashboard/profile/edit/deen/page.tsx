@@ -49,6 +49,7 @@ export default function EditDeenPage() {
   const [hasBeard, setHasBeard] = useState<boolean | null>(null)
   const [wearsHijab, setWearsHijab] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()

@@ -434,8 +434,8 @@ export async function getSisterMatches(userId: string): Promise<SisterMatch[]> {
   const brotherIds = matches.map(m => m.brother_id)
 
   const [
-    { data: brotherProfiles, error: profileError },
-    { data: profiles, error: badgeError },
+    { data: brotherProfiles },
+    { data: profiles },
     { data: existingInterests },
   ] = await Promise.all([
     supabase

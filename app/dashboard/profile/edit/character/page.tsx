@@ -17,6 +17,7 @@ export default function EditCharacterPage() {
   const [characterDescription, setCharacterDescription] = useState('')
   const [goals, setGoals] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()

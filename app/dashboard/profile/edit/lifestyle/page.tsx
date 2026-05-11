@@ -42,6 +42,7 @@ export default function EditLifestylePage() {
   const [willingToRelocate, setWillingToRelocate] = useState<boolean | null>(null)
   const [financialReadiness, setFinancialReadiness] = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     async function load() {
       const supabase = createClient()
