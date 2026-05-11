@@ -1,0 +1,148 @@
+/* eslint-disable @next/next/no-img-element */
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+
+const KEY = 'nasib_onboarding_brother'
+
+export default function BrotherPhoto() {
+  const router      = useRouter()
+  const inputRef    = useRef<HTMLInputElement>(null)
+  const [preview,   setPreview]   = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploaded,  setUploaded]  = useState(false)
+  const [error,     setError]     = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
+      if (s.photo_url) setUploaded(true)
+    } catch {}
+  }, [])
+
+  async function handleFile(file: File) {
+    setError(null)
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File must be under 5MB.')
+      return
+    }
+
+    setPreview(URL.createObjectURL(file))
+    setUploading(true)
+
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const ext  = file.name.split('.').pop() ?? 'jpg'
+      const path = `${user.id}/photo.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('brother-photos')
+        .upload(path, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('brother-photos')
+        .getPublicUrl(path)
+
+      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
+      localStorage.setItem(KEY, JSON.stringify({ ...s, photo_url: publicUrl }))
+      setUploaded(true)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
+      setPreview(null)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (file) handleFile(file)
+  }
+
+  function handleNext() {
+    if (!uploaded) { setError('Please upload a photo to continue.'); return }
+    router.push('/onboarding/brother/reference')
+  }
+
+  return (
+    <div className="max-w-lg mx-auto px-4 py-8">
+      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Your Photo</h2>
+      <p className="text-[#9B9B9B] text-sm mb-2">Upload a clear photo of yourself</p>
+      <p className="text-xs text-[#9B9B9B] mb-8">
+        Your photo is only shared with sisters you are connected with — not publicly visible.
+      </p>
+
+      {/* Upload area */}
+      <div
+        onClick={() => !uploading && inputRef.current?.click()}
+        onDrop={handleDrop}
+        onDragOver={e => e.preventDefault()}
+        className={`relative rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden ${
+          uploaded
+            ? 'border-[#AF4D98] bg-[#F5E6F2]'
+            : 'border-[#EBEBEB] bg-[#FDFAF7] hover:border-[#AF4D98] hover:bg-[#F5E6F2]'
+        }`}
+        style={{ minHeight: 280 }}
+      >
+        {preview ? (
+          <img src={preview} alt="Preview" className="w-full h-72 object-cover rounded-2xl" />
+        ) : uploaded ? (
+          <div className="flex flex-col items-center justify-center h-72 gap-3">
+            <div className="w-14 h-14 bg-[#AF4D98] rounded-full flex items-center justify-center">
+              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-[#AF4D98] font-medium text-sm">Photo uploaded</p>
+            <p className="text-[#9B9B9B] text-xs">Click to replace</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-72 gap-3 px-4 text-center">
+            <div className="w-14 h-14 bg-[#EBEBEB] rounded-full flex items-center justify-center">
+              <svg className="w-7 h-7 text-[#9B9B9B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-[#6B6B6B] font-medium text-sm">Tap to upload a photo</p>
+              <p className="text-[#9B9B9B] text-xs mt-1">JPG, PNG or WEBP · Max 5MB</p>
+            </div>
+          </div>
+        )}
+
+        {uploading && (
+          <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+              <p className="text-sm text-[#6B6B6B]">Uploading...</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <input ref={inputRef} type="file" accept="image/*" className="hidden"
+        onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }} />
+
+      {error && (
+        <div className="mt-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
+      )}
+
+      <button onClick={handleNext} disabled={uploading}
+        className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm mt-6 disabled:opacity-60 disabled:cursor-not-allowed">
+        Next →
+      </button>
+    </div>
+  )
+}
