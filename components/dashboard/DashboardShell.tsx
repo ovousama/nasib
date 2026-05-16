@@ -96,7 +96,21 @@ export default function DashboardShell({ userId, initialUnreadCount, children }:
       )
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    const matchChannel = supabase
+      .channel('matches-changes')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'matches', filter: 'status=eq.expired' },
+        (payload) => {
+          window.dispatchEvent(new CustomEvent('match-expired', { detail: payload.new }))
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+      supabase.removeChannel(matchChannel)
+    }
   }, [userId, dismissToast, refreshCount])
 
   return (

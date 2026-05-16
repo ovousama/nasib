@@ -530,16 +530,31 @@ function SisterProfileView({
 
         <SectionCard title="My Photos" editHref="/dashboard/profile/edit/photos">
           {sisterProfile.photo_urls?.length ? (
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap mb-3">
               {sisterProfile.photo_urls.map((url: string, i: number) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img key={i} src={url} alt={`Photo ${i + 1}`} className="w-20 h-20 rounded-[12px] object-cover border border-[#EDE8E3]" />
               ))}
             </div>
+          ) : null}
+
+          {sisterProfile.photos_uploaded ? (
+            <div className="flex items-center gap-2 bg-[#E6F9F7] border border-[#00A699]/20 rounded-[10px] px-3 py-2.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#00A699" className="w-4 h-4 flex-shrink-0">
+                <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
+              </svg>
+              <p className="text-xs text-[#00A699] font-medium">Your photos are private and ready to share when you accept an interest.</p>
+            </div>
           ) : (
-            <p className="text-sm text-[#9B9B9B]">No photos uploaded yet.</p>
+            <div className="bg-amber-50 border border-amber-100 rounded-[10px] px-3 py-2.5">
+              <p className="text-xs text-amber-700 leading-relaxed mb-1.5">
+                You have not added photos yet. Add photos to share when you accept a match.
+              </p>
+              <Link href="/dashboard/profile/edit/photos" className="text-xs font-medium text-amber-700 underline">
+                Add photos →
+              </Link>
+            </div>
           )}
-          <p className="text-xs text-[#9B9B9B] mt-2">Photos are private and only shared when you accept a connection.</p>
         </SectionCard>
 
         {/* Additional Questions */}

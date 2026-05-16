@@ -115,7 +115,13 @@ export default function EditPhotosPage() {
               <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
             </svg>
           </Link>
-          <h1 className="text-base font-medium text-[#1A1A1A]">Edit Photos</h1>
+          <h1 className="text-base font-medium text-[#1A1A1A]">My Photos</h1>
+        </div>
+
+        <div className="bg-amber-50 border border-amber-100 rounded-[12px] px-4 py-3 mb-5">
+          <p className="text-xs text-amber-700 leading-relaxed">
+            🔒 <strong>Your photos are private.</strong> They are only shared with a brother when you accept his interest — never visible publicly or to other matches.
+          </p>
         </div>
 
         {error && (

@@ -22,7 +22,6 @@ export default function SisterPhotos() {
       const s = JSON.parse(localStorage.getItem(KEY) || '{}')
       if (Array.isArray(s.photo_urls) && s.photo_urls.length > 0) {
         setPaths(s.photo_urls)
-        // Show placeholder count instead of re-downloading private URLs
       }
     } catch {}
   }, [])
@@ -44,7 +43,7 @@ export default function SisterPhotos() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const newPaths: string[]   = []
+      const newPaths: string[]    = []
       const newPreviews: string[] = []
 
       for (const file of selected) {
@@ -100,16 +99,18 @@ export default function SisterPhotos() {
   }
 
   function handleNext() {
-    if (paths.length === 0) { setError('Please upload at least one photo to continue.'); return }
     router.push('/onboarding/sister/reference')
   }
 
-  const alreadyUploaded = paths.length - previews.length // uploaded in a previous session
+  const alreadyUploaded = paths.length - previews.length
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
       <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Your Photos</h2>
-      <p className="text-[#9B9B9B] text-sm mb-2">Upload up to {MAX} photos</p>
+      <p className="text-[#9B9B9B] text-sm mb-1">Optional — add up to {MAX} photos</p>
+      <p className="text-[#9B9B9B] text-xs mb-4">
+        Your photos are private and only shared when you choose to accept a brother&apos;s interest.
+      </p>
       <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-8">
         <p className="text-xs text-amber-700">
           🔒 Your photos are <strong>completely private</strong>. They are only released to a brother
@@ -179,7 +180,16 @@ export default function SisterPhotos() {
 
       <button onClick={handleNext} disabled={uploading}
         className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed">
-        Next →
+        {paths.length > 0 ? 'Next →' : 'Continue without photos →'}
+      </button>
+
+      <button
+        type="button"
+        onClick={handleNext}
+        disabled={uploading}
+        className="w-full text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors mt-4 disabled:opacity-60"
+      >
+        Skip for now
       </button>
     </div>
   )

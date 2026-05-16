@@ -4,12 +4,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const type = searchParams.get('type')
 
   if (!code) {
     return NextResponse.redirect(`${origin}/auth/login`)
   }
 
-  const response = NextResponse.redirect(`${origin}/onboarding`)
+  const redirectTo = type === 'recovery' ? '/auth/reset-password' : '/onboarding'
+  const response = NextResponse.redirect(`${origin}${redirectTo}`)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,6 +34,11 @@ export async function GET(request: NextRequest) {
 
   if (error || !data.session) {
     return NextResponse.redirect(`${origin}/auth/login`)
+  }
+
+  // Password reset: session is set, no profile upsert needed
+  if (type === 'recovery') {
+    return response
   }
 
   const user = data.session.user

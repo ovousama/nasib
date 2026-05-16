@@ -974,3 +974,112 @@ export async function getWaliMeetingRequests(connectionId: string): Promise<Meet
     .order('created_at', { ascending: false })
   return (data ?? []) as MeetingRequest[]
 }
+
+export type ProfileForViewing = {
+  // From profiles
+  id: string
+  gender: GenderType
+  verification_badge: boolean
+  // Core profile fields (present for both brother and sister)
+  full_name: string
+  age: number
+  location: string | null
+  ethnicity: string | null
+  languages: string[] | null
+  religiosity_level: string | null
+  madhab: string | null
+  prayer_frequency: string | null
+  islamic_knowledge_level: string | null
+  occupation: string | null
+  education_level: string | null
+  living_situation: string | null
+  willing_to_relocate: boolean | null
+  previously_married: boolean | null
+  has_children: boolean | null
+  wants_children: boolean | null
+  timeline_to_marry: string | null
+  spouse_religiosity_preference: string | null
+  spouse_age_min: number | null
+  spouse_age_max: number | null
+  dealbreakers: string[] | null
+  character_description: string | null
+  goals: string | null
+  // Brother-specific (null for sisters)
+  has_beard: boolean | null
+  financial_readiness: string | null
+  polygamy_openness: boolean | null
+  photo_url: string | null
+  // Sister-specific (null for brothers)
+  wears_hijab: string | null
+  // Reference (null if no reference exists)
+  reference: {
+    status: string
+    referee_name: string
+    referee_relationship: string | null
+    // Additional referee response fields (may be null if questionnaire not completed yet)
+    how_long_known: string | null
+    character_description: string | null
+    islamic_practice_description: string | null
+    ready_for_marriage: boolean | null
+    would_recommend: boolean | null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any
+  } | null
+  // All other additional columns (from ALTER TABLE, not in TS types)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
+}
+
+export async function getProfileForViewing(userId: string): Promise<ProfileForViewing | null> {
+  const supabase = await createServerSupabaseClient()
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, gender, verification_badge')
+    .eq('id', userId)
+    .single()
+
+  if (!profile) return null
+
+  const table = profile.gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
+
+  const [{ data: extended }, { data: ref }] = await Promise.all([
+    supabase.from(table).select('*').eq('id', userId).single(),
+    supabase
+      .from('references')
+      .select('*')
+      .eq('profile_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  if (!extended) return null
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ext = extended as any
+
+  return {
+    ...profile,
+    ...ext,
+    // Normalize fields that only exist on one gender
+    has_beard: ext.has_beard ?? null,
+    financial_readiness: ext.financial_readiness ?? null,
+    polygamy_openness: ext.polygamy_openness ?? null,
+    photo_url: ext.photo_url ?? null,
+    wears_hijab: ext.wears_hijab ?? null,
+    reference: ref
+      ? {
+          ...ref,
+          status: ref.status,
+          referee_name: ref.referee_name,
+          referee_relationship: ref.referee_relationship ?? null,
+          how_long_known: ref.how_long_known ?? null,
+          character_description: ref.character_description ?? null,
+          islamic_practice_description: ref.islamic_practice_description ?? null,
+          ready_for_marriage: ref.ready_for_marriage ?? null,
+          would_recommend: ref.would_recommend ?? null,
+        }
+      : null,
+  } as ProfileForViewing
+}

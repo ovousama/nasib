@@ -244,6 +244,13 @@ export async function closeConnection(connectionId: string) {
   if (error) return { error: error.message }
 
   if (conn) {
+    await supabase
+      .from('matches')
+      .update({ status: 'expired' })
+      .eq('brother_id', conn.brother_id)
+      .eq('sister_id', conn.sister_id)
+      .eq('status', 'active')
+
     const gender: GenderType = conn.brother_id === user.id ? 'brother' : 'sister'
     await checkAndRefreshMatches(user.id, gender)
   }

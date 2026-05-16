@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import ProfileQuickView from '@/components/dashboard/ProfileQuickView'
 import {
   expressInterest,
   acceptInterest,
@@ -82,15 +83,27 @@ function formatRelativeDate(dateStr: string) {
 export default function BrotherDashboard({
   profile,
   brotherProfile,
-  matches,
-  connections,
+  matches: initialMatches,
+  connections: initialConnections,
   sentInterestOtherIds,
   incomingInterests,
   notifications,
 }: Props) {
   const router = useRouter()
   const firstName = brotherProfile.full_name.split(' ')[0]
+
+  const [matches, setMatches] = useState<BrotherMatch[]>(initialMatches)
+  const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections)
   const connectionsFull = connections.length >= 3
+
+  useEffect(() => {
+    function onMatchExpired(e: Event) {
+      const expired = (e as CustomEvent).detail as { sister_id: string }
+      setMatches(prev => prev.filter(m => m.sister_id !== expired.sister_id))
+    }
+    window.addEventListener('match-expired', onMatchExpired)
+    return () => window.removeEventListener('match-expired', onMatchExpired)
+  }, [])
 
   const [interestModal, setInterestModal] = useState<{ brotherId: string; sisterId: string; firstName: string } | null>(null)
   const [introMessage, setIntroMessage] = useState('')
@@ -107,6 +120,33 @@ export default function BrotherDashboard({
   const [closedToast, setClosedToast] = useState(false)
   const [mutualToast, setMutualToast] = useState(false)
   const [readNotifIds, setReadNotifIds] = useState<Set<string>>(new Set())
+  const [quickView, setQuickView] = useState<{
+    profileId: string
+    showActions: boolean
+    introMessage?: string | null
+    compatibilityNote?: string | null
+    interestId?: string
+    pendingInterest?: InterestWithProfile
+  } | null>(null)
+
+  function openInterestQuickView(interest: InterestWithProfile) {
+    setQuickView({
+      profileId: interest.other_profile?.id ?? interest.sister_id,
+      showActions: true,
+      introMessage: interest.intro_message,
+      compatibilityNote: interest.other_profile?.compatibility_note ?? null,
+      interestId: interest.id,
+      pendingInterest: interest,
+    })
+  }
+
+  function openMatchQuickView(match: BrotherMatch) {
+    setQuickView({
+      profileId: match.sister_id,
+      showActions: false,
+      compatibilityNote: match.compatibility_note,
+    })
+  }
 
   const openInterestModal = (brotherId: string, sisterId: string, sisterFirstName: string) => {
     setIntroMessage('')
@@ -167,10 +207,11 @@ export default function BrotherDashboard({
     if (result?.error) {
       setCloseError(result.error)
     } else {
+      setMatches(prev => prev.filter(m => m.sister_id !== closeModalConnection.sister_id))
+      setConnections(prev => prev.filter(c => c.id !== closeModalConnection.id))
       setCloseModalConnection(null)
       setClosedToast(true)
       setTimeout(() => setClosedToast(false), 3000)
-      router.refresh()
     }
   }
 
@@ -203,7 +244,7 @@ export default function BrotherDashboard({
               {visibleIncoming.map(interest => {
                 const op = interest.other_profile
                 return (
-                  <div key={interest.id} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150">
+                  <div key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
                     <div className="p-5">
                       <div className="flex items-start gap-3 mb-3">
                         {op?.photo_url ? (
@@ -243,14 +284,15 @@ export default function BrotherDashboard({
 
                       <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#EDE8E3]">
                         <button
-                          onClick={() => handleDecline(interest.id)}
+                          onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
                           disabled={declining === interest.id}
                           className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
                         >
                           {declining === interest.id ? '…' : 'Decline'}
                         </button>
                         <button
-                          onClick={() => {
+                          onClick={e => {
+                            e.stopPropagation()
                             if (connectionsFull) {
                               setActionError('Close an active connection before accepting a new one.')
                             } else {
@@ -287,7 +329,7 @@ export default function BrotherDashboard({
                 const incomingFromThis = incomingInterests.find(i => i.sister_id === match.sister_id && !localDeclinedIds.has(i.id))
 
                 return (
-                  <div key={match.id} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden">
+                  <div key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
                     <div className="p-5">
                       <div className="flex items-start gap-3 mb-3">
                         <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
@@ -322,14 +364,15 @@ export default function BrotherDashboard({
                             )}
                             <div className="grid grid-cols-2 gap-2">
                               <button
-                                onClick={() => handleDecline(incomingFromThis.id)}
+                                onClick={e => { e.stopPropagation(); handleDecline(incomingFromThis.id) }}
                                 disabled={declining === incomingFromThis.id}
                                 className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
                               >
                                 {declining === incomingFromThis.id ? '…' : 'Decline'}
                               </button>
                               <button
-                                onClick={() => {
+                                onClick={e => {
+                                  e.stopPropagation()
                                   if (connectionsFull) setInterestError('Close an active connection before accepting.')
                                   else { setInterestError(null); handleAccept(incomingFromThis.id) }
                                 }}
@@ -354,7 +397,7 @@ export default function BrotherDashboard({
                         ) : (
                           <div className="flex items-center justify-end">
                             <button
-                              onClick={() => openInterestModal(profile.id, match.sister_id, sisterFirstName)}
+                              onClick={e => { e.stopPropagation(); openInterestModal(profile.id, match.sister_id, sisterFirstName) }}
                               disabled={connectionsFull}
                               title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
                               className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -455,6 +498,29 @@ export default function BrotherDashboard({
           )}
         </section>
       </div>
+
+      {/* ── Quick View Modal ─────────────────────────────────────── */}
+      <ProfileQuickView
+        profileId={quickView?.profileId ?? null}
+        gender="sister"
+        isOpen={!!quickView}
+        onClose={() => setQuickView(null)}
+        onAccept={quickView?.showActions && quickView.pendingInterest ? () => {
+          const pi = quickView.pendingInterest!
+          setQuickView(null)
+          if (connectionsFull) setActionError('Close an active connection before accepting.')
+          else handleAccept(pi.id)
+        } : undefined}
+        onDecline={quickView?.showActions && quickView.pendingInterest ? () => {
+          const pi = quickView.pendingInterest!
+          setQuickView(null)
+          handleDecline(pi.id)
+        } : undefined}
+        showActions={quickView?.showActions ?? false}
+        introMessage={quickView?.introMessage}
+        compatibilityNote={quickView?.compatibilityNote}
+        interestId={quickView?.interestId}
+      />
 
       {/* ── Close Connection Modal ───────────────────────────────── */}
       {closeModalConnection && (

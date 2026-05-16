@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import ProfileQuickView from '@/components/dashboard/ProfileQuickView'
 import {
   expressInterest,
   acceptInterest,
@@ -84,13 +86,26 @@ export default function SisterDashboard({
   profile,
   sisterProfile,
   waliProfile,
-  matches,
-  connections,
+  matches: initialMatches,
+  connections: initialConnections,
   incomingInterests,
   notifications,
 }: Props) {
   const router = useRouter()
   const firstName = sisterProfile.full_name.split(' ')[0]
+
+  const [matches, setMatches] = useState<SisterMatch[]>(initialMatches)
+  const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections)
+  const [hasPhotos, setHasPhotos] = useState<boolean>(sisterProfile.photos_uploaded)
+
+  useEffect(() => {
+    function onMatchExpired(e: Event) {
+      const expired = (e as CustomEvent).detail as { brother_id: string }
+      setMatches(prev => prev.filter(m => m.brother_id !== expired.brother_id))
+    }
+    window.addEventListener('match-expired', onMatchExpired)
+    return () => window.removeEventListener('match-expired', onMatchExpired)
+  }, [])
 
   const [interestModal, setInterestModal] = useState<{ brotherId: string; sisterId: string; firstName: string } | null>(null)
   const [introMessage, setIntroMessage] = useState('')
@@ -99,6 +114,11 @@ export default function SisterDashboard({
   const [localSentIds, setLocalSentIds] = useState<string[]>([])
 
   const [acceptModalInterest, setAcceptModalInterest] = useState<InterestWithProfile | null>(null)
+  const [needsPhotosInterest, setNeedsPhotosInterest] = useState<InterestWithProfile | null>(null)
+  const [preAcceptUploading, setPreAcceptUploading] = useState(false)
+  const [preAcceptError, setPreAcceptError] = useState<string | null>(null)
+  const preAcceptFileRef = useRef<HTMLInputElement>(null)
+
   const [closeModalConnection, setCloseModalConnection] = useState<ConnectionWithProfile | null>(null)
   const [accepting, setAccepting] = useState(false)
   const [declining, setDeclining] = useState<string | null>(null)
@@ -110,6 +130,73 @@ export default function SisterDashboard({
   const [localDeclinedIds, setLocalDeclinedIds] = useState<Set<string>>(new Set())
 
   const connectionsFull = connections.length >= 3
+
+  const [quickView, setQuickView] = useState<{
+    profileId: string
+    showActions: boolean
+    introMessage?: string | null
+    compatibilityNote?: string | null
+    interestId?: string
+    pendingInterest?: InterestWithProfile
+  } | null>(null)
+
+  function openInterestQuickView(interest: InterestWithProfile) {
+    setQuickView({
+      profileId: interest.other_profile?.id ?? interest.brother_id,
+      showActions: true,
+      introMessage: interest.intro_message,
+      compatibilityNote: interest.other_profile?.compatibility_note ?? null,
+      interestId: interest.id,
+      pendingInterest: interest,
+    })
+  }
+
+  function openMatchQuickView(match: SisterMatch) {
+    setQuickView({
+      profileId: match.brother_id,
+      showActions: false,
+      compatibilityNote: match.compatibility_note,
+    })
+  }
+
+  function openAcceptOrPromptPhotos(interest: InterestWithProfile) {
+    setActionError(null)
+    if (!hasPhotos) {
+      setPreAcceptError(null)
+      setNeedsPhotosInterest(interest)
+    } else {
+      setAcceptModalInterest(interest)
+    }
+  }
+
+  async function handlePreAcceptUpload(file: File) {
+    if (!file.type.startsWith('image/')) { setPreAcceptError('Please upload an image file.'); return }
+    if (file.size > 5 * 1024 * 1024) { setPreAcceptError('Photo must be under 5MB.'); return }
+    setPreAcceptUploading(true)
+    setPreAcceptError(null)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${user.id}/${Date.now()}.${ext}`
+      const { error: uploadError } = await supabase.storage.from('sister-photos').upload(path, file)
+      if (uploadError) throw uploadError
+      const { error: updateError } = await supabase.from('sister_profiles').update({
+        photo_urls: [path],
+        photos_uploaded: true,
+      }).eq('id', user.id)
+      if (updateError) throw updateError
+      setHasPhotos(true)
+      const interest = needsPhotosInterest
+      setNeedsPhotosInterest(null)
+      setAcceptModalInterest(interest)
+    } catch (err: unknown) {
+      setPreAcceptError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
+    } finally {
+      setPreAcceptUploading(false)
+    }
+  }
 
   const openInterestModal = (brotherId: string, sisterId: string, brotherFirstName: string) => {
     setIntroMessage('')
@@ -174,10 +261,11 @@ export default function SisterDashboard({
     if (result?.error) {
       setActionError(result.error)
     } else {
+      setMatches(prev => prev.filter(m => m.brother_id !== closeModalConnection.brother_id))
+      setConnections(prev => prev.filter(c => c.id !== closeModalConnection.id))
       setCloseModalConnection(null)
       setClosedToast(true)
       setTimeout(() => setClosedToast(false), 3000)
-      router.refresh()
     }
   }
 
@@ -239,7 +327,7 @@ export default function SisterDashboard({
                 {visibleInterests.map(interest => {
                   const op = interest.other_profile
                   return (
-                    <div key={interest.id} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150">
+                    <div key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
                       <div className="p-5">
                         <div className="flex items-start gap-3 mb-3">
                           {op?.photo_url ? (
@@ -275,22 +363,24 @@ export default function SisterDashboard({
 
                         <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#EDE8E3]">
                           <Link
-                            href={`/dashboard/profile/${interest.brother_id}`}
+                            href={`/dashboard/profile/${interest.brother_id}?context=interest&interestId=${interest.id}`}
+                            onClick={e => e.stopPropagation()}
                             className="text-center text-sm font-medium text-[#AF4D98] py-2"
                           >
                             View
                           </Link>
                           <button
-                            onClick={() => {
+                            onClick={e => {
+                              e.stopPropagation()
                               if (connectionsFull) setActionError('Close an active connection before accepting a new one.')
-                              else { setActionError(null); setAcceptModalInterest(interest) }
+                              else openAcceptOrPromptPhotos(interest)
                             }}
                             className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
                           >
                             Accept
                           </button>
                           <button
-                            onClick={() => handleDecline(interest.id)}
+                            onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
                             disabled={declining === interest.id}
                             className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
                           >
@@ -329,7 +419,7 @@ export default function SisterDashboard({
                   const hasAnyInterest = match.interest !== null || localSentIds.includes(match.brother_id)
 
                   return (
-                    <div key={match.id} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden">
+                    <div key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
                       <div className="p-5">
                         <div className="flex items-start gap-3 mb-3">
                           {b?.photo_url ? (
@@ -368,16 +458,17 @@ export default function SisterDashboard({
                               )}
                               <div className="grid grid-cols-2 gap-2">
                                 <button
-                                  onClick={() => handleDecline(incomingFromThis.id)}
+                                  onClick={e => { e.stopPropagation(); handleDecline(incomingFromThis.id) }}
                                   disabled={declining === incomingFromThis.id}
                                   className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
                                 >
                                   {declining === incomingFromThis.id ? '…' : 'Decline'}
                                 </button>
                                 <button
-                                  onClick={() => {
+                                  onClick={e => {
+                                    e.stopPropagation()
                                     if (connectionsFull) setActionError('Close an active connection before accepting.')
-                                    else { setActionError(null); setAcceptModalInterest(incomingFromThis) }
+                                    else openAcceptOrPromptPhotos(incomingFromThis)
                                   }}
                                   className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
                                 >
@@ -399,7 +490,7 @@ export default function SisterDashboard({
                           ) : !hasAnyInterest && !hasConnection ? (
                             <div className="flex items-center justify-end">
                               <button
-                                onClick={() => openInterestModal(match.brother_id, match.sister_id, brotherFirstName)}
+                                onClick={e => { e.stopPropagation(); openInterestModal(match.brother_id, match.sister_id, brotherFirstName) }}
                                 disabled={connectionsFull}
                                 title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
                                 className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -495,6 +586,92 @@ export default function SisterDashboard({
           </section>
         </div>
       </div>
+
+      {/* ── Quick View Modal ─────────────────────────────────────── */}
+      <ProfileQuickView
+        profileId={quickView?.profileId ?? null}
+        gender="brother"
+        isOpen={!!quickView}
+        onClose={() => setQuickView(null)}
+        onAccept={quickView?.showActions && quickView.pendingInterest ? () => {
+          const pi = quickView.pendingInterest!
+          setQuickView(null)
+          if (connectionsFull) setActionError('Close an active connection before accepting.')
+          else openAcceptOrPromptPhotos(pi)
+        } : undefined}
+        onDecline={quickView?.showActions && quickView.pendingInterest ? () => {
+          const pi = quickView.pendingInterest!
+          setQuickView(null)
+          handleDecline(pi.id)
+        } : undefined}
+        showActions={quickView?.showActions ?? false}
+        introMessage={quickView?.introMessage}
+        compatibilityNote={quickView?.compatibilityNote}
+        interestId={quickView?.interestId}
+      />
+
+      {/* ── Needs Photos Modal ──────────────────────────────────── */}
+      {needsPhotosInterest && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[24px] p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
+            <div className="w-12 h-12 bg-[#FAF4EE] rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#AF4D98" className="w-6 h-6">
+                <path fillRule="evenodd" d="M1 8a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 018.07 3h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0016.07 6H17a2 2 0 012 2v7a2 2 0 01-2 2H3a2 2 0 01-2-2V8zm13.5 3a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM10 14a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-2 text-center">Add a photo first</h3>
+            <p className="text-[#5C5C5C] text-sm leading-relaxed mb-2 text-center">
+              Before accepting, you need to add at least one photo. Your photo will be shared with{' '}
+              <strong className="text-[#1A1A1A] font-medium">{needsPhotosInterest.other_profile?.full_name?.split(' ')[0] ?? 'this brother'}</strong>{' '}
+              when you confirm.
+            </p>
+            <p className="text-xs text-[#9B9B9B] text-center mb-6">
+              Your photo is private — only visible to brothers you accept.
+            </p>
+
+            {preAcceptError && (
+              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">
+                {preAcceptError}
+              </div>
+            )}
+
+            <input
+              ref={preAcceptFileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (file) handlePreAcceptUpload(file)
+                e.target.value = ''
+              }}
+            />
+
+            <div className="space-y-3">
+              <button
+                onClick={() => preAcceptFileRef.current?.click()}
+                disabled={preAcceptUploading}
+                className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-3 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors text-sm flex items-center justify-center gap-2"
+              >
+                {preAcceptUploading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Uploading…
+                  </>
+                ) : (
+                  'Upload a photo'
+                )}
+              </button>
+              <button
+                onClick={() => { setNeedsPhotosInterest(null); setPreAcceptError(null) }}
+                className="w-full text-[#9B9B9B] text-sm py-2 hover:text-[#1A1A1A] transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Express Interest Modal ───────────────────────────────── */}
       {interestModal && (
