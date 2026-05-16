@@ -13,7 +13,7 @@ import {
 
 function ReadOnlyBadge() {
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#9B9B9B] bg-[#FDFAF7] border border-[#EBEBEB] px-2 py-0.5 rounded-full uppercase tracking-wide">
+    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#9B9B9B] bg-[#FDF8F3] border border-[#EDE8E3] px-2 py-0.5 rounded-full uppercase tracking-wide">
       Read only
     </span>
   )
@@ -55,7 +55,7 @@ export default async function WaliDashboardPage() {
 
   if (!sisterData) {
     return (
-      <div className="px-6 py-8 text-center text-[#6B6B6B] text-sm">
+      <div className="px-6 py-8 text-center text-[#5C5C5C] text-sm">
         Sister profile not found. Please contact support.
       </div>
     )
@@ -69,7 +69,7 @@ export default async function WaliDashboardPage() {
 
       {/* ── Sister Profile Summary ─────────────────────────────── */}
       <section>
-        <div className="bg-white rounded-2xl p-5 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
+        <div className="bg-white rounded-2xl p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex items-start gap-4">
             {sisterProfile.photo_urls?.[0] ? (
               <Image
@@ -80,20 +80,20 @@ export default async function WaliDashboardPage() {
                 className="w-14 h-14 rounded-full object-cover ring-2 ring-white shadow-sm flex-shrink-0"
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-semibold flex-shrink-0">
+              <div className="w-14 h-14 rounded-full bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
                 {sisterFirstName[0]?.toUpperCase()}
               </div>
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-semibold text-[#1A1A1A]">{sisterProfile.full_name}</h2>
+                <h2 className="font-medium text-[#1A1A1A]">{sisterProfile.full_name}</h2>
                 {profile.verification_badge && (
                   <span className="inline-flex items-center gap-1 bg-[#E6F9F7] text-[#00A699] text-xs font-medium px-2.5 py-1 rounded-full">
                     ✓ Verified
                   </span>
                 )}
               </div>
-              <p className="text-sm text-[#6B6B6B] mt-0.5 leading-relaxed">
+              <p className="text-sm text-[#5C5C5C] mt-0.5 leading-relaxed">
                 {[sisterProfile.age ? `${sisterProfile.age} yrs` : null, sisterProfile.location].filter(Boolean).join(' · ')}
               </p>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -106,7 +106,7 @@ export default async function WaliDashboardPage() {
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-[#EBEBEB] grid grid-cols-2 gap-3 text-xs">
+          <div className="mt-4 pt-4 border-t border-[#EDE8E3] grid grid-cols-2 gap-3 text-xs">
             <div>
               <p className="text-[#9B9B9B] mb-0.5">Religiosity</p>
               <p className="text-[#1A1A1A] font-medium capitalize">{sisterProfile.religiosity_level?.replace(/_/g, ' ') ?? '—'}</p>
@@ -122,13 +122,13 @@ export default async function WaliDashboardPage() {
       {/* ── Matches ─────────────────────────────────────────────── */}
       <section>
         <div className="flex items-center gap-2 mb-3">
-          <h2 className="text-base font-semibold text-[#1A1A1A]">Matches</h2>
+          <h2 className="text-base font-medium text-[#1A1A1A]">Matches</h2>
           <ReadOnlyBadge />
         </div>
 
         {matches.length === 0 ? (
-          <div className="rounded-2xl p-5 text-center border-2 border-dashed border-[#EBEBEB] bg-[#FDFAF7]">
-            <p className="text-[#6B6B6B] text-sm">No active matches at this time.</p>
+          <div className="rounded-2xl p-5 text-center border-2 border-dashed border-[#EDE8E3] bg-[#FDF8F3]">
+            <p className="text-[#5C5C5C] text-sm">No active matches at this time.</p>
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -136,12 +136,12 @@ export default async function WaliDashboardPage() {
               const b = match.brother
               const brotherFirst = b?.full_name?.split(' ')[0] ?? 'Brother'
               return (
-                <div key={match.id} className="bg-white rounded-2xl p-4 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
+                <div key={match.id} className="bg-white rounded-2xl p-4 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                   <div className="flex items-start gap-3">
                     {b?.photo_url ? (
                       <Image src={b.photo_url} alt={brotherFirst} width={40} height={40} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
                     ) : (
-                      <div className="w-10 h-10 rounded-xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] font-semibold text-sm flex-shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] font-medium text-sm flex-shrink-0">
                         {brotherFirst[0]?.toUpperCase()}
                       </div>
                     )}
@@ -152,7 +152,7 @@ export default async function WaliDashboardPage() {
                           <span className="text-[10px] text-[#00A699] bg-[#E6F9F7] px-1.5 py-0.5 rounded-full">✓ Verified</span>
                         )}
                       </div>
-                      <p className="text-xs text-[#6B6B6B] mt-0.5">
+                      <p className="text-xs text-[#5C5C5C] mt-0.5">
                         {[b?.age ? `${b.age} yrs` : null, b?.location].filter(Boolean).join(' · ')}
                       </p>
                     </div>
@@ -174,7 +174,7 @@ export default async function WaliDashboardPage() {
       {interests.length > 0 && (
         <section>
           <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-base font-semibold text-[#1A1A1A]">Pending Interests</h2>
+            <h2 className="text-base font-medium text-[#1A1A1A]">Pending Interests</h2>
             <ReadOnlyBadge />
           </div>
 
@@ -182,27 +182,27 @@ export default async function WaliDashboardPage() {
             {interests.map(interest => {
               const op = interest.other_profile
               return (
-                <div key={interest.id} className="bg-white rounded-2xl p-4 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
+                <div key={interest.id} className="bg-white rounded-2xl p-4 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                   <div className="flex items-start gap-3 mb-3">
                     {op?.photo_url ? (
                       <Image src={op.photo_url} alt={op.full_name} width={40} height={40} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
                     ) : (
-                      <div className="w-10 h-10 rounded-xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] font-semibold text-sm flex-shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] font-medium text-sm flex-shrink-0">
                         {(op?.full_name ?? 'B')[0]?.toUpperCase()}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <span className="font-medium text-[#1A1A1A] text-sm">{op?.full_name ?? 'Brother'}</span>
-                      <p className="text-xs text-[#6B6B6B] mt-0.5">
+                      <p className="text-xs text-[#5C5C5C] mt-0.5">
                         {[op?.age ? `${op.age} yrs` : null, op?.location].filter(Boolean).join(' · ')}
                       </p>
                     </div>
                   </div>
 
                   {interest.intro_message && (
-                    <div className="bg-[#FDFAF7] rounded-xl px-3 py-2 mb-3 border border-[#EBEBEB]">
+                    <div className="bg-[#FDF8F3] rounded-xl px-3 py-2 mb-3 border border-[#EDE8E3]">
                       <p className="text-xs text-[#9B9B9B] font-medium mb-0.5">Their message</p>
-                      <p className="text-xs text-[#6B6B6B] italic">&ldquo;{interest.intro_message}&rdquo;</p>
+                      <p className="text-xs text-[#5C5C5C] italic">&ldquo;{interest.intro_message}&rdquo;</p>
                     </div>
                   )}
 
@@ -223,17 +223,17 @@ export default async function WaliDashboardPage() {
       {/* ── Active Connections ───────────────────────────────────── */}
       <section>
         <div className="flex items-center gap-2 mb-3">
-          <h2 className="text-base font-semibold text-[#1A1A1A]">Active Connections</h2>
+          <h2 className="text-base font-medium text-[#1A1A1A]">Active Connections</h2>
         </div>
 
         {connections.length === 0 ? (
-          <div className="rounded-2xl p-5 text-center border-2 border-dashed border-[#EBEBEB] bg-[#FDFAF7]">
-            <p className="text-[#6B6B6B] text-sm">No active connections yet.</p>
+          <div className="rounded-2xl p-5 text-center border-2 border-dashed border-[#EDE8E3] bg-[#FDF8F3]">
+            <p className="text-[#5C5C5C] text-sm">No active connections yet.</p>
           </div>
         ) : (
           <div className="space-y-2.5">
             {connections.map(conn => (
-              <div key={conn.id} className="bg-white rounded-2xl p-4 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
+              <div key={conn.id} className="bg-white rounded-2xl p-4 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#9DF7E5] border-2 border-[#5ECFBA] flex-shrink-0" />
                   <span className="font-medium text-[#1A1A1A] text-sm">{conn.other_name}</span>
@@ -255,13 +255,13 @@ export default async function WaliDashboardPage() {
       {notifications.length > 0 && (
         <section>
           <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-base font-semibold text-[#1A1A1A]">Recent Activity</h2>
+            <h2 className="text-base font-medium text-[#1A1A1A]">Recent Activity</h2>
             <ReadOnlyBadge />
           </div>
 
           <div className="space-y-2">
             {notifications.map(notif => (
-              <div key={notif.id} className="bg-white rounded-2xl p-3.5 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
+              <div key={notif.id} className="bg-white rounded-2xl p-3.5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-xl bg-[#F5E6F2] flex items-center justify-center text-base flex-shrink-0">
                     {NOTIF_ICONS[notif.type] ?? '🔔'}
@@ -271,7 +271,7 @@ export default async function WaliDashboardPage() {
                       <p className="text-sm font-medium text-[#1A1A1A] leading-snug">{notif.title}</p>
                       <span className="text-[10px] text-[#9B9B9B] flex-shrink-0">{formatRelative(notif.created_at)}</span>
                     </div>
-                    <p className="text-xs text-[#6B6B6B] mt-0.5 leading-relaxed">{notif.body}</p>
+                    <p className="text-xs text-[#5C5C5C] mt-0.5 leading-relaxed">{notif.body}</p>
                   </div>
                 </div>
               </div>

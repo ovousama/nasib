@@ -65,8 +65,8 @@ function PendingBadge() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-2xl p-6 text-center border-2 border-dashed border-[#EBEBEB] bg-[#FDFAF7]">
-      <p className="text-[#6B6B6B] text-sm leading-relaxed">{message}</p>
+    <div className="rounded-[16px] p-6 text-center border border-[#EDE8E3] bg-[#FAF4EE]">
+      <p className="text-[#9B9B9B] text-sm leading-relaxed">{message}</p>
     </div>
   )
 }
@@ -192,51 +192,31 @@ export default function SisterDashboard({
 
   return (
     <>
-      <div>
+      <div className="bg-[#FDF8F3] min-h-screen">
         {/* ── Header ──────────────────────────────────────────── */}
-        <div className="bg-gradient-to-br from-[#AF4D98] to-[#D66BA0] px-6 pt-8 pb-8">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <p className="text-white/70 text-sm font-medium mb-0.5">Assalamu Alaikum</p>
-              <h1 className="text-white text-2xl font-semibold tracking-tight leading-snug">{firstName}</h1>
-              <div className="mt-3 space-y-2">
-                {profile.verification_badge ? <VerifiedBadge dark /> : <PendingBadge />}
+        <div className="px-6 pt-10 pb-8">
+          <p className="text-sm text-[#9B9B9B]">Assalamu Alaikum,</p>
+          <h1 className="text-[26px] font-medium text-[#1A1A1A] tracking-[-0.02em] leading-snug mb-1">{firstName}</h1>
+          <div className="mt-2 space-y-2">
+            {profile.verification_badge ? <VerifiedBadge /> : <PendingBadge />}
 
-                {waliProfile && (
-                  <div className="inline-flex items-center gap-1.5 bg-white/10 text-white/80 text-xs font-medium px-3 py-1.5 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                      <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
-                    </svg>
-                    Wali: {waliProfile.full_name} · Read-only access
-                  </div>
-                )}
+            {waliProfile && (
+              <div className="inline-flex items-center gap-1.5 bg-[#FAF4EE] text-[#5C5C5C] text-xs font-medium px-3 py-1.5 rounded-full border border-[#EDE8E3]">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                  <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+                </svg>
+                Wali: {waliProfile.full_name} · Read-only access
               </div>
-            </div>
-
-            <div className="ml-4 flex-shrink-0">
-              {sisterProfile.photo_urls?.[0] ? (
-                <Image
-                  src={sisterProfile.photo_urls[0]}
-                  alt={firstName}
-                  width={64}
-                  height={64}
-                  className="w-16 h-16 rounded-full object-cover ring-2 ring-white/30"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-semibold">
-                  {firstName[0]?.toUpperCase()}
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="px-6 py-6 space-y-8">
+        <div className="px-6 pb-6 space-y-8">
           {/* ── Connections Counter ──────────────────────────────── */}
-          <div className="bg-white rounded-2xl p-5 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
-            <p className="text-sm text-[#6B6B6B] mb-3 leading-relaxed">
+          <div className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <p className="text-sm text-[#5C5C5C] mb-3 leading-relaxed">
               You have{' '}
-              <span className="font-semibold text-[#1A1A1A]">{connections.length}</span> of 3
+              <span className="font-medium text-[#1A1A1A]">{connections.length}</span> of 3
               active connections
             </p>
             <div className="flex gap-2">
@@ -244,7 +224,7 @@ export default function SisterDashboard({
                 <div
                   key={i}
                   className={`h-1.5 flex-1 rounded-full transition-colors ${
-                    i < connections.length ? 'bg-[#AF4D98]' : 'bg-[#EBEBEB]'
+                    i < connections.length ? 'bg-[#AF4D98]' : 'bg-[#EDE8E3]'
                   }`}
                 />
               ))}
@@ -254,67 +234,69 @@ export default function SisterDashboard({
           {/* ── Incoming Interests ───────────────────────────────── */}
           {visibleInterests.length > 0 && (
             <section id="interests">
-              <h2 className="text-lg font-semibold text-[#1A1A1A] tracking-tight mb-4">New Interest</h2>
+              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">New Interest</p>
               <div className="space-y-3">
                 {visibleInterests.map(interest => {
                   const op = interest.other_profile
                   return (
-                    <div key={interest.id} className="bg-white rounded-2xl p-5 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200">
-                      <div className="flex items-start gap-3 mb-3">
-                        {op?.photo_url ? (
-                          <Image src={op.photo_url} alt={op.full_name} width={56} height={56} className="w-14 h-14 rounded-2xl object-cover flex-shrink-0" />
-                        ) : (
-                          <div className="w-14 h-14 rounded-2xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-semibold flex-shrink-0">
-                            {(op?.full_name ?? 'B')[0]?.toUpperCase()}
+                    <div key={interest.id} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150">
+                      <div className="p-5">
+                        <div className="flex items-start gap-3 mb-3">
+                          {op?.photo_url ? (
+                            <Image src={op.photo_url} alt={op.full_name} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
+                          ) : (
+                            <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
+                              {(op?.full_name ?? 'B')[0]?.toUpperCase()}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{op?.full_name ?? 'Brother'}</span>
+                              {op?.verification_badge && <VerifiedBadge />}
+                            </div>
+                            <p className="text-sm text-[#9B9B9B] mt-0.5">
+                              {[op?.age ? `${op.age} yrs` : null, op?.location].filter(Boolean).join(' · ')}
+                            </p>
+                          </div>
+                        </div>
+
+                        {op?.compatibility_note && (
+                          <p className="border-l-2 border-[#E5A9A9] pl-3 text-sm italic text-[#5C5C5C] mb-3">
+                            {op.compatibility_note}
+                          </p>
+                        )}
+
+                        {interest.intro_message && (
+                          <div className="bg-[#FAF4EE] rounded-[12px] px-3 py-2.5 mb-3 border border-[#EDE8E3]">
+                            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Their message</p>
+                            <p className="text-sm text-[#1A1A1A] italic">&ldquo;{interest.intro_message}&rdquo;</p>
                           </div>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-[#1A1A1A]">{op?.full_name ?? 'Brother'}</span>
-                            {op?.verification_badge && <VerifiedBadge />}
-                          </div>
-                          <p className="text-sm text-[#6B6B6B] mt-0.5 leading-relaxed">
-                            {[op?.age ? `${op.age} yrs` : null, op?.location].filter(Boolean).join(' · ')}
-                          </p>
+
+                        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#EDE8E3]">
+                          <Link
+                            href={`/dashboard/profile/${interest.brother_id}`}
+                            className="text-center text-sm font-medium text-[#AF4D98] py-2"
+                          >
+                            View
+                          </Link>
+                          <button
+                            onClick={() => {
+                              if (connectionsFull) setActionError('Close an active connection before accepting a new one.')
+                              else { setActionError(null); setAcceptModalInterest(interest) }
+                            }}
+                            className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => handleDecline(interest.id)}
+                            disabled={declining === interest.id}
+                            className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
+                          >
+                            {declining === interest.id ? '…' : 'Decline'}
+                          </button>
                         </div>
-                      </div>
-
-                      {op?.compatibility_note && (
-                        <p className="text-sm text-[#AF4D98] bg-[#F5E6F2] rounded-xl px-3 py-2 mb-3 italic border-l-2 border-[#AF4D98]">
-                          {op.compatibility_note}
-                        </p>
-                      )}
-
-                      {interest.intro_message && (
-                        <div className="bg-[#FDFAF7] rounded-xl px-3 py-2.5 mb-3 border border-[#EBEBEB]">
-                          <p className="text-xs text-[#9B9B9B] font-medium mb-1">Their message</p>
-                          <p className="text-sm text-[#1A1A1A] italic">&ldquo;{interest.intro_message}&rdquo;</p>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#EBEBEB]">
-                        <Link
-                          href={`/dashboard/profile/${interest.brother_id}`}
-                          className="text-center text-sm font-medium text-[#6B6B6B] border border-[#EBEBEB] py-2.5 rounded-full hover:bg-[#FDFAF7] transition-colors"
-                        >
-                          View
-                        </Link>
-                        <button
-                          onClick={() => {
-                            if (connectionsFull) setActionError('Close an active connection before accepting a new one.')
-                            else { setActionError(null); setAcceptModalInterest(interest) }
-                          }}
-                          className="text-sm font-medium bg-[#AF4D98] text-white py-2.5 rounded-full hover:bg-[#9B3D85] active:scale-95 transition-all duration-200 shadow-sm"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleDecline(interest.id)}
-                          disabled={declining === interest.id}
-                          className="text-sm font-medium text-[#C13515] border border-[#C13515]/30 py-2.5 rounded-full hover:bg-[#FDECEA] disabled:opacity-50 active:scale-95 transition-all duration-200"
-                        >
-                          {declining === interest.id ? '…' : 'Decline'}
-                        </button>
                       </div>
                     </div>
                   )
@@ -322,7 +304,7 @@ export default function SisterDashboard({
               </div>
 
               {actionError && (
-                <div className="mt-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-xl p-3 text-sm text-[#C13515]">
+                <div className="mt-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">
                   {actionError}
                 </div>
               )}
@@ -331,8 +313,7 @@ export default function SisterDashboard({
 
           {/* ── Matches ─────────────────────────────────────────── */}
           <section id="matches">
-            <h2 className="text-lg font-semibold text-[#1A1A1A] tracking-tight mb-0.5">Your Matches</h2>
-            <p className="text-sm text-[#6B6B6B] mb-4 leading-relaxed">Curated for you based on your profile</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
 
             {matches.length === 0 ? (
               <EmptyState message="Your matches are being prepared. We will notify you when they are ready, in sha Allah." />
@@ -348,40 +329,40 @@ export default function SisterDashboard({
                   const hasAnyInterest = match.interest !== null || localSentIds.includes(match.brother_id)
 
                   return (
-                    <div key={match.id} className="bg-white rounded-2xl border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200 overflow-hidden">
+                    <div key={match.id} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden">
                       <div className="p-5">
                         <div className="flex items-start gap-3 mb-3">
                           {b?.photo_url ? (
-                            <Image src={b.photo_url} alt={brotherFirstName} width={56} height={56} className="w-14 h-14 rounded-2xl object-cover flex-shrink-0" />
+                            <Image src={b.photo_url} alt={brotherFirstName} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
                           ) : (
-                            <div className="w-14 h-14 rounded-2xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-semibold flex-shrink-0">
+                            <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
                               {brotherFirstName[0]?.toUpperCase()}
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-semibold text-[#1A1A1A]">{brotherFirstName}</span>
+                              <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{brotherFirstName}</span>
                               {b?.verification_badge && <VerifiedBadge />}
                             </div>
-                            <p className="text-sm text-[#6B6B6B] mt-0.5 leading-relaxed">
+                            <p className="text-sm text-[#9B9B9B] mt-0.5">
                               {[b?.age ? `${b.age} yrs` : null, b?.location].filter(Boolean).join(' · ')}
                             </p>
                           </div>
                         </div>
 
                         {match.compatibility_note && (
-                          <p className="text-sm text-[#AF4D98] bg-[#F5E6F2] rounded-xl px-3 py-2 mb-3 italic border-l-2 border-[#AF4D98]">
+                          <p className="border-l-2 border-[#E5A9A9] pl-3 text-sm italic text-[#5C5C5C] mb-3">
                             {match.compatibility_note}
                           </p>
                         )}
 
-                        <div className="pt-3 border-t border-[#EBEBEB]">
+                        <div className="pt-3 border-t border-[#EDE8E3]">
                           {incomingFromThis ? (
                             <div>
-                              <p className="text-xs text-[#AF4D98] font-medium mb-2">{brotherFirstName} has expressed interest</p>
+                              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#AF4D98] mb-2">{brotherFirstName} has expressed interest</p>
                               {incomingFromThis.intro_message && (
-                                <div className="bg-[#FDFAF7] rounded-xl px-3 py-2.5 mb-3 border border-[#EBEBEB]">
-                                  <p className="text-xs text-[#9B9B9B] font-medium mb-1">Their message</p>
+                                <div className="bg-[#FAF4EE] rounded-[12px] px-3 py-2.5 mb-3 border border-[#EDE8E3]">
+                                  <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Their message</p>
                                   <p className="text-sm text-[#1A1A1A] italic">&ldquo;{incomingFromThis.intro_message}&rdquo;</p>
                                 </div>
                               )}
@@ -389,7 +370,7 @@ export default function SisterDashboard({
                                 <button
                                   onClick={() => handleDecline(incomingFromThis.id)}
                                   disabled={declining === incomingFromThis.id}
-                                  className="text-sm font-medium text-[#C13515] border border-[#C13515]/30 py-2.5 rounded-full hover:bg-[#FDECEA] disabled:opacity-50 active:scale-95 transition-all duration-200"
+                                  className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
                                 >
                                   {declining === incomingFromThis.id ? '…' : 'Decline'}
                                 </button>
@@ -398,20 +379,20 @@ export default function SisterDashboard({
                                     if (connectionsFull) setActionError('Close an active connection before accepting.')
                                     else { setActionError(null); setAcceptModalInterest(incomingFromThis) }
                                   }}
-                                  className="text-sm font-medium bg-[#AF4D98] text-white py-2.5 rounded-full hover:bg-[#9B3D85] active:scale-95 transition-all duration-200 shadow-sm"
+                                  className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
                                 >
                                   Accept
                                 </button>
                               </div>
                             </div>
                           ) : isAccepted || hasConnection ? (
-                            <div className="flex items-center justify-center bg-[#E6F9F7] border border-[#00A699]/20 rounded-full px-3 py-2">
-                              <span className="text-xs font-medium text-[#00A699]">Connected — open chat to continue</span>
+                            <div className="flex items-center justify-center py-1">
+                              <span className="text-sm text-[#AF4D98] font-medium">Connected — open chat to continue</span>
                             </div>
                           ) : hasSent ? (
                             <div className="flex items-center justify-between">
-                              <span className="text-xs text-[#9B9B9B] italic">Awaiting response…</span>
-                              <span className="text-xs font-medium text-[#AF4D98] bg-[#F5E6F2] px-3 py-1.5 rounded-full">
+                              <span className="text-sm text-[#9B9B9B] italic">Awaiting response…</span>
+                              <span className="text-sm font-medium text-[#AF4D98]">
                                 Interest Sent
                               </span>
                             </div>
@@ -421,7 +402,7 @@ export default function SisterDashboard({
                                 onClick={() => openInterestModal(match.brother_id, match.sister_id, brotherFirstName)}
                                 disabled={connectionsFull}
                                 title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
-                                className="text-sm font-medium bg-[#AF4D98] text-white px-5 py-2.5 rounded-full hover:bg-[#9B3D85] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 shadow-sm"
+                                className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
                                 Express Interest
                               </button>
@@ -436,7 +417,7 @@ export default function SisterDashboard({
             )}
 
             {interestError && (
-              <div className="mt-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-xl p-3 text-sm text-[#C13515]">
+              <div className="mt-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">
                 {interestError}
               </div>
             )}
@@ -444,35 +425,34 @@ export default function SisterDashboard({
 
           {/* ── Active Connections ───────────────────────────────── */}
           <section id="connections">
-            <h2 className="text-lg font-semibold text-[#1A1A1A] tracking-tight mb-4">Active Connections</h2>
+            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Active Connections</p>
 
             {connections.length === 0 ? (
               <EmptyState message="No active connections yet. When a match interest is accepted, a connection will appear here." />
             ) : (
               <div className="space-y-3">
                 {connections.map(conn => (
-                  <div key={conn.id} className="bg-white rounded-2xl p-5 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
+                  <div key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#9DF7E5] border-2 border-[#5ECFBA] flex-shrink-0" />
-                      <span className="font-semibold text-[#1A1A1A]">{conn.other_name}</span>
-                      <span className="text-xs text-[#00A699] bg-[#E6F9F7] px-2 py-0.5 rounded-full ml-auto font-medium">Active</span>
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
+                      <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <Link
                         href={`/dashboard/chat/${conn.id}`}
-                        className="text-center text-sm font-medium text-[#AF4D98] border border-[#AF4D98] py-2.5 rounded-full hover:bg-[#F5E6F2] transition-colors"
+                        className="text-center text-sm font-medium text-[#AF4D98] py-2"
                       >
                         Open Chat
                       </Link>
                       <Link
                         href={`/dashboard/meetings/${conn.id}`}
-                        className="text-center text-sm font-medium bg-[#AF4D98] text-white py-2.5 rounded-full hover:bg-[#9B3D85] transition-colors shadow-sm"
+                        className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
                       >
                         Meeting
                       </Link>
                       <button
                         onClick={() => { setActionError(null); setCloseModalConnection(conn) }}
-                        className="text-sm font-medium text-[#C13515] border border-[#C13515]/30 py-2.5 rounded-full hover:bg-[#FDECEA] transition-colors"
+                        className="text-sm font-medium text-[#9B9B9B]"
                       >
                         Close
                       </button>
@@ -485,7 +465,7 @@ export default function SisterDashboard({
 
           {/* ── Notifications ────────────────────────────────────── */}
           <section id="notifications">
-            <h2 className="text-lg font-semibold text-[#1A1A1A] tracking-tight mb-4">Notifications</h2>
+            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Notifications</p>
 
             {visibleNotifications.length === 0 ? (
               <EmptyState message="You're all caught up. May Allah bless your journey." />
@@ -495,13 +475,13 @@ export default function SisterDashboard({
                   <button
                     key={notif.id}
                     onClick={() => handleMarkRead(notif.id)}
-                    className="w-full text-left bg-white rounded-2xl p-4 border border-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:border-[#AF4D98]/30 transition-colors group"
+                    className="w-full text-left bg-[#F9F0F6] rounded-[16px] p-4 border border-[#EDE8E3] hover:border-[#D4CBC4] transition-colors group"
                   >
                     <div className="flex items-start gap-3">
-                      <span className="w-2 h-2 rounded-full bg-[#AF4D98] flex-shrink-0 mt-1.5" />
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#AF4D98] flex-shrink-0 mt-1.5" />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-[#1A1A1A] text-sm">{notif.title}</p>
-                        <p className="text-[#6B6B6B] text-xs mt-0.5 line-clamp-2 leading-relaxed">{notif.body}</p>
+                        <p className="text-[#9B9B9B] text-xs mt-0.5 line-clamp-2 leading-relaxed">{notif.body}</p>
                         <p className="text-[#9B9B9B] text-xs mt-1">{formatRelativeDate(notif.created_at)}</p>
                       </div>
                       <span className="text-[10px] text-[#9B9B9B] group-hover:text-[#AF4D98] flex-shrink-0 mt-1 transition-colors">
@@ -519,9 +499,9 @@ export default function SisterDashboard({
       {/* ── Express Interest Modal ───────────────────────────────── */}
       {interestModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
+          <div className="bg-white rounded-[24px] p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-[#1A1A1A] tracking-tight">
+              <h3 className="text-xl font-medium text-[#1A1A1A] tracking-[-0.02em]">
                 Express Interest in {interestModal.firstName}
               </h3>
               <button onClick={() => setInterestModal(null)} className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors p-1" aria-label="Close">
@@ -530,7 +510,7 @@ export default function SisterDashboard({
                 </svg>
               </button>
             </div>
-            <p className="text-sm text-[#6B6B6B] mb-4 leading-relaxed">
+            <p className="text-sm text-[#5C5C5C] mb-4 leading-relaxed">
               Write a short message to introduce yourself. This is optional but encouraged.
             </p>
             <textarea
@@ -539,21 +519,21 @@ export default function SisterDashboard({
               placeholder="Assalamu Alaikum, I came across your profile and felt it aligned well with what I am looking for…"
               rows={4}
               maxLength={300}
-              className="w-full border border-[#D4D4D4] rounded-xl px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#9B9B9B] focus:outline-none focus:ring-2 focus:ring-[#AF4D98]/20 focus:border-[#AF4D98] resize-none transition-all duration-150"
+              className="w-full border border-[#EDE8E3] rounded-[12px] px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#9B9B9B] focus:outline-none focus:ring-2 focus:ring-[#AF4D98]/8 focus:border-[#AF4D98] resize-none transition-all duration-150"
             />
             <p className="text-xs text-[#9B9B9B] text-right mt-1 mb-5">{introMessage.length}/300</p>
             {interestError && (
-              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-xl p-3 text-sm text-[#C13515]">{interestError}</div>
+              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{interestError}</div>
             )}
             <div className="space-y-2">
               <button
                 onClick={handleSendInterest}
                 disabled={interestLoading}
-                className="w-full bg-[#AF4D98] text-white font-medium py-3 rounded-full hover:bg-[#9B3D85] disabled:opacity-50 active:scale-95 transition-all duration-200 text-sm shadow-sm"
+                className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-3 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors text-sm"
               >
                 {interestLoading ? 'Sending…' : 'Send Interest'}
               </button>
-              <button onClick={() => setInterestModal(null)} className="w-full text-[#6B6B6B] text-sm py-2 hover:text-[#1A1A1A] transition-colors">
+              <button onClick={() => setInterestModal(null)} className="w-full text-[#9B9B9B] text-sm py-2 hover:text-[#1A1A1A] transition-colors">
                 Cancel
               </button>
             </div>
@@ -564,33 +544,33 @@ export default function SisterDashboard({
       {/* ── Accept Interest Modal ────────────────────────────────── */}
       {acceptModalInterest && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
-            <h3 className="text-xl font-semibold text-[#1A1A1A] tracking-tight mb-2">Accept Interest</h3>
-            <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">
+          <div className="bg-white rounded-[24px] p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
+            <h3 className="text-xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-2">Accept Interest</h3>
+            <p className="text-[#5C5C5C] text-sm leading-relaxed mb-6">
               Accepting will share your photos with{' '}
-              <strong className="text-[#1A1A1A]">{acceptModalInterest.other_profile?.full_name ?? 'this person'}</strong>.
+              <strong className="text-[#1A1A1A] font-medium">{acceptModalInterest.other_profile?.full_name ?? 'this person'}</strong>.
               Are you ready?
             </p>
             {actionError && (
-              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-xl p-3 text-sm text-[#C13515]">{actionError}</div>
+              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{actionError}</div>
             )}
             <div className="space-y-3">
               <Link
                 href="/dashboard/profile"
-                className="block w-full text-center border border-[#AF4D98] text-[#AF4D98] font-medium py-3 rounded-full hover:bg-[#F5E6F2] transition-colors text-sm"
+                className="block w-full text-center text-sm font-medium text-[#AF4D98] py-3"
               >
                 Review My Photos
               </Link>
               <button
                 onClick={handleAccept}
                 disabled={accepting}
-                className="w-full bg-[#AF4D98] text-white font-medium py-3 rounded-full hover:bg-[#9B3D85] disabled:opacity-50 active:scale-95 transition-all duration-200 text-sm shadow-sm"
+                className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-3 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors text-sm"
               >
                 {accepting ? 'Accepting…' : 'Confirm & Accept'}
               </button>
               <button
                 onClick={() => { setAcceptModalInterest(null); setActionError(null) }}
-                className="w-full text-[#6B6B6B] text-sm py-2 hover:text-[#1A1A1A] transition-colors"
+                className="w-full text-[#9B9B9B] text-sm py-2 hover:text-[#1A1A1A] transition-colors"
               >
                 Cancel
               </button>
@@ -602,31 +582,31 @@ export default function SisterDashboard({
       {/* ── Close Connection Modal ───────────────────────────────── */}
       {closeModalConnection && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
-            <h3 className="text-xl font-semibold text-[#1A1A1A] tracking-tight mb-2">Close Connection</h3>
-            <p className="text-[#6B6B6B] text-sm leading-relaxed mb-3">
+          <div className="bg-white rounded-[24px] p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
+            <h3 className="text-xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-2">Close Connection</h3>
+            <p className="text-[#5C5C5C] text-sm leading-relaxed mb-3">
               Are you sure you want to close your connection with{' '}
-              <strong className="text-[#1A1A1A]">{closeModalConnection.other_name}</strong>? This cannot be undone.
+              <strong className="text-[#1A1A1A] font-medium">{closeModalConnection.other_name}</strong>? This cannot be undone.
             </p>
-            <div className="bg-[#FFF4CC] border border-[#FFB400]/20 rounded-xl px-4 py-3 mb-6">
-              <p className="text-xs text-[#6B4F00] leading-relaxed">
+            <div className="bg-[#F4E4BA]/40 border border-[#EDE8E3] rounded-[12px] px-4 py-3 mb-6">
+              <p className="text-xs text-[#5C5C5C] leading-relaxed">
                 Your photos will be revoked and {closeModalConnection.other_name} will no longer have access to them.
               </p>
             </div>
             {actionError && (
-              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-xl p-3 text-sm text-[#C13515]">{actionError}</div>
+              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{actionError}</div>
             )}
             <div className="space-y-3">
               <button
                 onClick={handleCloseConnection}
                 disabled={closing}
-                className="w-full bg-[#C13515] text-white font-medium py-3 rounded-full hover:bg-[#a02d10] disabled:opacity-50 active:scale-95 transition-all duration-200 text-sm"
+                className="w-full bg-[#C13515] text-white font-medium py-3 rounded-full hover:bg-[#a02d10] disabled:opacity-50 transition-colors text-sm"
               >
                 {closing ? 'Closing…' : 'Close Connection'}
               </button>
               <button
                 onClick={() => { setCloseModalConnection(null); setActionError(null) }}
-                className="w-full text-[#6B6B6B] text-sm py-2 hover:text-[#1A1A1A] transition-colors"
+                className="w-full text-[#9B9B9B] text-sm py-2 hover:text-[#1A1A1A] transition-colors"
               >
                 Cancel
               </button>
@@ -637,12 +617,12 @@ export default function SisterDashboard({
 
       {/* ── Toasts ───────────────────────────────────────────────── */}
       {closedToast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#1A1A1A] text-white text-sm font-medium px-5 py-2.5 rounded-full shadow-lg whitespace-nowrap">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#1A1A1A] text-white text-sm font-medium px-5 py-2.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.12)] whitespace-nowrap">
           Connection closed. Jazakallah khair.
         </div>
       )}
       {mutualToast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#AF4D98] text-white text-sm font-medium px-5 py-2.5 rounded-full shadow-lg whitespace-nowrap">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#AF4D98] text-white text-sm font-medium px-5 py-2.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.12)] whitespace-nowrap">
           It&apos;s a match! Chat is now open.
         </div>
       )}

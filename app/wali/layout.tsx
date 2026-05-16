@@ -16,7 +16,7 @@ export default async function WaliLayout({ children }: { children: React.ReactNo
   const sisterName = waliProfile.full_name.split(' ')[0]
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] flex flex-col max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#FDF8F3] flex flex-col max-w-lg mx-auto">
       <WaliTopBar sisterName={sisterName} />
 
       {/* Read-only observer banner */}

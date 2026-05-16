@@ -8,12 +8,12 @@ const KEY = 'nasib_sister_additional'
 const MAIN_KEY = 'nasib_onboarding_sister'
 
 const textareaCls =
-  'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm resize-none'
+  'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm resize-none'
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <div className="border-b border-[#EBEBEB] pb-2 mb-5">
-      <h3 className="text-sm font-semibold text-[#6B6B6B] uppercase tracking-wider">{title}</h3>
+    <div className="border-b border-[#EDE8E3] pb-2 mb-5">
+      <h3 className="text-sm font-medium text-[#5C5C5C] uppercase tracking-wider">{title}</h3>
     </div>
   )
 }
@@ -36,7 +36,7 @@ function Pill({ label, selected, onClick }: { label: string; selected: boolean; 
       className={`px-4 py-2 rounded-full text-sm font-medium border transition-all cursor-pointer ${
         selected
           ? 'bg-[#AF4D98] text-white border-[#AF4D98]'
-          : 'bg-white text-[#1A1A1A] border-[#EBEBEB] hover:border-[#AF4D98]'
+          : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#AF4D98]'
       }`}
     >
       {label}
@@ -52,7 +52,7 @@ function MultiPill({ label, selected, onClick }: { label: string; selected: bool
       className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-all cursor-pointer ${
         selected
           ? 'bg-[#AF4D98] text-white border-[#AF4D98]'
-          : 'bg-white text-[#1A1A1A] border-[#EBEBEB] hover:border-[#AF4D98]'
+          : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#AF4D98]'
       }`}
     >
       {selected && (
@@ -284,7 +284,7 @@ export default function SisterAdditional() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8 pb-28">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">A little more about you</h2>
+      <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">A little more about you</h2>
       <p className="text-[#9B9B9B] text-sm mb-8">These help us find you a truly compatible match</p>
 
       <form id="sister-additional-form" ref={formRef} onSubmit={handleSubmit} className="space-y-8">
@@ -519,13 +519,13 @@ export default function SisterAdditional() {
       </form>
 
       {/* Fixed bottom submit */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#EBEBEB] px-4 py-4 z-20">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#EDE8E3] px-4 py-4 z-20">
         <div className="max-w-lg mx-auto">
           <button
             type="submit"
             form="sister-additional-form"
             disabled={loading}
-            className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Saving...' : 'Next →'}
           </button>

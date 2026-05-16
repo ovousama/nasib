@@ -13,7 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const unreadCount = await getUnreadNotificationCount(user.id)
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] flex flex-col max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#FDF8F3] flex flex-col max-w-lg mx-auto">
       <TopBar />
       <DashboardShell userId={user.id} initialUnreadCount={unreadCount}>
         {children}

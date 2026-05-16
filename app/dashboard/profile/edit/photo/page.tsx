@@ -80,14 +80,14 @@ export default function EditPhotoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FDF8F3]">
       <div className="max-w-lg mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
           <Link href="/dashboard/profile" className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
@@ -95,7 +95,7 @@ export default function EditPhotoPage() {
               <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
             </svg>
           </Link>
-          <h1 className="text-lg font-semibold text-[#1A1A1A]">Edit Photo</h1>
+          <h1 className="text-base font-medium text-[#1A1A1A]">Edit Photo</h1>
         </div>
 
         {error && (
@@ -107,7 +107,7 @@ export default function EditPhotoPage() {
         {currentPhotoUrl && (
           <div className="mb-6">
             <p className="text-sm font-medium text-[#1A1A1A] mb-2">Current Photo</p>
-            <div className="w-32 h-32 rounded-xl overflow-hidden border border-[#EBEBEB]">
+            <div className="w-32 h-32 rounded-xl overflow-hidden border border-[#EDE8E3]">
               <Image src={currentPhotoUrl} alt="Current profile photo" width={128} height={128} className="w-full h-full object-cover" />
             </div>
           </div>
@@ -119,7 +119,7 @@ export default function EditPhotoPage() {
           onDrop={onDrop}
           onClick={() => fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all ${
-            dragOver ? 'border-[#AF4D98] bg-[#AF4D98]/5' : 'border-[#EBEBEB] hover:border-[#AF4D98]'
+            dragOver ? 'border-[#AF4D98] bg-[#AF4D98]/5' : 'border-[#EDE8E3] hover:border-[#AF4D98]'
           }`}
         >
           {uploading ? (
@@ -149,7 +149,7 @@ export default function EditPhotoPage() {
       </div>
 
       {toast && (
-        <div className={`fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-xl px-4 py-3 shadow-md text-sm font-medium text-center ${toast === 'success' ? 'bg-[#AF4D98] text-white' : 'bg-red-600 text-white'}`}>
+        <div className={`fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center ${toast === 'success' ? 'bg-[#AF4D98] text-white' : 'bg-red-600 text-white'}`}>
           {toast === 'success' ? 'Photo updated successfully' : 'Something went wrong'}
         </div>
       )}

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
 const KEY = 'nasib_onboarding_sister'
-const inputCls = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
+const inputCls = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
 
 export default function SisterReference() {
   const router = useRouter()
@@ -113,7 +113,7 @@ export default function SisterReference() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Character Reference</h2>
+      <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Character Reference</h2>
       <p className="text-[#9B9B9B] text-sm mb-2">
         Provide someone who can speak to your character — a close friend, teacher, or community member.
       </p>
@@ -155,14 +155,14 @@ export default function SisterReference() {
 
         <div className="bg-[#F5E6F2] border border-[#AF4D98]/20 rounded-xl p-4">
           <p className="text-sm text-[#AF4D98] font-medium mb-1">Almost there, mashAllah!</p>
-          <p className="text-xs text-[#6B6B6B]">
+          <p className="text-xs text-[#5C5C5C]">
             After submitting, your profile will be reviewed by the Nasib team. {"You'll"} be notified once verified,
             inshAllah. Jazakillah khayran for your trust.
           </p>
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed">
           {loading ? 'Submitting...' : 'Submit Profile'}
         </button>
       </form>

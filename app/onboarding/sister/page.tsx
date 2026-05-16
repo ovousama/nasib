@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 
 const KEY = 'nasib_onboarding_sister'
 type ContactMethod = 'email' | 'phone' | 'whatsapp'
-const inputCls = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
+const inputCls = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
 
 export default function SisterWali() {
   const router = useRouter()
@@ -50,10 +50,10 @@ export default function SisterWali() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Your Wali</h2>
+      <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Your Wali</h2>
       <div className="bg-[#F5E6F2] border border-[#AF4D98]/20 rounded-xl p-4 mb-8">
         <p className="text-sm text-[#AF4D98] font-medium mb-1">About your wali&apos;s role</p>
-        <p className="text-sm text-[#6B6B6B] leading-relaxed">
+        <p className="text-sm text-[#5C5C5C] leading-relaxed">
           Your wali will have read-only visibility into your journey — they can see your matches,
           messages, and meeting requests. They will <strong>not</strong> need to approve anything.
           This is about transparency, not gatekeeping.
@@ -96,7 +96,7 @@ export default function SisterWali() {
                 className={`flex-1 py-3 rounded-xl border-2 font-medium text-sm transition-all ${
                   contactMethod === c.value
                     ? 'border-[#AF4D98] bg-[#AF4D98] text-white'
-                    : 'border-[#EBEBEB] text-[#6B6B6B] hover:border-[#AF4D98]'
+                    : 'border-[#EDE8E3] text-[#5C5C5C] hover:border-[#AF4D98]'
                 }`}>
                 {c.label}
               </button>
@@ -109,7 +109,7 @@ export default function SisterWali() {
         )}
 
         <button type="submit"
-          className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm">
+          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm">
           Next →
         </button>
       </form>

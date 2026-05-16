@@ -13,13 +13,13 @@ export default function TopBar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-6 h-14 flex items-center justify-between">
-      <span className="text-lg font-semibold tracking-tight text-[#AF4D98]">
+    <header className="sticky top-0 z-40 bg-white border-b border-[#EDE8E3] px-6 h-[52px] flex items-center justify-between">
+      <span className="text-[18px] font-medium tracking-[-0.02em] text-[#AF4D98]">
         Nasib
       </span>
       <button
         onClick={handleSignOut}
-        className="text-sm text-[#6B6B6B] hover:text-[#1A1A1A] font-medium transition-colors"
+        className="text-sm text-[#9B9B9B] hover:text-[#5C5C5C] transition-colors"
       >
         Sign out
       </button>

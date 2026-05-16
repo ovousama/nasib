@@ -40,22 +40,22 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
   const progress = totalSteps > 0 && currentStep > 0 ? (currentStep / totalSteps) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7]">
+    <div className="min-h-screen bg-[#FDF8F3]">
       {/* Fixed top bar */}
-      <div className="fixed top-0 left-0 right-0 z-10 bg-white border-b border-[#EBEBEB]">
-        {/* Progress bar — very top */}
+      <div className="fixed top-0 left-0 right-0 z-10 bg-white border-b border-[#EDE8E3]">
+        {/* Progress bar — very top, 2px, no border-radius */}
         {currentStep > 0 && (
-          <div className="h-0.5 bg-[#EBEBEB]">
+          <div className="h-[2px] bg-[#EDE8E3]">
             <div
-              className="h-0.5 bg-[#AF4D98] transition-all duration-500 ease-out"
+              className="h-[2px] bg-[#AF4D98] transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
         )}
         <div className="max-w-lg mx-auto px-6 h-14 flex items-center justify-between">
-          <span className="text-lg font-semibold text-[#AF4D98] tracking-tight">Nasib</span>
+          <span className="text-lg font-medium text-[#AF4D98] tracking-[-0.02em]">Nasib</span>
           {currentStep > 0 && (
-            <span className="text-sm text-[#9B9B9B] font-medium tabular-nums">
+            <span className="text-[13px] text-[#9B9B9B] tabular-nums">
               Step {currentStep} of {totalSteps}
             </span>
           )}

@@ -58,11 +58,11 @@ function SectionCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#EBEBEB]">
+    <div className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-5 mb-3">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-[#1A1A1A]">{title}</h3>
+        <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B]">{title}</p>
         {editHref && (
-          <Link href={editHref} className="text-sm text-[#AF4D98] font-medium hover:underline">
+          <Link href={editHref} className="text-xs text-[#AF4D98]">
             Edit
           </Link>
         )}
@@ -75,8 +75,8 @@ function SectionCard({
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">{label}</span>
-      <span className="text-sm text-[#1A1A1A]">{value ?? '—'}</span>
+      <span className="text-xs text-[#9B9B9B]">{label}</span>
+      <span className="text-sm text-[#1A1A1A] font-medium">{value ?? '—'}</span>
     </div>
   )
 }
@@ -84,15 +84,15 @@ function Field({ label, value }: { label: string; value: string | null | undefin
 function FieldFull({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div className="col-span-2 flex flex-col gap-0.5">
-      <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">{label}</span>
-      <span className="text-sm text-[#1A1A1A] leading-relaxed whitespace-pre-wrap">{value ?? '—'}</span>
+      <span className="text-xs text-[#9B9B9B]">{label}</span>
+      <span className="text-sm text-[#1A1A1A] font-medium leading-relaxed whitespace-pre-wrap">{value ?? '—'}</span>
     </div>
   )
 }
 
 function YesNo({ value }: { value: boolean | null | undefined }) {
-  if (value === null || value === undefined) return <span className="text-sm text-[#9B9B9B]">—</span>
-  return <span className="text-sm text-[#1A1A1A]">{value ? 'Yes' : 'No'}</span>
+  if (value === null || value === undefined) return <span className="text-sm text-[#9B9B9B] font-medium">—</span>
+  return <span className="text-sm text-[#1A1A1A] font-medium">{value ? 'Yes' : 'No'}</span>
 }
 
 function StatusHeader({
@@ -110,41 +110,35 @@ function StatusHeader({
 }) {
   const firstName = name.split(' ')[0]
   return (
-    <div className="bg-gradient-to-br from-[#AF4D98] to-[#9B3D85] px-4 pt-8 pb-8">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h1 className="text-white text-2xl font-bold">{firstName}</h1>
-          <p className="text-white/70 text-sm mt-0.5">
-            {age} years{location ? ` · ${location}` : ''}
-          </p>
-          <div className="mt-3">
-            {verificationBadge ? (
-              <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-                </svg>
-                Verified
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 bg-amber-400/20 text-amber-200 text-xs font-medium px-3 py-1.5 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clipRule="evenodd" />
-                </svg>
-                Pending Verification
-              </span>
-            )}
-          </div>
+    <div className="bg-white border-b border-[#EDE8E3] px-5 pt-8 pb-6 flex flex-col items-center text-center">
+      {photoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={photoUrl} alt={firstName} className="w-[72px] h-[72px] rounded-full object-cover ring-2 ring-[#EDE8E3]" />
+      ) : (
+        <div className="w-[72px] h-[72px] rounded-full bg-[#F9F0F6] flex items-center justify-center text-[#AF4D98] text-2xl font-medium">
+          {firstName[0]?.toUpperCase()}
         </div>
-        <div className="ml-4 flex-shrink-0">
-          {photoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={photoUrl} alt={firstName} className="w-16 h-16 rounded-full object-cover ring-2 ring-white/30" />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-xl font-bold">
-              {firstName[0]?.toUpperCase()}
-            </div>
-          )}
-        </div>
+      )}
+      <h1 className="text-[22px] font-medium tracking-[-0.02em] text-[#1A1A1A] mt-3">{firstName}</h1>
+      <p className="text-sm text-[#9B9B9B] mt-0.5">
+        {age} years{location ? ` · ${location}` : ''}
+      </p>
+      <div className="mt-3">
+        {verificationBadge ? (
+          <span className="inline-flex items-center gap-1.5 bg-[#F9F0F6] text-[#AF4D98] text-xs font-medium px-3 py-1.5 rounded-full border border-[#AF4D98]/20">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+            </svg>
+            Verified
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-xs font-medium px-3 py-1.5 rounded-full border border-amber-100">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clipRule="evenodd" />
+            </svg>
+            Pending Verification
+          </span>
+        )}
       </div>
     </div>
   )
@@ -152,10 +146,10 @@ function StatusHeader({
 
 function ReferenceCard({ reference }: { reference: Reference | null }) {
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#EBEBEB]">
+    <div className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-5 mb-3">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-[#1A1A1A]">Character Reference</h3>
-        <Link href="/dashboard/profile/edit/reference" className="text-sm text-[#AF4D98] font-medium hover:underline">
+        <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B]">Character Reference</p>
+        <Link href="/dashboard/profile/edit/reference" className="text-xs text-[#AF4D98]">
           {reference ? 'Edit' : 'Add'}
         </Link>
       </div>
@@ -165,9 +159,9 @@ function ReferenceCard({ reference }: { reference: Reference | null }) {
           <Field label="Relationship" value={reference.referee_relationship} />
           <div className="flex items-center gap-2 mt-2">
             <span
-              className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+              className={`text-xs font-medium px-3 py-1 rounded-full ${
                 reference.status === 'completed'
-                  ? 'bg-[#F5E6F2] text-[#AF4D98] border border-[#AF4D98]/20'
+                  ? 'bg-[#F9F0F6] text-[#AF4D98]'
                   : 'bg-amber-50 text-amber-700 border border-amber-100'
               }`}
             >
@@ -202,7 +196,7 @@ function BrotherProfileView({
   const bp = brotherProfile as AnyProfile
 
   return (
-    <div>
+    <div className="min-h-screen bg-[#FDF8F3]">
       <StatusHeader
         name={brotherProfile.full_name}
         age={brotherProfile.age}
@@ -211,7 +205,7 @@ function BrotherProfileView({
         verificationBadge={profile.verification_badge}
       />
 
-      <div className="px-4 py-5 space-y-3">
+      <div className="px-4 py-4">
 
         <SectionCard title="Basic Information" editHref="/dashboard/profile/edit/basic">
           <div className="grid grid-cols-2 gap-3">
@@ -232,7 +226,7 @@ function BrotherProfileView({
             <Field label="Prayer Frequency" value={brotherProfile.prayer_frequency} />
             <Field label="Islamic Knowledge" value={brotherProfile.islamic_knowledge_level} />
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Has Beard</span>
+              <span className="text-xs text-[#9B9B9B]">Has Beard</span>
               <YesNo value={brotherProfile.has_beard} />
             </div>
           </div>
@@ -244,7 +238,7 @@ function BrotherProfileView({
             <Field label="Education" value={brotherProfile.education_level} />
             <Field label="Living Situation" value={brotherProfile.living_situation} />
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Willing to Relocate</span>
+              <span className="text-xs text-[#9B9B9B]">Willing to Relocate</span>
               <YesNo value={brotherProfile.willing_to_relocate} />
             </div>
             <div className="col-span-2">
@@ -257,19 +251,19 @@ function BrotherProfileView({
           <div className="grid grid-cols-2 gap-3">
             <Field label="Timeline" value={brotherProfile.timeline_to_marry} />
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Previously Married</span>
+              <span className="text-xs text-[#9B9B9B]">Previously Married</span>
               <YesNo value={brotherProfile.previously_married} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Has Children</span>
+              <span className="text-xs text-[#9B9B9B]">Has Children</span>
               <YesNo value={brotherProfile.has_children} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Wants Children</span>
+              <span className="text-xs text-[#9B9B9B]">Wants Children</span>
               <YesNo value={brotherProfile.wants_children} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Open to Polygamy</span>
+              <span className="text-xs text-[#9B9B9B]">Open to Polygamy</span>
               <YesNo value={brotherProfile.polygamy_openness} />
             </div>
           </div>
@@ -288,10 +282,10 @@ function BrotherProfileView({
             />
             {brotherProfile.dealbreakers?.length ? (
               <div className="col-span-2 flex flex-col gap-0.5">
-                <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Dealbreakers</span>
+                <span className="text-xs text-[#9B9B9B]">Dealbreakers</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {brotherProfile.dealbreakers.map((d: string) => (
-                    <span key={d} className="text-xs bg-red-50 text-red-700 border border-red-100 px-2 py-0.5 rounded-full">
+                    <span key={d} className="text-xs bg-red-50 text-red-700 border border-red-100 px-3 py-1 rounded-full">
                       {d}
                     </span>
                   ))}
@@ -304,12 +298,12 @@ function BrotherProfileView({
         <SectionCard title="Character & Goals" editHref="/dashboard/profile/edit/character">
           <div className="space-y-3">
             <div>
-              <p className="text-xs text-[#9B9B9B] uppercase tracking-wide mb-1">About Me</p>
-              <p className="text-sm text-[#1A1A1A] leading-relaxed">{brotherProfile.character_description ?? '—'}</p>
+              <p className="text-xs text-[#9B9B9B] mb-1">About Me</p>
+              <p className="text-sm text-[#1A1A1A] font-medium leading-relaxed">{brotherProfile.character_description ?? '—'}</p>
             </div>
             <div>
-              <p className="text-xs text-[#9B9B9B] uppercase tracking-wide mb-1">My Goals</p>
-              <p className="text-sm text-[#1A1A1A] leading-relaxed">{brotherProfile.goals ?? '—'}</p>
+              <p className="text-xs text-[#9B9B9B] mb-1">My Goals</p>
+              <p className="text-sm text-[#1A1A1A] font-medium leading-relaxed">{brotherProfile.goals ?? '—'}</p>
             </div>
           </div>
         </SectionCard>
@@ -317,7 +311,7 @@ function BrotherProfileView({
         <SectionCard title="My Photo" editHref="/dashboard/profile/edit/photo">
           {brotherProfile.photo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={brotherProfile.photo_url} alt="Profile photo" className="w-24 h-24 rounded-xl object-cover" />
+            <img src={brotherProfile.photo_url} alt="Profile photo" className="w-24 h-24 rounded-[12px] object-cover border border-[#EDE8E3]" />
           ) : (
             <p className="text-sm text-[#9B9B9B]">No photo uploaded yet.</p>
           )}
@@ -377,10 +371,10 @@ function BrotherProfileView({
             <Field label="Alone Time" value={bp.alone_time_importance} />
             {bp.love_language?.length ? (
               <div className="col-span-2 flex flex-col gap-0.5">
-                <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Love Language</span>
+                <span className="text-xs text-[#9B9B9B]">Love Language</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {bp.love_language.map((l: string) => (
-                    <span key={l} className="text-xs bg-[#F5E6F2] text-[#AF4D98] border border-[#AF4D98]/20 px-2 py-0.5 rounded-full">
+                    <span key={l} className="px-3 py-1 rounded-full bg-[#F9F0F6] text-[#AF4D98] text-xs">
                       {l}
                     </span>
                   ))}
@@ -418,7 +412,7 @@ function SisterProfileView({
   const sp = sisterProfile as AnyProfile
 
   return (
-    <div>
+    <div className="min-h-screen bg-[#FDF8F3]">
       <StatusHeader
         name={sisterProfile.full_name}
         age={sisterProfile.age}
@@ -427,7 +421,7 @@ function SisterProfileView({
         verificationBadge={profile.verification_badge}
       />
 
-      <div className="px-4 py-5 space-y-3">
+      <div className="px-4 py-4">
 
         <SectionCard title="Wali Details" editHref="/dashboard/profile/edit/wali">
           {waliProfile ? (
@@ -471,7 +465,7 @@ function SisterProfileView({
             <Field label="Education" value={sisterProfile.education_level} />
             <Field label="Living Situation" value={sisterProfile.living_situation} />
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Willing to Relocate</span>
+              <span className="text-xs text-[#9B9B9B]">Willing to Relocate</span>
               <YesNo value={sisterProfile.willing_to_relocate} />
             </div>
           </div>
@@ -481,15 +475,15 @@ function SisterProfileView({
           <div className="grid grid-cols-2 gap-3">
             <Field label="Timeline" value={sisterProfile.timeline_to_marry} />
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Previously Married</span>
+              <span className="text-xs text-[#9B9B9B]">Previously Married</span>
               <YesNo value={sisterProfile.previously_married} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Has Children</span>
+              <span className="text-xs text-[#9B9B9B]">Has Children</span>
               <YesNo value={sisterProfile.has_children} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Wants Children</span>
+              <span className="text-xs text-[#9B9B9B]">Wants Children</span>
               <YesNo value={sisterProfile.wants_children} />
             </div>
           </div>
@@ -508,10 +502,10 @@ function SisterProfileView({
             />
             {sisterProfile.dealbreakers?.length ? (
               <div className="col-span-2 flex flex-col gap-0.5">
-                <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Dealbreakers</span>
+                <span className="text-xs text-[#9B9B9B]">Dealbreakers</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {sisterProfile.dealbreakers.map((d: string) => (
-                    <span key={d} className="text-xs bg-red-50 text-red-700 border border-red-100 px-2 py-0.5 rounded-full">
+                    <span key={d} className="text-xs bg-red-50 text-red-700 border border-red-100 px-3 py-1 rounded-full">
                       {d}
                     </span>
                   ))}
@@ -524,12 +518,12 @@ function SisterProfileView({
         <SectionCard title="Character & Goals" editHref="/dashboard/profile/edit/character">
           <div className="space-y-3">
             <div>
-              <p className="text-xs text-[#9B9B9B] uppercase tracking-wide mb-1">About Me</p>
-              <p className="text-sm text-[#1A1A1A] leading-relaxed">{sisterProfile.character_description ?? '—'}</p>
+              <p className="text-xs text-[#9B9B9B] mb-1">About Me</p>
+              <p className="text-sm text-[#1A1A1A] font-medium leading-relaxed">{sisterProfile.character_description ?? '—'}</p>
             </div>
             <div>
-              <p className="text-xs text-[#9B9B9B] uppercase tracking-wide mb-1">My Goals</p>
-              <p className="text-sm text-[#1A1A1A] leading-relaxed">{sisterProfile.goals ?? '—'}</p>
+              <p className="text-xs text-[#9B9B9B] mb-1">My Goals</p>
+              <p className="text-sm text-[#1A1A1A] font-medium leading-relaxed">{sisterProfile.goals ?? '—'}</p>
             </div>
           </div>
         </SectionCard>
@@ -539,7 +533,7 @@ function SisterProfileView({
             <div className="flex gap-2 flex-wrap">
               {sisterProfile.photo_urls.map((url: string, i: number) => (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={url} alt={`Photo ${i + 1}`} className="w-20 h-20 rounded-xl object-cover" />
+                <img key={i} src={url} alt={`Photo ${i + 1}`} className="w-20 h-20 rounded-[12px] object-cover border border-[#EDE8E3]" />
               ))}
             </div>
           ) : (
@@ -604,10 +598,10 @@ function SisterProfileView({
             <Field label="Alone Time" value={sp.alone_time_importance} />
             {sp.love_language?.length ? (
               <div className="col-span-2 flex flex-col gap-0.5">
-                <span className="text-xs text-[#9B9B9B] uppercase tracking-wide">Love Language</span>
+                <span className="text-xs text-[#9B9B9B]">Love Language</span>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {sp.love_language.map((l: string) => (
-                    <span key={l} className="text-xs bg-[#F5E6F2] text-[#AF4D98] border border-[#AF4D98]/20 px-2 py-0.5 rounded-full">
+                    <span key={l} className="px-3 py-1 rounded-full bg-[#F9F0F6] text-[#AF4D98] text-xs">
                       {l}
                     </span>
                   ))}

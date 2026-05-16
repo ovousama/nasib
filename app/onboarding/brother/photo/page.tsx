@@ -77,72 +77,74 @@ export default function BrotherPhoto() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Your Photo</h2>
-      <p className="text-[#9B9B9B] text-sm mb-2">Upload a clear photo of yourself</p>
-      <p className="text-xs text-[#9B9B9B] mb-8">
-        Your photo is only shared with sisters you are connected with — not publicly visible.
-      </p>
+    <div className="min-h-screen bg-[#FDF8F3]">
+      <div className="max-w-[480px] mx-auto px-5 py-8 pb-28">
+        <h2 className="text-2xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-1">Your Photo</h2>
+        <p className="text-[15px] text-[#9B9B9B] mb-2">Upload a clear photo of yourself</p>
+        <p className="text-xs text-[#9B9B9B] mb-8">
+          Your photo is only shared with sisters you are connected with — not publicly visible.
+        </p>
 
-      {/* Upload area */}
-      <div
-        onClick={() => !uploading && inputRef.current?.click()}
-        onDrop={handleDrop}
-        onDragOver={e => e.preventDefault()}
-        className={`relative rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden ${
-          uploaded
-            ? 'border-[#AF4D98] bg-[#F5E6F2]'
-            : 'border-[#EBEBEB] bg-[#FDFAF7] hover:border-[#AF4D98] hover:bg-[#F5E6F2]'
-        }`}
-        style={{ minHeight: 280 }}
-      >
-        {preview ? (
-          <img src={preview} alt="Preview" className="w-full h-72 object-cover rounded-2xl" />
-        ) : uploaded ? (
-          <div className="flex flex-col items-center justify-center h-72 gap-3">
-            <div className="w-14 h-14 bg-[#AF4D98] rounded-full flex items-center justify-center">
-              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+        {/* Upload area */}
+        <div
+          onClick={() => !uploading && inputRef.current?.click()}
+          onDrop={handleDrop}
+          onDragOver={e => e.preventDefault()}
+          className={`relative rounded-2xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden ${
+            uploaded
+              ? 'border-[#AF4D98] bg-[#F9F0F6]'
+              : 'border-[#EDE8E3] bg-[#FDF8F3] hover:border-[#AF4D98] hover:bg-[#F9F0F6]'
+          }`}
+          style={{ minHeight: 280 }}
+        >
+          {preview ? (
+            <img src={preview} alt="Preview" className="w-full h-72 object-cover rounded-2xl" />
+          ) : uploaded ? (
+            <div className="flex flex-col items-center justify-center h-72 gap-3">
+              <div className="w-14 h-14 bg-[#AF4D98] rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="text-[#AF4D98] font-medium text-sm">Photo uploaded</p>
+              <p className="text-[#9B9B9B] text-xs">Click to replace</p>
             </div>
-            <p className="text-[#AF4D98] font-medium text-sm">Photo uploaded</p>
-            <p className="text-[#9B9B9B] text-xs">Click to replace</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-72 gap-3 px-4 text-center">
-            <div className="w-14 h-14 bg-[#EBEBEB] rounded-full flex items-center justify-center">
-              <svg className="w-7 h-7 text-[#9B9B9B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-72 gap-3 px-4 text-center">
+              <div className="w-14 h-14 bg-[#EDE8E3] rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7 text-[#9B9B9B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[#5C5C5C] font-medium text-sm">Tap to upload a photo</p>
+                <p className="text-[#9B9B9B] text-xs mt-1">JPG, PNG or WEBP · Max 5MB</p>
+              </div>
             </div>
-            <div>
-              <p className="text-[#6B6B6B] font-medium text-sm">Tap to upload a photo</p>
-              <p className="text-[#9B9B9B] text-xs mt-1">JPG, PNG or WEBP · Max 5MB</p>
+          )}
+
+          {uploading && (
+            <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm text-[#5C5C5C]">Uploading...</p>
+              </div>
             </div>
-          </div>
+          )}
+        </div>
+
+        <input ref={inputRef} type="file" accept="image/*" className="hidden"
+          onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }} />
+
+        {error && (
+          <div className="mt-4 border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">{error}</div>
         )}
 
-        {uploading && (
-          <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-[#6B6B6B]">Uploading...</p>
-            </div>
-          </div>
-        )}
+        <button onClick={handleNext} disabled={uploading}
+          className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors mt-6 disabled:opacity-40 disabled:cursor-not-allowed">
+          Next →
+        </button>
       </div>
-
-      <input ref={inputRef} type="file" accept="image/*" className="hidden"
-        onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }} />
-
-      {error && (
-        <div className="mt-4 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
-      )}
-
-      <button onClick={handleNext} disabled={uploading}
-        className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm mt-6 disabled:opacity-60 disabled:cursor-not-allowed">
-        Next →
-      </button>
     </div>
   )
 }

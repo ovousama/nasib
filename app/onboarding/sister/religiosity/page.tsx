@@ -12,8 +12,8 @@ const LEVELS: { value: Religiosity; label: string; sub: string }[] = [
   { value: 'learning',              label: 'Learning',              sub: 'Growing in my deen' },
 ]
 
-const selectCls = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] text-sm bg-white'
-const inputCls  = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
+const selectCls = 'w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white'
+const inputCls  = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
 
 export default function SisterReligiosity() {
   const router = useRouter()
@@ -56,7 +56,7 @@ export default function SisterReligiosity() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Your Deen</h2>
+      <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Your Deen</h2>
       <p className="text-[#9B9B9B] text-sm mb-8">Help us understand where you are in your faith journey</p>
 
       <form onSubmit={handleNext} className="space-y-6">
@@ -69,7 +69,7 @@ export default function SisterReligiosity() {
                 className={`w-full px-4 py-4 rounded-xl border-2 text-left transition-all ${
                   religiosity === opt.value
                     ? 'border-[#AF4D98] bg-[#AF4D98] text-white'
-                    : 'border-[#EBEBEB] text-[#1A1A1A] hover:border-[#AF4D98]'
+                    : 'border-[#EDE8E3] text-[#1A1A1A] hover:border-[#AF4D98]'
                 }`}>
                 <div className="font-medium text-sm">{opt.label}</div>
                 <div className={`text-xs mt-0.5 ${religiosity === opt.value ? 'text-green-100' : 'text-[#9B9B9B]'}`}>
@@ -125,7 +125,7 @@ export default function SisterReligiosity() {
         )}
 
         <button type="submit"
-          className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm">
+          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm">
           Next →
         </button>
       </form>

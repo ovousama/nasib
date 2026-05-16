@@ -15,12 +15,12 @@ export default function WaliTopBar({ sisterName }: Props) {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-[#EBEBEB] px-6 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-white border-b border-[#EDE8E3] px-6 h-14 flex items-center justify-between">
       <div className="flex items-center gap-2.5">
-        <span className="text-xs font-semibold text-[#9B9B9B] tracking-widest uppercase">WALI VIEW</span>
-        <span className="w-px h-4 bg-[#EBEBEB]" />
-        <span className="text-sm text-[#6B6B6B]">
-          Viewing <span className="font-semibold text-[#1A1A1A]">{sisterName}&apos;s</span> journey
+        <span className="text-xs font-medium text-[#9B9B9B] tracking-widest uppercase">WALI VIEW</span>
+        <span className="w-px h-4 bg-[#EDE8E3]" />
+        <span className="text-sm text-[#5C5C5C]">
+          Viewing <span className="font-medium text-[#1A1A1A]">{sisterName}&apos;s</span> journey
         </span>
       </div>
       <button

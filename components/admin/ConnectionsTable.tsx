@@ -26,36 +26,36 @@ export default function ConnectionsTable({ connections }: { connections: AdminCo
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-[#EBEBEB] overflow-hidden">
+    <div className="bg-white rounded-[16px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3] overflow-hidden">
       {error && (
-        <div className="mx-4 mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">{error}</div>
+        <div className="mx-4 mt-4 bg-red-50 border border-red-200 rounded-[10px] p-3 text-sm text-red-700">{error}</div>
       )}
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>
-            <tr className="border-b border-[#EBEBEB] bg-[#FDFAF7]">
+            <tr className="border-b border-[#EDE8E3]">
               {['Brother', 'Sister', 'Status', 'Connected', 'Meetings', 'Actions'].map(h => (
-                <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-[#6B6B6B] uppercase tracking-wide whitespace-nowrap">{h}</th>
+                <th key={h} className="text-left px-4 py-3 text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody>
             {connections.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-[#9B9B9B] text-sm">No connections found</td>
               </tr>
             )}
-            {connections.map(conn => (
-              <tr key={conn.id} className="hover:bg-[#FDFAF7] transition-colors">
+            {connections.map((conn, idx) => (
+              <tr key={conn.id} className={`border-b border-[#EDE8E3] hover:bg-[#FAF4EE] transition-colors ${idx === connections.length - 1 ? 'border-b-0' : ''}`}>
                 <td className="px-4 py-3 font-medium text-[#1A1A1A]">{conn.brother_name}</td>
                 <td className="px-4 py-3 font-medium text-[#1A1A1A]">{conn.sister_name}</td>
                 <td className="px-4 py-3">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${conn.status === 'active' ? 'bg-green-100 text-[#AF4D98]' : 'bg-[#FDFAF7] text-[#6B6B6B]'}`}>
+                  <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${conn.status === 'active' ? 'bg-[#F9F0F6] text-[#AF4D98]' : 'bg-[#FAF4EE] text-[#9B9B9B]'}`}>
                     {conn.status}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-[#9B9B9B] text-xs whitespace-nowrap">{formatDate(conn.created_at)}</td>
-                <td className="px-4 py-3 text-[#6B6B6B] text-center">{conn.meeting_count}</td>
+                <td className="px-4 py-3 text-[#5C5C5C] text-center">{conn.meeting_count}</td>
                 <td className="px-4 py-3">
                   {conn.status === 'active' && (
                     confirming === conn.id ? (
@@ -63,18 +63,18 @@ export default function ConnectionsTable({ connections }: { connections: AdminCo
                         <button
                           onClick={() => handleClose(conn.id)}
                           disabled={loading === conn.id}
-                          className="text-xs font-medium text-white bg-red-600 px-2.5 py-1 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                          className="text-xs font-medium text-white bg-red-600 px-2.5 py-1 rounded-full hover:bg-red-700 disabled:opacity-50 transition-colors"
                         >
                           {loading === conn.id ? '…' : 'Confirm'}
                         </button>
-                        <button onClick={() => setConfirming(null)} className="text-xs text-[#9B9B9B] hover:text-[#6B6B6B]">
+                        <button onClick={() => setConfirming(null)} className="text-xs text-[#9B9B9B] hover:text-[#5C5C5C]">
                           Cancel
                         </button>
                       </div>
                     ) : (
                       <button
                         onClick={() => setConfirming(conn.id)}
-                        className="text-xs text-red-600 hover:text-red-700 font-medium"
+                        className="text-sm text-[#C13515]"
                       >
                         Close
                       </button>

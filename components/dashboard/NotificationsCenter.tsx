@@ -6,24 +6,6 @@ import { markNotificationRead, markAllNotificationsRead } from '@/app/dashboard/
 import { getNotificationRoute } from '@/components/dashboard/DashboardShell'
 import type { Notification } from '@/lib/database'
 
-const NOTIFICATION_ICONS: Record<string, string> = {
-  interest_received: '💌',
-  new_interest: '💌',
-  interest_accepted: '✅',
-  mutual_interest: '✅',
-  interest_declined: '🤝',
-  connection_closed: '🔒',
-  meeting_confirmed: '📅',
-  meeting_requested: '🗓',
-  checkin_complete: '🤍',
-  nikah_planning: '☀️',
-  match_ready: '⭐',
-  match_refresh: '🔄',
-}
-
-function getIcon(type: string) {
-  return NOTIFICATION_ICONS[type] ?? '🔔'
-}
 
 function formatRelative(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime()
@@ -94,13 +76,13 @@ export default function NotificationsCenter({ notifications }: Props) {
   }
 
   return (
-    <div className="px-6 py-6">
+    <div className="bg-[#FDF8F3] min-h-screen px-6 py-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1A1A1A] tracking-tight">Notifications</h1>
+          <h1 className="text-[26px] font-medium text-[#1A1A1A] tracking-[-0.02em]">Notifications</h1>
           {hasUnread && (
-            <p className="text-sm text-[#6B6B6B] mt-0.5 leading-relaxed">
+            <p className="text-sm text-[#9B9B9B] mt-0.5">
               {effectiveNotifications.filter(n => !n.read).length} unread
             </p>
           )}
@@ -109,7 +91,7 @@ export default function NotificationsCenter({ notifications }: Props) {
           <button
             onClick={handleMarkAll}
             disabled={markingAll || isPending}
-            className="text-xs font-medium text-[#AF4D98] border border-[#AF4D98] px-4 py-2 rounded-full hover:bg-[#F5E6F2] disabled:opacity-50 transition-colors active:scale-95"
+            className="text-sm font-medium text-[#AF4D98] disabled:opacity-50 transition-colors"
           >
             {markingAll ? 'Marking…' : 'Mark all read'}
           </button>
@@ -119,11 +101,10 @@ export default function NotificationsCenter({ notifications }: Props) {
       {/* Empty state */}
       {notifications.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-16 h-16 bg-[#F5E6F2] rounded-2xl flex items-center justify-center mb-4 text-2xl">
-            🔔
-          </div>
-          <p className="text-[#6B6B6B] text-sm leading-relaxed max-w-[240px]">
-            No notifications yet. We will notify you when something happens, in sha Allah.
+          <p className="text-[20px] text-[#F4E4BA] mb-2">نصيب</p>
+          <p className="text-lg font-medium text-[#1A1A1A] mt-3">No notifications yet</p>
+          <p className="text-sm text-[#9B9B9B] max-w-[260px] mx-auto text-center mt-1">
+            We will notify you when something happens, in sha Allah.
           </p>
         </div>
       )}
@@ -132,7 +113,7 @@ export default function NotificationsCenter({ notifications }: Props) {
       <div className="space-y-6">
         {groups.map(group => (
           <div key={group.label}>
-            <p className="text-xs font-semibold text-[#9B9B9B] uppercase tracking-wide mb-3">
+            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">
               {group.label}
             </p>
             <div className="space-y-2">
@@ -142,32 +123,29 @@ export default function NotificationsCenter({ notifications }: Props) {
                   <button
                     key={notif.id}
                     onClick={() => handleClick(notif)}
-                    className={`w-full text-left rounded-2xl p-4 border transition-all duration-200 group ${
+                    className={`w-full text-left rounded-[16px] p-4 border transition-all duration-150 group ${
                       isUnread
-                        ? 'bg-white border-l-[3px] border-l-[#AF4D98] border-t-[#EBEBEB] border-r-[#EBEBEB] border-b-[#EBEBEB] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]'
-                        : 'bg-white border-[#EBEBEB] border-l-[3px] border-l-transparent opacity-70 hover:opacity-100'
-                    } hover:shadow-[0_2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.08)]`}
+                        ? 'bg-[#F9F0F6] border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+                        : 'bg-white border-[#EDE8E3]'
+                    } hover:border-[#D4CBC4]`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#F5E6F2] flex items-center justify-center flex-shrink-0 text-base">
-                        {getIcon(notif.type)}
+                      <div className="flex-shrink-0 mt-0.5">
+                        <span className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1 ${isUnread ? 'bg-[#AF4D98]' : 'bg-[#EDE8E3]'}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className={`text-sm leading-snug ${isUnread ? 'font-semibold text-[#1A1A1A]' : 'font-medium text-[#6B6B6B]'}`}>
+                          <p className={`text-sm leading-snug ${isUnread ? 'font-medium text-[#1A1A1A]' : 'font-normal text-[#5C5C5C]'}`}>
                             {notif.title}
                           </p>
-                          <span className="text-[10px] text-[#9B9B9B] flex-shrink-0 mt-0.5">
+                          <span className="text-xs text-[#9B9B9B] flex-shrink-0 mt-0.5">
                             {formatRelative(notif.created_at)}
                           </span>
                         </div>
-                        <p className="text-xs text-[#6B6B6B] mt-0.5 leading-relaxed line-clamp-2">
+                        <p className="text-xs text-[#9B9B9B] mt-0.5 leading-relaxed line-clamp-2">
                           {notif.body}
                         </p>
                       </div>
-                      {isUnread && (
-                        <span className="w-2 h-2 rounded-full bg-[#AF4D98] flex-shrink-0 mt-1.5" />
-                      )}
                     </div>
                   </button>
                 )

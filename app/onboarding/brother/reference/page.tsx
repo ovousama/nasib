@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
 const KEY = 'nasib_onboarding_brother'
-const inputCls = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
+const inputCls = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors'
 
 export default function BrotherReference() {
   const router = useRouter()
@@ -99,59 +99,61 @@ export default function BrotherReference() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Character Reference</h2>
-      <p className="text-[#9B9B9B] text-sm mb-2">
-        Provide someone who can vouch for your character — a friend, colleague, or community member.
-      </p>
-      <p className="text-xs text-[#9B9B9B] mb-8">
-        They will receive a short questionnaire by email. Your imam, teacher, or a close brother works well.
-      </p>
+    <div className="min-h-screen bg-[#FDF8F3]">
+      <div className="max-w-[480px] mx-auto px-5 py-8 pb-28">
+        <h2 className="text-2xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-1">Character Reference</h2>
+        <p className="text-[15px] text-[#9B9B9B] mb-2">
+          Provide someone who can vouch for your character — a friend, colleague, or community member.
+        </p>
+        <p className="text-xs text-[#9B9B9B] mb-8">
+          They will receive a short questionnaire by email. Your imam, teacher, or a close brother works well.
+        </p>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">{"Referee's"} Full Name</label>
-          <input type="text" required value={refName} onChange={e => setRefName(e.target.value)}
-            placeholder="e.g. Ustadh Ibrahim Ali" className={inputCls} />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">{"Referee's"} Full Name</label>
+            <input type="text" required value={refName} onChange={e => setRefName(e.target.value)}
+              placeholder="e.g. Ustadh Ibrahim Ali" className={inputCls} />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Relationship to You</label>
-          <input type="text" required value={refRelationship} onChange={e => setRefRelationship(e.target.value)}
-            placeholder="e.g. Imam, close friend, colleague" className={inputCls} />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Relationship to You</label>
+            <input type="text" required value={refRelationship} onChange={e => setRefRelationship(e.target.value)}
+              placeholder="e.g. Imam, close friend, colleague" className={inputCls} />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">{"Referee's"} Email</label>
-          <input type="email" required value={refEmail} onChange={e => setRefEmail(e.target.value)}
-            placeholder="referee@example.com" className={inputCls} />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">{"Referee's"} Email</label>
+            <input type="email" required value={refEmail} onChange={e => setRefEmail(e.target.value)}
+              placeholder="referee@example.com" className={inputCls} />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-            {"Referee's"} Phone <span className="text-[#9B9B9B] font-normal">(optional)</span>
-          </label>
-          <input type="tel" value={refPhone} onChange={e => setRefPhone(e.target.value)}
-            placeholder="+44 7700 000000" className={inputCls} />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
+              {"Referee's"} Phone <span className="text-[#9B9B9B] font-normal">(optional)</span>
+            </label>
+            <input type="tel" value={refPhone} onChange={e => setRefPhone(e.target.value)}
+              placeholder="+44 7700 000000" className={inputCls} />
+          </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
-        )}
+          {error && (
+            <div className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">{error}</div>
+          )}
 
-        <div className="bg-[#F5E6F2] border border-[#AF4D98]/20 rounded-xl p-4">
-          <p className="text-sm text-[#AF4D98] font-medium mb-1">Almost there, mashAllah!</p>
-          <p className="text-xs text-[#6B6B6B]">
-            After submitting, your profile will be reviewed by the Nasib team. {"You'll"} be notified once verified.
-          </p>
-        </div>
+          <div className="bg-[#F9F0F6] border border-[#AF4D98]/20 rounded-[10px] p-4">
+            <p className="text-sm text-[#AF4D98] font-medium mb-1">Almost there, mashAllah!</p>
+            <p className="text-xs text-[#5C5C5C]">
+              After submitting, your profile will be reviewed by the Nasib team. {"You'll"} be notified once verified.
+            </p>
+          </div>
 
-        <button type="submit" disabled={loading}
-          className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed">
-          {loading ? 'Submitting...' : 'Submit Profile'}
-        </button>
-      </form>
+          <button type="submit" disabled={loading}
+            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            {loading ? 'Submitting...' : 'Submit Profile'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

@@ -8,9 +8,9 @@ type Props = {
 
 const paddingClasses = {
   none: '',
-  sm: 'p-4',
-  md: 'p-6',
-  lg: 'p-8',
+  sm:   'p-4',
+  md:   'p-5',
+  lg:   'p-6',
 }
 
 export default function Card({ children, className = '', hover = false, padding = 'md', onClick }: Props) {
@@ -18,9 +18,9 @@ export default function Card({ children, className = '', hover = false, padding 
     <div
       onClick={onClick}
       className={`
-        bg-white rounded-2xl border border-[#EBEBEB]
-        shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]
-        ${hover ? 'hover:shadow-[0_2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer' : ''}
+        bg-white rounded-[16px] border border-[#EDE8E3]
+        shadow-[0_1px_3px_rgba(0,0,0,0.06)]
+        ${hover ? 'hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer' : ''}
         ${paddingClasses[padding]}
         ${className}
       `}

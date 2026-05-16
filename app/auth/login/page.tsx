@@ -35,98 +35,81 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] flex">
-      {/* Left brand panel — hidden on mobile */}
-      <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-[#AF4D98] to-[#D66BA0] flex-col items-center justify-center p-12 relative overflow-hidden">
-        {/* Decorative circles */}
-        <div className="absolute top-[-80px] left-[-80px] w-64 h-64 rounded-full bg-white/5" />
-        <div className="absolute bottom-[-60px] right-[-60px] w-80 h-80 rounded-full bg-white/5" />
-        <div className="absolute top-1/3 right-[-40px] w-48 h-48 rounded-full bg-white/5" />
+    <div className="min-h-screen bg-[#FDF8F3] flex flex-col items-center justify-center px-6 py-16">
+      <div className="w-full max-w-[380px]">
 
-        <div className="relative z-10 text-center">
-          <h1 className="text-6xl font-semibold text-white tracking-tight mb-4">Nasib</h1>
-          <p className="text-white/80 text-lg font-medium">Find your nasib</p>
-          <p className="text-white/60 text-sm mt-2">The halal way</p>
+        {/* Wordmark */}
+        <div className="text-center mb-12">
+          <h1 className="text-[32px] font-medium text-[#AF4D98] tracking-[-0.03em]">Nasib</h1>
+          <p className="text-[13px] text-[#9B9B9B] mt-1.5 italic">نصيب — your portion, your destiny</p>
         </div>
-      </div>
 
-      {/* Right form panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="lg:hidden text-center mb-10">
-            <h1 className="text-4xl font-semibold text-[#AF4D98] tracking-tight">Nasib</h1>
-            <p className="text-[#6B6B6B] text-sm mt-1">Find your nasib</p>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="block text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B]">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors"
+            />
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-3xl font-semibold text-[#1A1A1A] tracking-tight leading-snug">
-              Welcome back
-            </h2>
-            <p className="text-[#6B6B6B] mt-2 leading-relaxed">
-              Sign in to continue your journey
-            </p>
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="block text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B]">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Your password"
+              className="w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-1">
-              <label htmlFor="email" className="block text-sm font-medium text-[#1A1A1A]">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-xl border border-[#D4D4D4] text-[#1A1A1A] placeholder-[#9B9B9B] text-sm focus:outline-none focus:ring-2 focus:ring-[#AF4D98]/20 focus:border-[#AF4D98] transition-all duration-150"
-              />
+          {error && (
+            <div className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">
+              {error}
             </div>
+          )}
 
-            <div className="space-y-1">
-              <label htmlFor="password" className="block text-sm font-medium text-[#1A1A1A]">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Your password"
-                className="w-full px-4 py-3 rounded-xl border border-[#D4D4D4] text-[#1A1A1A] placeholder-[#9B9B9B] text-sm focus:outline-none focus:ring-2 focus:ring-[#AF4D98]/20 focus:border-[#AF4D98] transition-all duration-150"
-              />
-            </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-2"
+          >
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
 
-            {error && (
-              <div className="bg-[#FDECEA] border border-[#C13515]/20 text-[#C13515] text-sm rounded-xl px-4 py-3">
-                {error}
-              </div>
-            )}
+        <p className="text-center text-sm text-[#5C5C5C] mt-8">
+          Don&apos;t have an account?{' '}
+          <Link href="/auth/signup" className="text-[#AF4D98] font-medium hover:underline">
+            Create one
+          </Link>
+        </p>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed text-sm"
-            >
-              {loading ? 'Signing in…' : 'Sign In'}
-            </button>
-          </form>
-
-          <p className="text-center text-sm text-[#6B6B6B] mt-8">
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="text-[#AF4D98] font-medium hover:underline">
-              Create one
-            </Link>
+        {/* Quranic verse */}
+        <div className="text-center mt-16">
+          <p className="text-[14px] text-[#9B9B9B] leading-loose">
+            وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا
           </p>
-
-          <p className="text-center text-xs text-[#9B9B9B] mt-6">
-            May Allah make it easy for you
+          <p className="text-[12px] text-[#B8B0A8] mt-1">
+            &ldquo;And of His signs is that He created for you mates&rdquo; — Ar-Rum 30:21
           </p>
         </div>
+
       </div>
     </div>
   )

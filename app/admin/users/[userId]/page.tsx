@@ -7,8 +7,8 @@ type Props = { params: Promise<{ userId: string }> }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#EBEBEB]">
-      <h3 className="text-sm font-semibold text-[#6B6B6B] uppercase tracking-wide mb-4">{title}</h3>
+    <div className="bg-white rounded-[16px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3]">
+      <h3 className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">{title}</h3>
       {children}
     </div>
   )
@@ -18,8 +18,8 @@ function Row({ label, value }: { label: string; value: unknown }) {
   if (value === null || value === undefined || value === '') return null
   const display = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : Array.isArray(value) ? value.join(', ') : String(value)
   return (
-    <div className="flex justify-between items-start py-2 border-b border-[#FDFAF7] last:border-0">
-      <span className="text-sm text-[#6B6B6B] flex-shrink-0 mr-4 w-40">{label}</span>
+    <div className="flex justify-between items-start py-2 border-b border-[#EDE8E3] last:border-0">
+      <span className="text-sm text-[#5C5C5C] flex-shrink-0 mr-4 w-40">{label}</span>
       <span className="text-sm text-[#1A1A1A] text-right">{display}</span>
     </div>
   )
@@ -31,13 +31,13 @@ function formatDate(d: string) {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    pending_verification: 'bg-amber-100 text-amber-700',
-    active: 'bg-green-100 text-[#AF4D98]',
-    verified: 'bg-green-100 text-[#AF4D98]',
-    inactive: 'bg-[#FDFAF7] text-[#6B6B6B]',
+    pending_verification: 'bg-[#FEF9EC] text-[#8A6A00]',
+    active: 'bg-[#F9F0F6] text-[#AF4D98]',
+    verified: 'bg-[#E6F9F7] text-[#00857A]',
+    inactive: 'bg-[#FAF4EE] text-[#9B9B9B]',
   }
   return (
-    <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full ${map[status] ?? 'bg-[#FDFAF7] text-[#6B6B6B]'}`}>
+    <span className={`inline-block text-[11px] font-medium px-2.5 py-1 rounded-full ${map[status] ?? 'bg-[#FAF4EE] text-[#9B9B9B]'}`}>
       {status.replace(/_/g, ' ')}
     </span>
   )
@@ -54,20 +54,20 @@ export default async function UserDetailPage({ params }: Props) {
   return (
     <div className="max-w-5xl">
       <div className="flex items-center gap-3 mb-5">
-        <Link href="/admin/users" className="text-[#9B9B9B] hover:text-[#6B6B6B]">
+        <Link href="/admin/users" className="text-[#9B9B9B] hover:text-[#5C5C5C]">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
             <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
           </svg>
         </Link>
         <div>
-          <h2 className="text-xl font-bold text-[#1A1A1A]">{name}</h2>
+          <h2 className="text-xl font-medium tracking-[-0.02em] text-[#1A1A1A]">{name}</h2>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${detail.gender === 'brother' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'}`}>
+            <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${detail.gender === 'brother' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'}`}>
               {detail.gender}
             </span>
             <StatusBadge status={detail.status} />
             {detail.verification_badge && (
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-[#AF4D98]">Verified</span>
+              <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#E6F9F7] text-[#00857A]">Verified</span>
             )}
           </div>
         </div>
@@ -182,12 +182,12 @@ export default async function UserDetailPage({ params }: Props) {
             ) : (
               <div className="space-y-2">
                 {detail.matches.map(m => (
-                  <div key={m.id} className="flex items-center justify-between py-2 border-b border-[#FDFAF7] last:border-0">
+                  <div key={m.id} className="flex items-center justify-between py-2 border-b border-[#EDE8E3] last:border-0">
                     <div>
                       <p className="text-sm font-medium text-[#1A1A1A]">{m.other_name}</p>
-                      {m.compatibility_note && <p className="text-xs text-[#6B6B6B] mt-0.5 italic">{m.compatibility_note}</p>}
+                      {m.compatibility_note && <p className="text-xs text-[#5C5C5C] mt-0.5 italic">{m.compatibility_note}</p>}
                     </div>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${m.status === 'active' ? 'bg-[#F5E6F2] text-[#AF4D98]' : 'bg-[#FDFAF7] text-[#6B6B6B]'}`}>
+                    <span className={`text-[11px] px-2.5 py-1 rounded-full font-medium ${m.status === 'active' ? 'bg-[#F9F0F6] text-[#AF4D98]' : 'bg-[#FAF4EE] text-[#9B9B9B]'}`}>
                       {m.status}
                     </span>
                   </div>
@@ -203,9 +203,9 @@ export default async function UserDetailPage({ params }: Props) {
             ) : (
               <div className="space-y-2">
                 {detail.connections.map(c => (
-                  <div key={c.id} className="flex items-center justify-between py-2 border-b border-[#FDFAF7] last:border-0">
+                  <div key={c.id} className="flex items-center justify-between py-2 border-b border-[#EDE8E3] last:border-0">
                     <p className="text-sm font-medium text-[#1A1A1A]">{c.other_name}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.status === 'active' ? 'bg-[#F5E6F2] text-[#AF4D98]' : 'bg-[#FDFAF7] text-[#6B6B6B]'}`}>
+                    <span className={`text-[11px] px-2.5 py-1 rounded-full font-medium ${c.status === 'active' ? 'bg-[#F9F0F6] text-[#AF4D98]' : 'bg-[#FAF4EE] text-[#9B9B9B]'}`}>
                       {c.status}
                     </span>
                   </div>

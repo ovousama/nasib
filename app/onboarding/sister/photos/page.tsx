@@ -108,7 +108,7 @@ export default function SisterPhotos() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Your Photos</h2>
+      <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Your Photos</h2>
       <p className="text-[#9B9B9B] text-sm mb-2">Upload up to {MAX} photos</p>
       <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-8">
         <p className="text-xs text-amber-700">
@@ -148,21 +148,21 @@ export default function SisterPhotos() {
       {paths.length < MAX && (
         <div
           onClick={() => !uploading && inputRef.current?.click()}
-          className="rounded-2xl border-2 border-dashed border-[#EBEBEB] bg-[#FDFAF7] hover:border-[#AF4D98] hover:bg-[#F5E6F2] transition-all cursor-pointer flex flex-col items-center justify-center gap-3 py-10 mb-5">
+          className="rounded-2xl border-2 border-dashed border-[#EDE8E3] bg-[#FDF8F3] hover:border-[#AF4D98] hover:bg-[#F5E6F2] transition-all cursor-pointer flex flex-col items-center justify-center gap-3 py-10 mb-5">
           {uploading ? (
             <>
               <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-[#6B6B6B]">Uploading securely...</p>
+              <p className="text-sm text-[#5C5C5C]">Uploading securely...</p>
             </>
           ) : (
             <>
-              <div className="w-12 h-12 bg-[#EBEBEB] rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-[#EDE8E3] rounded-full flex items-center justify-center">
                 <svg className="w-6 h-6 text-[#9B9B9B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                 </svg>
               </div>
               <div className="text-center">
-                <p className="text-[#6B6B6B] font-medium text-sm">Add photos</p>
+                <p className="text-[#5C5C5C] font-medium text-sm">Add photos</p>
                 <p className="text-[#9B9B9B] text-xs mt-0.5">{paths.length} of {MAX} uploaded · JPG, PNG · Max 5MB each</p>
               </div>
             </>
@@ -178,7 +178,7 @@ export default function SisterPhotos() {
       )}
 
       <button onClick={handleNext} disabled={uploading}
-        className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+        className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed">
         Next →
       </button>
     </div>

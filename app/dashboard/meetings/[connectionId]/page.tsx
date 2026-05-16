@@ -20,16 +20,16 @@ export default async function MeetingsPage({ params }: Props) {
   if (!connection) notFound()
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7]">
-      <div className="bg-white border-b border-[#EBEBEB] px-4 py-3 flex items-center gap-3">
-        <Link href={`/dashboard/chat/${connectionId}`} className="text-[#6B6B6B] hover:text-[#1A1A1A] transition-colors">
+    <div className="min-h-screen bg-[#FDF8F3]">
+      <div className="bg-white border-b border-[#EDE8E3] px-4 py-3 flex items-center gap-3">
+        <Link href={`/dashboard/chat/${connectionId}`} className="text-[#5C5C5C] hover:text-[#1A1A1A] transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
             <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
           </svg>
         </Link>
         <div className="flex-1">
-          <p className="font-semibold text-[#1A1A1A]">Meetings</p>
-          <p className="text-xs text-[#6B6B6B]">With {connection.other_first_name}</p>
+          <p className="font-medium text-[#1A1A1A]">Meetings</p>
+          <p className="text-xs text-[#5C5C5C]">With {connection.other_first_name}</p>
         </div>
       </div>
 

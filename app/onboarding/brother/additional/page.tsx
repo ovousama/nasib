@@ -8,12 +8,12 @@ const KEY = 'nasib_brother_additional'
 const MAIN_KEY = 'nasib_onboarding_brother'
 
 const textareaCls =
-  'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm resize-none'
+  'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors resize-none'
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <div className="border-b border-[#EBEBEB] pb-2 mb-5">
-      <h3 className="text-sm font-semibold text-[#6B6B6B] uppercase tracking-wider">{title}</h3>
+    <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] border-b border-[#EDE8E3] pb-2 mb-5">
+      {title}
     </div>
   )
 }
@@ -33,10 +33,10 @@ function Pill({ label, selected, onClick }: { label: string; selected: boolean; 
     <button
       type="button"
       onClick={onClick}
-      className={`px-4 py-2 rounded-full text-sm font-medium border transition-all cursor-pointer ${
+      className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors cursor-pointer ${
         selected
           ? 'bg-[#AF4D98] text-white border-[#AF4D98]'
-          : 'bg-white text-[#1A1A1A] border-[#EBEBEB] hover:border-[#AF4D98]'
+          : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#D4CBC4]'
       }`}
     >
       {label}
@@ -49,10 +49,10 @@ function MultiPill({ label, selected, onClick }: { label: string; selected: bool
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-all cursor-pointer ${
+      className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-colors cursor-pointer ${
         selected
           ? 'bg-[#AF4D98] text-white border-[#AF4D98]'
-          : 'bg-white text-[#1A1A1A] border-[#EBEBEB] hover:border-[#AF4D98]'
+          : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#D4CBC4]'
       }`}
     >
       {selected && (
@@ -286,250 +286,252 @@ export default function BrotherAdditional() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8 pb-28">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">A little more about you</h2>
-      <p className="text-[#9B9B9B] text-sm mb-8">These help us find you a truly compatible match</p>
+    <div className="min-h-screen bg-[#FDF8F3]">
+      <div className="max-w-[480px] mx-auto px-5 py-8 pb-28">
+        <h2 className="text-2xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-1">A little more about you</h2>
+        <p className="text-[15px] text-[#9B9B9B] mb-8">These help us find you a truly compatible match</p>
 
-      <form id="brother-additional-form" ref={formRef} onSubmit={handleSubmit} className="space-y-8">
+        <form id="brother-additional-form" ref={formRef} onSubmit={handleSubmit} className="space-y-8">
 
-        {/* Faith & Practice */}
-        <div>
-          <SectionHeader title="Faith & Practice" />
-          <div className="space-y-6">
-            <Question label="Do you listen to music?">
-              <PillGroup
-                options={['Yes', 'No', 'Nasheeds only', 'Occasionally']}
-                value={doYouListenToMusic}
-                onChange={v => { setDoYouListenToMusic(v); save({ do_you_listen_to_music: v }) }}
-              />
-            </Question>
-            <Question label="Do you celebrate birthdays or non-Islamic holidays?">
-              <PillGroup
-                options={['Yes', 'No', 'Birthdays only', 'Rarely']}
-                value={celebrateNonIslamicHolidays}
-                onChange={v => { setCelebrateNonIslamicHolidays(v); save({ celebrate_non_islamic_holidays: v }) }}
-              />
-            </Question>
-            <Question label="How important is it that your wife wears hijab?">
-              <PillGroup
-                options={['Required', 'Strongly preferred', 'Preferred', 'Not a requirement']}
-                value={wifeHijabImportance}
-                onChange={v => { setWifeHijabImportance(v); save({ wife_hijab_importance: v }) }}
-              />
-            </Question>
-            <Question label="How often do you attend Jumu'ah and congregational prayers?">
-              <PillGroup
-                options={['Every week', 'Most weeks', 'When I can', 'Working on it']}
-                value={jumuahAttendance}
-                onChange={v => { setJumuahAttendance(v); save({ jumuah_attendance: v }) }}
-              />
-            </Question>
-            <Question label="How do you approach differences in Islamic opinion between spouses?">
-              <textarea
-                value={differingIslamicOpinions}
-                onChange={e => { setDifferingIslamicOpinions(e.target.value); save({ differing_islamic_opinions: e.target.value }) }}
-                rows={3}
-                placeholder="e.g. I believe we should discuss openly and respect each other's madhab..."
-                className={textareaCls}
-              />
-            </Question>
+          {/* Faith & Practice */}
+          <div>
+            <SectionHeader title="Faith & Practice" />
+            <div className="space-y-6">
+              <Question label="Do you listen to music?">
+                <PillGroup
+                  options={['Yes', 'No', 'Nasheeds only', 'Occasionally']}
+                  value={doYouListenToMusic}
+                  onChange={v => { setDoYouListenToMusic(v); save({ do_you_listen_to_music: v }) }}
+                />
+              </Question>
+              <Question label="Do you celebrate birthdays or non-Islamic holidays?">
+                <PillGroup
+                  options={['Yes', 'No', 'Birthdays only', 'Rarely']}
+                  value={celebrateNonIslamicHolidays}
+                  onChange={v => { setCelebrateNonIslamicHolidays(v); save({ celebrate_non_islamic_holidays: v }) }}
+                />
+              </Question>
+              <Question label="How important is it that your wife wears hijab?">
+                <PillGroup
+                  options={['Required', 'Strongly preferred', 'Preferred', 'Not a requirement']}
+                  value={wifeHijabImportance}
+                  onChange={v => { setWifeHijabImportance(v); save({ wife_hijab_importance: v }) }}
+                />
+              </Question>
+              <Question label="How often do you attend Jumu'ah and congregational prayers?">
+                <PillGroup
+                  options={['Every week', 'Most weeks', 'When I can', 'Working on it']}
+                  value={jumuahAttendance}
+                  onChange={v => { setJumuahAttendance(v); save({ jumuah_attendance: v }) }}
+                />
+              </Question>
+              <Question label="How do you approach differences in Islamic opinion between spouses?">
+                <textarea
+                  value={differingIslamicOpinions}
+                  onChange={e => { setDifferingIslamicOpinions(e.target.value); save({ differing_islamic_opinions: e.target.value }) }}
+                  rows={3}
+                  placeholder="e.g. I believe we should discuss openly and respect each other's madhab..."
+                  className={textareaCls}
+                />
+              </Question>
+            </div>
           </div>
-        </div>
 
-        {/* Financial & Practical */}
-        <div>
-          <SectionHeader title="Financial & Practical" />
-          <div className="space-y-6">
-            <Question label="What is your annual income range?">
-              <PillGroup
-                options={['Under $30k', '$30k–$60k', '$60k–$100k', '$100k–$150k', '$150k+', 'Prefer not to say']}
-                value={annualIncomeRange}
-                onChange={v => { setAnnualIncomeRange(v); save({ annual_income_range: v }) }}
-              />
-            </Question>
-            <Question label="Do you own or rent your home?">
-              <PillGroup
-                options={['Own', 'Rent', 'Living with family', 'Other']}
-                value={ownOrRent}
-                onChange={v => { setOwnOrRent(v); save({ own_or_rent: v }) }}
-              />
-            </Question>
-            <Question label="Do you have any significant debt?">
-              <PillGroup
-                options={['No', 'Yes — student loans', 'Yes — other', 'Prefer not to say']}
-                value={hasSignificantDebt}
-                onChange={v => { setHasSignificantDebt(v); save({ has_significant_debt: v }) }}
-              />
-            </Question>
-            <Question label="Are you currently financially supporting parents or family members?">
-              <PillGroup
-                options={['Yes — significant', 'Yes — some', 'No', 'Occasionally']}
-                value={supportingFamilyFinancially}
-                onChange={v => { setSupportingFamilyFinancially(v); save({ supporting_family_financially: v }) }}
-              />
-            </Question>
-            <Question label="How do you approach mahr?">
-              <textarea
-                value={mahrApproach}
-                onChange={e => { setMahrApproach(e.target.value); save({ mahr_approach: e.target.value }) }}
-                rows={3}
-                placeholder="e.g. I believe mahr should be meaningful but not a burden..."
-                className={textareaCls}
-              />
-            </Question>
+          {/* Financial & Practical */}
+          <div>
+            <SectionHeader title="Financial & Practical" />
+            <div className="space-y-6">
+              <Question label="What is your annual income range?">
+                <PillGroup
+                  options={['Under $30k', '$30k–$60k', '$60k–$100k', '$100k–$150k', '$150k+', 'Prefer not to say']}
+                  value={annualIncomeRange}
+                  onChange={v => { setAnnualIncomeRange(v); save({ annual_income_range: v }) }}
+                />
+              </Question>
+              <Question label="Do you own or rent your home?">
+                <PillGroup
+                  options={['Own', 'Rent', 'Living with family', 'Other']}
+                  value={ownOrRent}
+                  onChange={v => { setOwnOrRent(v); save({ own_or_rent: v }) }}
+                />
+              </Question>
+              <Question label="Do you have any significant debt?">
+                <PillGroup
+                  options={['No', 'Yes — student loans', 'Yes — other', 'Prefer not to say']}
+                  value={hasSignificantDebt}
+                  onChange={v => { setHasSignificantDebt(v); save({ has_significant_debt: v }) }}
+                />
+              </Question>
+              <Question label="Are you currently financially supporting parents or family members?">
+                <PillGroup
+                  options={['Yes — significant', 'Yes — some', 'No', 'Occasionally']}
+                  value={supportingFamilyFinancially}
+                  onChange={v => { setSupportingFamilyFinancially(v); save({ supporting_family_financially: v }) }}
+                />
+              </Question>
+              <Question label="How do you approach mahr?">
+                <textarea
+                  value={mahrApproach}
+                  onChange={e => { setMahrApproach(e.target.value); save({ mahr_approach: e.target.value }) }}
+                  rows={3}
+                  placeholder="e.g. I believe mahr should be meaningful but not a burden..."
+                  className={textareaCls}
+                />
+              </Question>
+            </div>
           </div>
-        </div>
 
-        {/* Family & Household */}
-        <div>
-          <SectionHeader title="Family & Household" />
-          <div className="space-y-6">
-            <Question label="How many children do you want?">
-              <PillGroup
-                options={['1–2', '3–4', '5+', 'Open to whatever Allah wills', 'None']}
-                value={numberOfChildrenWanted}
-                onChange={v => { setNumberOfChildrenWanted(v); save({ number_of_children_wanted: v }) }}
-              />
-            </Question>
-            <Question label="Are you open to your wife working after marriage?">
-              <PillGroup
-                options={["Yes fully", "Yes with conditions", "Prefer she doesn't", "No"]}
-                value={wifeWorkingOpenness}
-                onChange={v => { setWifeWorkingOpenness(v); save({ wife_working_openness: v }) }}
-              />
-            </Question>
-            <Question label="Who do you expect to manage the household day to day?">
-              <PillGroup
-                options={['My wife primarily', 'Shared equally', 'Flexible', 'We would decide together']}
-                value={householdManagement}
-                onChange={v => { setHouseholdManagement(v); save({ household_management: v }) }}
-              />
-            </Question>
-            <Question label="Would you be open to your in-laws living with you?">
-              <PillGroup
-                options={['Yes', 'Possibly', 'No', 'Depends on circumstances']}
-                value={inlawsLivingTogether}
-                onChange={v => { setInlawsLivingTogether(v); save({ inlaws_living_together: v }) }}
-              />
-            </Question>
-            <Question label="How important is Islamic schooling for your children?">
-              <PillGroup
-                options={['Very important — required', 'Important', 'Somewhat important', 'Not a priority']}
-                value={islamicSchoolingImportance}
-                onChange={v => { setIslamicSchoolingImportance(v); save({ islamic_schooling_importance: v }) }}
-              />
-            </Question>
+          {/* Family & Household */}
+          <div>
+            <SectionHeader title="Family & Household" />
+            <div className="space-y-6">
+              <Question label="How many children do you want?">
+                <PillGroup
+                  options={['1–2', '3–4', '5+', 'Open to whatever Allah wills', 'None']}
+                  value={numberOfChildrenWanted}
+                  onChange={v => { setNumberOfChildrenWanted(v); save({ number_of_children_wanted: v }) }}
+                />
+              </Question>
+              <Question label="Are you open to your wife working after marriage?">
+                <PillGroup
+                  options={["Yes fully", "Yes with conditions", "Prefer she doesn't", "No"]}
+                  value={wifeWorkingOpenness}
+                  onChange={v => { setWifeWorkingOpenness(v); save({ wife_working_openness: v }) }}
+                />
+              </Question>
+              <Question label="Who do you expect to manage the household day to day?">
+                <PillGroup
+                  options={['My wife primarily', 'Shared equally', 'Flexible', 'We would decide together']}
+                  value={householdManagement}
+                  onChange={v => { setHouseholdManagement(v); save({ household_management: v }) }}
+                />
+              </Question>
+              <Question label="Would you be open to your in-laws living with you?">
+                <PillGroup
+                  options={['Yes', 'Possibly', 'No', 'Depends on circumstances']}
+                  value={inlawsLivingTogether}
+                  onChange={v => { setInlawsLivingTogether(v); save({ inlaws_living_together: v }) }}
+                />
+              </Question>
+              <Question label="How important is Islamic schooling for your children?">
+                <PillGroup
+                  options={['Very important — required', 'Important', 'Somewhat important', 'Not a priority']}
+                  value={islamicSchoolingImportance}
+                  onChange={v => { setIslamicSchoolingImportance(v); save({ islamic_schooling_importance: v }) }}
+                />
+              </Question>
+            </div>
           </div>
-        </div>
 
-        {/* Lifestyle & Social */}
-        <div>
-          <SectionHeader title="Lifestyle & Social" />
-          <div className="space-y-6">
-            <Question label="How do you spend your weekends typically?">
-              <textarea
-                value={weekendLifestyle}
-                onChange={e => { setWeekendLifestyle(e.target.value); save({ weekend_lifestyle: e.target.value }) }}
-                rows={3}
-                placeholder="e.g. Family time, outdoor activities, Islamic studies..."
-                className={textareaCls}
-              />
-            </Question>
-            <Question label="Do you have a mixed gender social circle?">
-              <PillGroup
-                options={['Yes', 'No', 'Professionally only', 'Working on changing this']}
-                value={mixedGenderSocialCircle}
-                onChange={v => { setMixedGenderSocialCircle(v); save({ mixed_gender_social_circle: v }) }}
-              />
-            </Question>
-            <Question label="How often do you travel and would you expect your wife to travel with you?">
-              <PillGroup
-                options={['Rarely', 'A few times a year', 'Monthly', 'Frequently — yes she would join', 'Frequently — independently']}
-                value={travelFrequency}
-                onChange={v => { setTravelFrequency(v); save({ travel_frequency: v }) }}
-              />
-            </Question>
-            <Question label="Do you follow a strict halal diet?">
-              <PillGroup
-                options={['Yes — strictly', 'Mostly', 'No pork but not strict', 'Not strictly']}
-                value={strictHalalDiet}
-                onChange={v => { setStrictHalalDiet(v); save({ strict_halal_diet: v }) }}
-              />
-            </Question>
-            <Question label="Do you smoke or use tobacco products?">
-              <PillGroup
-                options={['No', 'Yes', 'Occasionally', 'Trying to quit']}
-                value={smoking}
-                onChange={v => { setSmoking(v); save({ smoking: v }) }}
-              />
-            </Question>
+          {/* Lifestyle & Social */}
+          <div>
+            <SectionHeader title="Lifestyle & Social" />
+            <div className="space-y-6">
+              <Question label="How do you spend your weekends typically?">
+                <textarea
+                  value={weekendLifestyle}
+                  onChange={e => { setWeekendLifestyle(e.target.value); save({ weekend_lifestyle: e.target.value }) }}
+                  rows={3}
+                  placeholder="e.g. Family time, outdoor activities, Islamic studies..."
+                  className={textareaCls}
+                />
+              </Question>
+              <Question label="Do you have a mixed gender social circle?">
+                <PillGroup
+                  options={['Yes', 'No', 'Professionally only', 'Working on changing this']}
+                  value={mixedGenderSocialCircle}
+                  onChange={v => { setMixedGenderSocialCircle(v); save({ mixed_gender_social_circle: v }) }}
+                />
+              </Question>
+              <Question label="How often do you travel and would you expect your wife to travel with you?">
+                <PillGroup
+                  options={['Rarely', 'A few times a year', 'Monthly', 'Frequently — yes she would join', 'Frequently — independently']}
+                  value={travelFrequency}
+                  onChange={v => { setTravelFrequency(v); save({ travel_frequency: v }) }}
+                />
+              </Question>
+              <Question label="Do you follow a strict halal diet?">
+                <PillGroup
+                  options={['Yes — strictly', 'Mostly', 'No pork but not strict', 'Not strictly']}
+                  value={strictHalalDiet}
+                  onChange={v => { setStrictHalalDiet(v); save({ strict_halal_diet: v }) }}
+                />
+              </Question>
+              <Question label="Do you smoke or use tobacco products?">
+                <PillGroup
+                  options={['No', 'Yes', 'Occasionally', 'Trying to quit']}
+                  value={smoking}
+                  onChange={v => { setSmoking(v); save({ smoking: v }) }}
+                />
+              </Question>
+            </div>
           </div>
-        </div>
 
-        {/* Personality & Communication */}
-        <div>
-          <SectionHeader title="Personality & Communication" />
-          <div className="space-y-6">
-            <Question label="How do you handle conflict?">
-              <PillGroup
-                options={['Need space first then talk', 'Prefer to resolve immediately', 'Depends on situation', 'Still working on this']}
-                value={conflictStyle}
-                onChange={v => { setConflictStyle(v); save({ conflict_style: v }) }}
-              />
-            </Question>
-            <Question label="Are you more introverted or extroverted?">
-              <PillGroup
-                options={['Very introverted', 'Mostly introverted', 'Mostly extroverted', 'Very extroverted', 'Ambivert']}
-                value={introvertExtrovert}
-                onChange={v => { setIntrovertExtrovert(v); save({ introvert_extrovert: v }) }}
-              />
-            </Question>
-            <Question label="How do you express love and affection?" note="Choose up to 3">
-              <MultiPillGroup
-                options={['Words of affirmation', 'Quality time', 'Acts of service', 'Gift giving', 'Physical affection', 'All of the above']}
-                values={loveLanguage}
-                onChange={v => { setLoveLanguage(v); save({ love_language: v }) }}
-                max={3}
-              />
-            </Question>
-            <Question label="How important is alone time to you?">
-              <PillGroup
-                options={['Very important — I need regular alone time', 'Somewhat important', 'Not very important', 'I prefer company']}
-                value={aloneTimeImportance}
-                onChange={v => { setAloneTimeImportance(v); save({ alone_time_importance: v }) }}
-              />
-            </Question>
-            <Question
-              label="Is there anything about your health or background a potential spouse should know?"
-              note="Optional but encouraged for transparency. This information is private and only shared with matches."
+          {/* Personality & Communication */}
+          <div>
+            <SectionHeader title="Personality & Communication" />
+            <div className="space-y-6">
+              <Question label="How do you handle conflict?">
+                <PillGroup
+                  options={['Need space first then talk', 'Prefer to resolve immediately', 'Depends on situation', 'Still working on this']}
+                  value={conflictStyle}
+                  onChange={v => { setConflictStyle(v); save({ conflict_style: v }) }}
+                />
+              </Question>
+              <Question label="Are you more introverted or extroverted?">
+                <PillGroup
+                  options={['Very introverted', 'Mostly introverted', 'Mostly extroverted', 'Very extroverted', 'Ambivert']}
+                  value={introvertExtrovert}
+                  onChange={v => { setIntrovertExtrovert(v); save({ introvert_extrovert: v }) }}
+                />
+              </Question>
+              <Question label="How do you express love and affection?" note="Choose up to 3">
+                <MultiPillGroup
+                  options={['Words of affirmation', 'Quality time', 'Acts of service', 'Gift giving', 'Physical affection', 'All of the above']}
+                  values={loveLanguage}
+                  onChange={v => { setLoveLanguage(v); save({ love_language: v }) }}
+                  max={3}
+                />
+              </Question>
+              <Question label="How important is alone time to you?">
+                <PillGroup
+                  options={['Very important — I need regular alone time', 'Somewhat important', 'Not very important', 'I prefer company']}
+                  value={aloneTimeImportance}
+                  onChange={v => { setAloneTimeImportance(v); save({ alone_time_importance: v }) }}
+                />
+              </Question>
+              <Question
+                label="Is there anything about your health or background a potential spouse should know?"
+                note="Optional but encouraged for transparency. This information is private and only shared with matches."
+              >
+                <textarea
+                  value={healthBackgroundDisclosure}
+                  onChange={e => { setHealthBackgroundDisclosure(e.target.value); save({ health_background_disclosure: e.target.value }) }}
+                  rows={3}
+                  placeholder="This is optional but encouraged for transparency. This information is private and only shared with matches."
+                  className={textareaCls}
+                />
+              </Question>
+            </div>
+          </div>
+
+          {error && (
+            <div className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">{error}</div>
+          )}
+        </form>
+
+        {/* Fixed bottom submit */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#EDE8E3] px-4 py-4 z-20">
+          <div className="max-w-[480px] mx-auto">
+            <button
+              type="submit"
+              form="brother-additional-form"
+              disabled={loading}
+              className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <textarea
-                value={healthBackgroundDisclosure}
-                onChange={e => { setHealthBackgroundDisclosure(e.target.value); save({ health_background_disclosure: e.target.value }) }}
-                rows={3}
-                placeholder="This is optional but encouraged for transparency. This information is private and only shared with matches."
-                className={textareaCls}
-              />
-            </Question>
+              {loading ? 'Saving...' : 'Next →'}
+            </button>
           </div>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
-        )}
-      </form>
-
-      {/* Fixed bottom submit */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#EBEBEB] px-4 py-4 z-20">
-        <div className="max-w-lg mx-auto">
-          <button
-            type="submit"
-            form="brother-additional-form"
-            disabled={loading}
-            className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Saving...' : 'Next →'}
-          </button>
         </div>
       </div>
     </div>

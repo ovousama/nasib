@@ -63,9 +63,9 @@ export default function AdminSidebar() {
   }
 
   return (
-    <aside className="w-56 bg-white border-r border-[#EBEBEB] min-h-screen flex flex-col flex-shrink-0">
-      <div className="px-5 py-6 border-b border-[#EBEBEB]">
-        <p className="text-[#AF4D98] font-semibold text-xl tracking-tight">Nasib</p>
+    <aside className="w-56 bg-white border-r border-[#EDE8E3] min-h-screen flex flex-col flex-shrink-0">
+      <div className="px-5 py-6 border-b border-[#EDE8E3]">
+        <p className="text-lg font-medium tracking-[-0.02em] text-[#AF4D98]">Nasib</p>
         <p className="text-[#9B9B9B] text-xs mt-0.5">Admin Panel</p>
       </div>
 
@@ -78,10 +78,10 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-colors ${
                 active
-                  ? 'bg-[#F5E6F2] text-[#AF4D98]'
-                  : 'text-[#6B6B6B] hover:bg-[#FDFAF7] hover:text-[#1A1A1A]'
+                  ? 'bg-[#F9F0F6] text-[#AF4D98]'
+                  : 'text-[#5C5C5C] hover:bg-[#FAF4EE]'
               }`}
             >
               {item.icon}
@@ -91,10 +91,10 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-[#EBEBEB]">
+      <div className="px-3 py-4 border-t border-[#EDE8E3]">
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#6B6B6B] hover:bg-[#FDFAF7] hover:text-[#1A1A1A] transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-[#5C5C5C] hover:bg-[#FAF4EE] transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
             <path fillRule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clipRule="evenodd" />

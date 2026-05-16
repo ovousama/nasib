@@ -84,20 +84,20 @@ export default async function DashboardPage() {
 
 function PendingVerification() {
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] p-4">
-      <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-sm border border-gray-100 text-center">
-        <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-5">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#d97706" className="w-8 h-8">
+    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] p-6">
+      <div className="max-w-sm w-full text-center">
+        <div className="w-12 h-12 bg-[#FEF9EC] rounded-full flex items-center justify-center mx-auto mb-5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#B8860B" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-3">Application Under Review</h2>
-        <p className="text-gray-600 text-sm leading-relaxed mb-6">
+        <h2 className="text-xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-2">Application Under Review</h2>
+        <p className="text-[#5C5C5C] text-sm leading-relaxed">
           JazakAllah khair for completing your profile. Our team is carefully reviewing your
           application and character reference. We will notify you once verified, in sha Allah.
         </p>
-        <div className="bg-amber-50 rounded-xl p-3 border border-amber-100">
-          <p className="text-amber-700 text-xs font-medium">
+        <div className="mt-6 bg-[#FEF9EC] border border-[#EDE8E3] rounded-[10px] px-4 py-3">
+          <p className="text-[#8A6A00] text-xs">
             Verification typically takes 2–5 business days.
           </p>
         </div>

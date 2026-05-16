@@ -68,24 +68,24 @@ function MeetingCard({
     const showCheckin = isPast && !checkinDone
     return (
       <div className="mx-auto w-full max-w-[85%] my-3">
-        <div className="bg-[#E6F9F7] border border-[#00A699]/20 rounded-2xl p-4">
+        <div className="bg-[#E6F9F7] border border-[#9DF7E5] rounded-[16px] p-4">
           <div className="flex items-center gap-2 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-[#00A699] flex-shrink-0">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
             </svg>
-            <span className="text-sm font-semibold text-[#00A699]">Meeting Confirmed</span>
+            <span className="text-sm font-medium text-[#00A699]">Meeting Confirmed</span>
           </div>
           <p className="text-sm text-[#1A1A1A] font-medium mb-1">
             {meeting.confirmed_slot ? formatSlot(meeting.confirmed_slot) : ''}
           </p>
-          <p className="text-xs text-[#6B6B6B]">{formatLabel}</p>
+          <p className="text-xs text-[#5C5C5C]">{formatLabel}</p>
           {meeting.format === 'virtual' ? (
             <p className="text-xs text-[#00A699] mt-1">Meeting will take place in-app</p>
           ) : meeting.location_or_link ? (
-            <p className="text-xs text-[#6B6B6B] mt-1">{meeting.location_or_link}</p>
+            <p className="text-xs text-[#5C5C5C] mt-1">{meeting.location_or_link}</p>
           ) : null}
           {showCheckin && (
-            <div className="mt-3 pt-3 border-t border-[#00A699]/20">
+            <div className="mt-3 pt-3 border-t border-[#9DF7E5]/40">
               <Link
                 href={`/dashboard/checkin/${connectionId}`}
                 className="text-sm font-medium text-[#00A699] flex items-center justify-between"
@@ -105,7 +105,7 @@ function MeetingCard({
   if (meeting.status === 'cancelled') {
     return (
       <div className="mx-auto w-full max-w-[85%] my-3">
-        <div className="bg-[#FDFAF7] border border-[#EBEBEB] rounded-2xl p-3 text-center">
+        <div className="bg-[#FAF4EE] border border-[#EDE8E3] rounded-[16px] p-3 text-center">
           <p className="text-xs text-[#9B9B9B]">Meeting request declined</p>
         </div>
       </div>
@@ -115,21 +115,21 @@ function MeetingCard({
   if (isSender) {
     return (
       <div className="mx-auto w-full max-w-[85%] my-3">
-        <div className="bg-white border border-[#EBEBEB] rounded-2xl p-4 shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
+        <div className="bg-white border border-[#EDE8E3] rounded-[16px] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-2 mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-[#9B9B9B] flex-shrink-0">
               <path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clipRule="evenodd" />
             </svg>
-            <span className="text-sm font-semibold text-[#1A1A1A]">Meeting Request</span>
+            <span className="text-sm font-medium text-[#1A1A1A]">Meeting Request</span>
             <span className="ml-auto text-xs text-[#9B9B9B]">{formatLabel}</span>
           </div>
           <div className="space-y-1.5 mb-3">
             {slots.map((slot, i) => (
               <div key={slot} className="flex items-center gap-2">
-                <span className="w-4 h-4 rounded-full bg-[#F5E6F2] text-[#AF4D98] text-[10px] flex items-center justify-center font-medium flex-shrink-0">
+                <span className="w-4 h-4 rounded-full bg-[#F9F0F6] text-[#AF4D98] text-[10px] flex items-center justify-center font-medium flex-shrink-0">
                   {i + 1}
                 </span>
-                <span className="text-sm text-[#6B6B6B]">{formatSlot(slot)}</span>
+                <span className="text-sm text-[#5C5C5C]">{formatSlot(slot)}</span>
               </div>
             ))}
           </div>
@@ -146,29 +146,29 @@ function MeetingCard({
 
   return (
     <div className="mx-auto w-full max-w-[85%] my-3">
-      <div className="bg-white border-l-2 border-l-[#AF4D98] border border-[#EBEBEB] rounded-2xl p-4 shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)]">
+      <div className="bg-white border-l-2 border-l-[#AF4D98] border border-[#EDE8E3] rounded-[16px] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="flex items-center gap-2 mb-3">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-[#AF4D98] flex-shrink-0">
             <path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clipRule="evenodd" />
           </svg>
-          <span className="text-sm font-semibold text-[#1A1A1A]">Meeting Request</span>
+          <span className="text-sm font-medium text-[#1A1A1A]">Meeting Request</span>
           <span className="ml-auto text-xs text-[#AF4D98] font-medium">{formatLabel}</span>
         </div>
 
-        <p className="text-xs text-[#6B6B6B] mb-2">Select a time that works for you:</p>
+        <p className="text-xs text-[#5C5C5C] mb-2">Select a time that works for you:</p>
         <div className="space-y-2 mb-4">
           {slots.map((slot) => (
             <button
               key={slot}
               onClick={() => setSelectedSlot(slot)}
-              className={`w-full text-left px-3 py-2.5 rounded-xl border text-sm transition-colors ${
+              className={`w-full text-left px-3 py-2.5 rounded-[10px] border text-sm transition-colors ${
                 selectedSlot === slot
-                  ? 'border-[#AF4D98] bg-[#F5E6F2] text-[#AF4D98] font-medium'
-                  : 'border-[#EBEBEB] text-[#1A1A1A] hover:border-[#D4D4D4]'
+                  ? 'border-[#AF4D98] bg-[#F9F0F6] text-[#AF4D98] font-medium'
+                  : 'border-[#EDE8E3] text-[#1A1A1A] hover:border-[#D4CBC4]'
               }`}
             >
               <span className="flex items-center gap-2">
-                <span className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 ${selectedSlot === slot ? 'border-[#AF4D98] bg-[#AF4D98]' : 'border-[#D4D4D4]'}`} />
+                <span className={`w-3.5 h-3.5 rounded-full border-2 flex-shrink-0 ${selectedSlot === slot ? 'border-[#AF4D98] bg-[#AF4D98]' : 'border-[#D4CBC4]'}`} />
                 {formatSlot(slot)}
               </span>
             </button>
@@ -179,7 +179,7 @@ function MeetingCard({
           <button
             onClick={async () => { setLoading(true); await onDecline(meeting.id); setLoading(false) }}
             disabled={loading}
-            className="text-sm font-medium text-[#C13515] border border-[#C13515]/30 py-2.5 rounded-full hover:bg-[#FDECEA] disabled:opacity-50 active:scale-95 transition-all duration-200"
+            className="text-sm font-medium text-[#C13515] border border-[#C13515]/30 py-2.5 rounded-full hover:bg-[#FDECEA] disabled:opacity-50 transition-colors"
           >
             Decline
           </button>
@@ -191,7 +191,7 @@ function MeetingCard({
               setLoading(false)
             }}
             disabled={!selectedSlot || loading}
-            className="text-sm font-medium bg-[#AF4D98] text-white py-2.5 rounded-full hover:bg-[#9B3D85] disabled:opacity-40 active:scale-95 transition-all duration-200 shadow-sm"
+            className="text-sm font-medium bg-[#AF4D98] text-white py-2.5 rounded-full hover:bg-[#9B3D85] disabled:opacity-40 transition-colors"
           >
             {loading ? '…' : 'Accept'}
           </button>
@@ -284,7 +284,7 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
   return (
     <div className="flex flex-col h-full">
       {/* Timeline */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 bg-[#FDFAF7]">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-[#FDF8F3]">
         {allItems.length === 0 && (
           <div className="text-center py-8">
             <p className="text-[#9B9B9B] text-sm">Bismillah. Begin your conversation with kindness.</p>
@@ -293,10 +293,8 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
 
         {grouped.map(group => (
           <div key={group.day}>
-            <div className="flex items-center gap-3 my-4">
-              <div className="flex-1 h-px bg-[#EBEBEB]" />
-              <span className="text-xs text-[#9B9B9B] font-medium">{group.day}</span>
-              <div className="flex-1 h-px bg-[#EBEBEB]" />
+            <div className="text-center text-xs text-[#9B9B9B] my-3">
+              {group.day}
             </div>
 
             {group.items.map(item => {
@@ -317,14 +315,14 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
               const msg = item.msg
               const isOwn = msg.sender_id === currentUserId
               return (
-                <div key={msg.id} className={`flex mb-2 ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                <div key={msg.id} className={`flex mt-4 ${isOwn ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[75%] rounded-3xl px-4 py-2.5 ${
+                    className={`text-[15px] leading-relaxed px-4 py-2.5 ${
                       isOwn
-                        ? 'bg-[#AF4D98] text-white rounded-tr-sm'
+                        ? 'bg-[#AF4D98] text-white rounded-[18px_18px_4px_18px] max-w-[75%] ml-auto'
                         : msg.is_suggested_question
-                        ? 'bg-[#F5E6F2] text-[#AF4D98] border border-[#AF4D98]/10 rounded-tl-sm'
-                        : 'bg-white text-[#1A1A1A] border border-[#EBEBEB] shadow-sm rounded-tl-sm'
+                        ? 'bg-[#F9F0F6] text-[#AF4D98] border border-[#AF4D98]/10 rounded-[18px_18px_18px_4px] max-w-[75%]'
+                        : 'bg-white border border-[#EDE8E3] text-[#1A1A1A] rounded-[18px_18px_18px_4px] max-w-[75%]'
                     }`}
                   >
                     {msg.is_suggested_question && !isOwn && (
@@ -332,7 +330,7 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
                         Suggested question
                       </p>
                     )}
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
+                    <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                     <p className={`text-[10px] mt-1 text-right ${isOwn ? 'text-white/60' : 'text-[#9B9B9B]'}`}>
                       {formatTime(msg.created_at)}
                     </p>
@@ -346,7 +344,7 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
       </div>
 
       {/* Wali notice */}
-      <div className="mx-4 mb-2 bg-[#FFF4CC] border border-[#FFB400]/20 rounded-xl px-3 py-2">
+      <div className="mx-4 mb-2 bg-[#FFF4CC] border border-[#FFB400]/20 rounded-[10px] px-3 py-2">
         <p className="text-[#6B4F00] text-xs text-center">
           The wali has been notified of this connection and can read this conversation.
         </p>
@@ -354,27 +352,24 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
 
       {/* Suggested questions */}
       {showSuggestions && (
-        <div className="px-4 mb-3">
-          <p className="text-xs text-[#9B9B9B] font-medium mb-2">Suggested questions</p>
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {SUGGESTED_QUESTIONS.map((q) => (
-              <button
-                key={q}
-                onClick={() => handleSend(q, true)}
-                className="flex-shrink-0 text-xs text-[#AF4D98] border border-[#AF4D98] rounded-full px-4 py-1.5 hover:bg-[#F5E6F2] transition-colors whitespace-nowrap"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
+        <div className="border-t border-[#EDE8E3] flex gap-2 px-4 py-2.5 overflow-x-auto">
+          {SUGGESTED_QUESTIONS.map((q) => (
+            <button
+              key={q}
+              onClick={() => handleSend(q, true)}
+              className="flex-shrink-0 border border-[#EDE8E3] rounded-full px-3 py-1.5 text-sm text-[#5C5C5C] bg-white hover:border-[#AF4D98] hover:text-[#AF4D98] transition-colors whitespace-nowrap"
+            >
+              {q}
+            </button>
+          ))}
         </div>
       )}
 
       {/* Input */}
-      <div className="border-t border-[#EBEBEB] bg-white px-4 py-3 flex items-end gap-3">
+      <div className="border-t border-[#EDE8E3] px-4 py-3 bg-white flex items-center gap-2">
         <button
           onClick={() => setShowSuggestions(s => !s)}
-          className="flex-shrink-0 text-[#9B9B9B] hover:text-[#AF4D98] transition-colors mb-1"
+          className="flex-shrink-0 text-[#9B9B9B] hover:text-[#AF4D98] transition-colors"
           aria-label="Suggested questions"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -389,7 +384,7 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
           placeholder="Type a message…"
           rows={1}
           maxLength={1000}
-          className="flex-1 border border-[#EBEBEB] rounded-full px-4 py-2.5 text-sm text-[#1A1A1A] placeholder:text-[#9B9B9B] focus:outline-none focus:ring-2 focus:ring-[#AF4D98]/20 focus:border-[#AF4D98] resize-none max-h-32 overflow-y-auto transition-all duration-150"
+          className="flex-1 bg-[#FDF8F3] rounded-full px-4 py-2.5 text-sm border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] text-[#1A1A1A] placeholder-[#9B9B9B] resize-none max-h-32 overflow-y-auto transition-colors"
           style={{ height: 'auto' }}
           onInput={e => {
             const el = e.currentTarget
@@ -400,16 +395,16 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
         <button
           onClick={() => handleSend(input)}
           disabled={!input.trim() || sending}
-          className="flex-shrink-0 w-10 h-10 bg-[#AF4D98] text-white rounded-full flex items-center justify-center hover:bg-[#9B3D85] disabled:opacity-40 active:scale-95 transition-all duration-200 shadow-sm"
+          className="flex-shrink-0 w-10 h-10 rounded-full bg-[#AF4D98] flex items-center justify-center hover:bg-[#9B3D85] transition-colors disabled:opacity-40"
           aria-label="Send"
         >
           {sending ? (
-            <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-white">
               <path d="M3.105 2.289a.75.75 0 00-.826.95l1.903 6.308a.75.75 0 00.63.525l4.802.625-4.802.625a.75.75 0 00-.63.525L2.279 17.76a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
             </svg>
           )}

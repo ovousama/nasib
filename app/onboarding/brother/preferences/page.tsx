@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 const KEY = 'nasib_onboarding_brother'
-const inputCls    = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
-const textareaCls = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm resize-none'
+const inputCls    = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors'
+const textareaCls = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors resize-none'
 
 export default function BrotherPreferences() {
   const router = useRouter()
@@ -48,50 +48,52 @@ export default function BrotherPreferences() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Spouse Preferences</h2>
-      <p className="text-[#9B9B9B] text-sm mb-8">What are you looking for in a spouse?</p>
+    <div className="min-h-screen bg-[#FDF8F3]">
+      <div className="max-w-[480px] mx-auto px-5 py-8 pb-28">
+        <h2 className="text-2xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-1">Spouse Preferences</h2>
+        <p className="text-[15px] text-[#9B9B9B] mb-8">What are you looking for in a spouse?</p>
 
-      <form onSubmit={handleNext} className="space-y-5">
+        <form onSubmit={handleNext} className="space-y-5">
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-            Religiosity Preference <span className="text-[#9B9B9B] font-normal">(optional)</span>
-          </label>
-          <input type="text" value={spouseReligiosity} onChange={e => setSpouseReligiosity(e.target.value)}
-            placeholder="e.g. Practicing, similar to me" className={inputCls} />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Preferred Age Range</label>
-          <div className="flex gap-3 items-center">
-            <input type="number" min={18} max={99} value={ageMin} onChange={e => setAgeMin(e.target.value)}
-              placeholder="Min" className={inputCls} />
-            <span className="text-[#9B9B9B] text-sm shrink-0">to</span>
-            <input type="number" min={18} max={99} value={ageMax} onChange={e => setAgeMax(e.target.value)}
-              placeholder="Max" className={inputCls} />
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
+              Religiosity Preference <span className="text-[#9B9B9B] font-normal">(optional)</span>
+            </label>
+            <input type="text" value={spouseReligiosity} onChange={e => setSpouseReligiosity(e.target.value)}
+              placeholder="e.g. Practicing, similar to me" className={inputCls} />
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-            Dealbreakers <span className="text-[#9B9B9B] font-normal">(optional)</span>
-          </label>
-          <textarea value={dealbreakers} onChange={e => setDealbreakers(e.target.value)} rows={3}
-            placeholder="e.g. Smoking, not willing to make hijab, no plans for children..."
-            className={textareaCls} />
-          <p className="text-xs text-[#9B9B9B] mt-1">Separate with commas</p>
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Preferred Age Range</label>
+            <div className="flex gap-3 items-center">
+              <input type="number" min={18} max={99} value={ageMin} onChange={e => setAgeMin(e.target.value)}
+                placeholder="Min" className={inputCls} />
+              <span className="text-[#9B9B9B] text-sm shrink-0">to</span>
+              <input type="number" min={18} max={99} value={ageMax} onChange={e => setAgeMax(e.target.value)}
+                placeholder="Max" className={inputCls} />
+            </div>
+          </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
-        )}
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
+              Dealbreakers <span className="text-[#9B9B9B] font-normal">(optional)</span>
+            </label>
+            <textarea value={dealbreakers} onChange={e => setDealbreakers(e.target.value)} rows={3}
+              placeholder="e.g. Smoking, not willing to make hijab, no plans for children..."
+              className={textareaCls} />
+            <p className="text-xs text-[#9B9B9B] mt-1">Separate with commas</p>
+          </div>
 
-        <button type="submit"
-          className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm">
-          Next →
-        </button>
-      </form>
+          {error && (
+            <div className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">{error}</div>
+          )}
+
+          <button type="submit"
+            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors">
+            Next →
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

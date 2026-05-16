@@ -73,14 +73,14 @@ export default function EditWaliPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#FDF8F3]">
       <div className="max-w-lg mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
           <Link href="/dashboard/profile" className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
@@ -88,12 +88,12 @@ export default function EditWaliPage() {
               <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
             </svg>
           </Link>
-          <h1 className="text-lg font-semibold text-[#1A1A1A]">Edit Wali</h1>
+          <h1 className="text-base font-medium text-[#1A1A1A]">Edit Wali</h1>
         </div>
 
         {!hasWali ? (
           <div className="text-center py-10">
-            <p className="text-[#6B6B6B] text-sm mb-4">No wali profile found. Please complete the onboarding flow to add your wali information.</p>
+            <p className="text-[#5C5C5C] text-sm mb-4">No wali profile found. Please complete the onboarding flow to add your wali information.</p>
             <Link href="/dashboard/profile" className="text-[#AF4D98] text-sm font-medium hover:underline">
               Back to profile
             </Link>
@@ -113,7 +113,7 @@ export default function EditWaliPage() {
                   type="text"
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] text-sm bg-white"
+                  className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
                   placeholder="Wali's full name"
                 />
               </div>
@@ -124,7 +124,7 @@ export default function EditWaliPage() {
                   type="text"
                   value={relationship}
                   onChange={e => setRelationship(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] text-sm bg-white"
+                  className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
                   placeholder="e.g. Father, Brother, Uncle"
                 />
               </div>
@@ -135,7 +135,7 @@ export default function EditWaliPage() {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] text-sm bg-white"
+                  className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
                   placeholder="wali@email.com"
                 />
               </div>
@@ -146,7 +146,7 @@ export default function EditWaliPage() {
                   type="tel"
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] text-sm bg-white"
+                  className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
                   placeholder="+1 (555) 000-0000"
                 />
               </div>
@@ -156,7 +156,7 @@ export default function EditWaliPage() {
                 <select
                   value={preferredContactMethod}
                   onChange={e => setPreferredContactMethod(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] text-sm bg-white"
+                  className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
                 >
                   <option value="">Select...</option>
                   {CONTACT_METHODS.map(opt => (
@@ -168,7 +168,7 @@ export default function EditWaliPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full bg-[#AF4D98] text-white font-semibold rounded-xl py-3 mt-2 disabled:opacity-60 transition-opacity"
+                className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60 transition-opacity"
               >
                 {saving ? 'Saving...' : 'Save changes'}
               </button>
@@ -182,7 +182,7 @@ export default function EditWaliPage() {
       </div>
 
       {toast && (
-        <div className={`fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-xl px-4 py-3 shadow-md text-sm font-medium text-center ${toast === 'success' ? 'bg-[#AF4D98] text-white' : 'bg-red-600 text-white'}`}>
+        <div className={`fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center ${toast === 'success' ? 'bg-[#AF4D98] text-white' : 'bg-red-600 text-white'}`}>
           {toast === 'success' ? 'Changes saved' : 'Something went wrong'}
         </div>
       )}

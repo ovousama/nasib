@@ -27,7 +27,7 @@ const OPTIONS: Option[] = [
       </svg>
     ),
     borderColor: 'border-[#AF4D98]',
-    bgColor: 'bg-[#F5E6F2]',
+    bgColor: 'bg-[#F9F0F6]',
     titleColor: 'text-[#AF4D98]',
   },
   {
@@ -39,9 +39,9 @@ const OPTIONS: Option[] = [
         <path d="M9.653 16.915l-.005-.003-.019-.01a20.759 20.759 0 01-1.162-.682 22.045 22.045 0 01-2.582-2.075C4.504 12.382 3 10.561 3 8.17a5.17 5.17 0 0110 0 5.17 5.17 0 015 .828 5.17 5.17 0 01-5 5.17zm0 0l.005-.003.019-.01a20.759 20.759 0 001.162-.682 22.045 22.045 0 002.582-2.075C14.496 12.382 16 10.561 16 8.17A5.17 5.17 0 006 8.17a5.17 5.17 0 005 5.17z" />
       </svg>
     ),
-    borderColor: 'border-amber-400',
-    bgColor: 'bg-amber-50',
-    titleColor: 'text-amber-700',
+    borderColor: 'border-[#D4CBC4]',
+    bgColor: 'bg-[#FAF4EE]',
+    titleColor: 'text-[#5C5C5C]',
   },
   {
     outcome: 'close',
@@ -52,9 +52,9 @@ const OPTIONS: Option[] = [
         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
       </svg>
     ),
-    borderColor: 'border-red-200',
-    bgColor: 'bg-red-50',
-    titleColor: 'text-red-700',
+    borderColor: 'border-[#EDE8E3]',
+    bgColor: 'bg-[#FAF4EE]',
+    titleColor: 'text-[#9B9B9B]',
   },
 ]
 
@@ -82,22 +82,22 @@ export default function CheckinUI({ connection, connectionId }: { connection: Co
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFAF7] flex flex-col">
-      <div className="px-4 pt-8 pb-4 bg-white border-b border-[#EBEBEB]">
-        <Link href={`/dashboard/chat/${connectionId}`} className="text-[#9B9B9B] hover:text-[#6B6B6B] text-sm flex items-center gap-1 mb-4">
+    <div className="min-h-screen bg-[#FDF8F3] flex flex-col">
+      <div className="px-6 pt-8 pb-4 bg-white border-b border-[#EDE8E3]">
+        <Link href={`/dashboard/chat/${connectionId}`} className="text-[#9B9B9B] hover:text-[#5C5C5C] text-sm flex items-center gap-1 mb-4">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
             <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
           </svg>
           Back to chat
         </Link>
-        <h1 className="text-xl font-bold text-[#1A1A1A]">Post-Meeting Check-in</h1>
-        <p className="text-sm text-[#6B6B6B] mt-1">
+        <h1 className="text-[26px] font-medium text-[#1A1A1A] tracking-[-0.02em]">Post-Meeting Check-in</h1>
+        <p className="text-sm text-[#9B9B9B] mt-1">
           With {connection.other_first_name}
         </p>
       </div>
 
-      <div className="flex-1 px-4 py-6">
-        <p className="text-sm text-[#6B6B6B] mb-6 leading-relaxed">
+      <div className="flex-1 px-6 py-6">
+        <p className="text-sm text-[#5C5C5C] mb-6 leading-relaxed">
           Bismillah. After your meeting, please share how you would like to proceed. Both parties must submit their responses independently.
         </p>
 
@@ -106,10 +106,10 @@ export default function CheckinUI({ connection, connectionId }: { connection: Co
             <button
               key={opt.outcome}
               onClick={() => setSelected(opt.outcome)}
-              className={`w-full text-left p-4 rounded-2xl border-2 transition-all ${
+              className={`w-full text-left p-4 rounded-[16px] border-2 transition-all duration-150 ${
                 selected === opt.outcome
                   ? `${opt.borderColor} ${opt.bgColor}`
-                  : 'border-[#EBEBEB] bg-white hover:border-gray-300'
+                  : 'border-[#EDE8E3] bg-white hover:border-[#D4CBC4]'
               }`}
             >
               <div className="flex items-start gap-3">
@@ -117,19 +117,19 @@ export default function CheckinUI({ connection, connectionId }: { connection: Co
                   {opt.icon}
                 </span>
                 <div>
-                  <p className={`font-semibold text-sm ${selected === opt.outcome ? opt.titleColor : 'text-[#1A1A1A]'}`}>
+                  <p className={`font-medium text-sm ${selected === opt.outcome ? opt.titleColor : 'text-[#1A1A1A]'}`}>
                     {opt.title}
                   </p>
-                  <p className="text-xs text-[#6B6B6B] mt-0.5">{opt.description}</p>
+                  <p className="text-xs text-[#9B9B9B] mt-0.5">{opt.description}</p>
                 </div>
                 <div className="ml-auto flex-shrink-0">
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    selected === opt.outcome ? `${opt.borderColor} bg-white` : 'border-gray-300'
+                    selected === opt.outcome ? `${opt.borderColor} bg-white` : 'border-[#D4CBC4]'
                   }`}>
                     {selected === opt.outcome && (
                       <div className={`w-2.5 h-2.5 rounded-full ${
                         opt.outcome === 'continue' ? 'bg-[#AF4D98]' :
-                        opt.outcome === 'nikah_planning' ? 'bg-amber-500' : 'bg-red-500'
+                        opt.outcome === 'nikah_planning' ? 'bg-[#D4CBC4]' : 'bg-[#9B9B9B]'
                       }`} />
                     )}
                   </div>
@@ -139,14 +139,14 @@ export default function CheckinUI({ connection, connectionId }: { connection: Co
           ))}
         </div>
 
-        <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-6">
-          <p className="text-xs text-amber-700 leading-relaxed">
+        <div className="bg-[#FAF4EE] border border-[#EDE8E3] rounded-[12px] px-4 py-3 mb-6">
+          <p className="text-xs text-[#5C5C5C] leading-relaxed">
             Your response is private. The outcome is only actioned when both parties agree. An admin reviews all nikah planning requests.
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+          <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">
             {error}
           </div>
         )}
@@ -154,7 +154,7 @@ export default function CheckinUI({ connection, connectionId }: { connection: Co
         <button
           onClick={handleSubmit}
           disabled={!selected || loading}
-          className="w-full bg-[#AF4D98] text-white font-medium py-3 rounded-2xl hover:bg-[#9B3D85] disabled:opacity-40 transition-colors text-sm"
+          className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-3 hover:bg-[#9B3D85] disabled:opacity-40 transition-colors text-sm"
         >
           {loading ? 'Submitting…' : 'Submit Response'}
         </button>

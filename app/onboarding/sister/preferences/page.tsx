@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 const KEY = 'nasib_onboarding_sister'
-const inputCls    = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
-const textareaCls = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm resize-none'
+const inputCls    = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
+const textareaCls = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm resize-none'
 
 export default function SisterPreferences() {
   const router = useRouter()
@@ -48,7 +48,7 @@ export default function SisterPreferences() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Spouse Preferences</h2>
+      <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Spouse Preferences</h2>
       <p className="text-[#9B9B9B] text-sm mb-8">What are you looking for in a spouse?</p>
 
       <form onSubmit={handleNext} className="space-y-5">
@@ -86,7 +86,7 @@ export default function SisterPreferences() {
         )}
 
         <button type="submit"
-          className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm">
+          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm">
           Next →
         </button>
       </form>

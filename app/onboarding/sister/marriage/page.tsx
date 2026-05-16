@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 const KEY = 'nasib_onboarding_sister'
-const selectCls = 'w-full px-4 py-3 rounded-xl border border-[#EBEBEB] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] text-sm bg-white'
+const selectCls = 'w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white'
 
 function YesNo({ value, onChange }: { value: boolean | null; onChange: (v: boolean) => void }) {
   return (
@@ -14,7 +14,7 @@ function YesNo({ value, onChange }: { value: boolean | null; onChange: (v: boole
           className={`flex-1 py-3 rounded-xl border-2 font-medium text-sm transition-all ${
             value === v
               ? 'border-[#AF4D98] bg-[#AF4D98] text-white'
-              : 'border-[#EBEBEB] text-[#6B6B6B] hover:border-[#AF4D98]'
+              : 'border-[#EDE8E3] text-[#5C5C5C] hover:border-[#AF4D98]'
           }`}>
           {v ? 'Yes' : 'No'}
         </button>
@@ -59,7 +59,7 @@ export default function SisterMarriage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-semibold text-[#1A1A1A] mb-1">Marriage Goals</h2>
+      <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Marriage Goals</h2>
       <p className="text-[#9B9B9B] text-sm mb-8">Be honest — the right match depends on it</p>
 
       <form onSubmit={handleNext} className="space-y-6">
@@ -94,7 +94,7 @@ export default function SisterMarriage() {
         )}
 
         <button type="submit"
-          className="w-full py-3 bg-[#AF4D98] text-white font-semibold rounded-xl hover:bg-[#9B3D85] transition-colors text-sm">
+          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm">
           Next →
         </button>
       </form>

@@ -29,13 +29,13 @@ export default function UsersFilter() {
         defaultValue={searchParams.get('search') ?? ''}
         placeholder="Search by name…"
         onChange={e => update('search', e.target.value)}
-        className="border border-[#EBEBEB] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#AF4D98] w-48"
+        className="border border-[#EDE8E3] rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#AF4D98] w-48"
       />
 
       <select
         defaultValue={searchParams.get('gender') ?? ''}
         onChange={e => update('gender', e.target.value)}
-        className="border border-[#EBEBEB] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#AF4D98] bg-white"
+        className="border border-[#EDE8E3] rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#AF4D98] bg-white"
       >
         <option value="">All genders</option>
         <option value="brother">Brothers</option>
@@ -45,7 +45,7 @@ export default function UsersFilter() {
       <select
         defaultValue={searchParams.get('status') ?? ''}
         onChange={e => update('status', e.target.value)}
-        className="border border-[#EBEBEB] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#AF4D98] bg-white"
+        className="border border-[#EDE8E3] rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#AF4D98] bg-white"
       >
         <option value="">All statuses</option>
         <option value="pending_verification">Pending Verification</option>

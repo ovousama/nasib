@@ -37,7 +37,7 @@ function SearchSelect({
     <div className="relative">
       <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">{label}</label>
       <div
-        className="border border-[#EBEBEB] rounded-xl px-3 py-2.5 cursor-pointer flex items-center justify-between hover:border-[#AF4D98] transition-colors"
+        className="border border-[#EDE8E3] rounded-[10px] px-3 py-2.5 cursor-pointer flex items-center justify-between hover:border-[#AF4D98] transition-colors"
         onClick={() => setOpen(o => !o)}
       >
         <span className={selected ? 'text-sm text-[#1A1A1A]' : 'text-sm text-[#9B9B9B]'}>
@@ -49,8 +49,8 @@ function SearchSelect({
       </div>
 
       {open && (
-        <div className="absolute z-20 mt-1 w-full bg-white border border-[#EBEBEB] rounded-xl shadow-lg overflow-hidden">
-          <div className="p-2 border-b border-[#EBEBEB]">
+        <div className="absolute z-20 mt-1 w-full bg-white border border-[#EDE8E3] rounded-[10px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
+          <div className="p-2 border-b border-[#EDE8E3]">
             <input
               autoFocus
               type="text"
@@ -69,7 +69,7 @@ function SearchSelect({
               <li
                 key={p.id}
                 onClick={() => { onChange(p.id); setOpen(false); setSearch('') }}
-                className={`px-3 py-2.5 text-sm cursor-pointer hover:bg-[#F5E6F2] hover:text-[#AF4D98] transition-colors ${p.id === value ? 'text-[#AF4D98] font-medium' : 'text-[#1A1A1A]'}`}
+                className={`px-3 py-2.5 text-sm cursor-pointer hover:bg-[#F9F0F6] hover:text-[#AF4D98] transition-colors ${p.id === value ? 'text-[#AF4D98] font-medium' : 'text-[#1A1A1A]'}`}
               >
                 {p.full_name}
               </li>
@@ -99,9 +99,9 @@ export default function NewMatchForm({ brothers, sisters, defaultBrotherId = '',
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 shadow-sm border border-[#EBEBEB] max-w-lg space-y-5">
+    <form onSubmit={handleSubmit} className="bg-white rounded-[16px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3] max-w-lg space-y-5">
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">{error}</div>
+        <div className="bg-red-50 border border-red-200 rounded-[10px] p-3 text-sm text-red-700">{error}</div>
       )}
 
       <SearchSelect label="Brother" people={brothers} value={brotherId} onChange={setBrotherId} />
@@ -116,14 +116,14 @@ export default function NewMatchForm({ brothers, sisters, defaultBrotherId = '',
           onChange={e => setNote(e.target.value)}
           rows={4}
           placeholder="Why this pair is a good match…"
-          className="w-full border border-[#EBEBEB] rounded-xl px-3 py-2.5 text-sm text-[#1A1A1A] placeholder:text-[#9B9B9B] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] resize-none"
+          className="w-full border border-[#EDE8E3] rounded-[10px] px-3 py-2.5 text-sm text-[#1A1A1A] placeholder:text-[#9B9B9B] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] resize-none"
         />
       </div>
 
       <button
         type="submit"
         disabled={submitting}
-        className="w-full bg-[#AF4D98] text-white font-medium py-3 rounded-xl hover:bg-[#9B3D85] disabled:opacity-50 transition-colors text-sm"
+        className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-2 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors text-sm"
       >
         {submitting ? 'Assigning…' : 'Assign Match'}
       </button>

@@ -13,9 +13,9 @@ function StatCard({
   color?: 'green' | 'amber' | 'blue' | 'gray'
 }) {
   return (
-    <Link href={href} className="bg-white rounded-2xl p-5 shadow-sm border border-[#EBEBEB] hover:border-[#AF4D98] transition-colors block">
-      <p className="text-sm text-[#6B6B6B] mb-1">{label}</p>
-      <p className={`text-3xl font-bold ${color === 'green' ? 'text-[#AF4D98]' : color === 'amber' ? 'text-amber-600' : color === 'blue' ? 'text-blue-600' : 'text-[#1A1A1A]'}`}>
+    <Link href={href} className="bg-white rounded-[16px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3] hover:border-[#AF4D98] transition-colors block">
+      <p className="text-[11px] uppercase tracking-[0.06em] text-[#9B9B9B] mt-1">{label}</p>
+      <p className={`text-2xl font-medium tracking-[-0.02em] mt-1 ${color === 'green' ? 'text-[#AF4D98]' : color === 'amber' ? 'text-amber-600' : color === 'blue' ? 'text-blue-600' : 'text-[#1A1A1A]'}`}>
         {value.toLocaleString()}
       </p>
     </Link>
@@ -28,8 +28,8 @@ export default async function AdminDashboard() {
   return (
     <div className="max-w-5xl">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-[#1A1A1A]">Overview</h2>
-        <p className="text-sm text-[#6B6B6B] mt-1">Platform statistics at a glance</p>
+        <h2 className="text-xl font-medium tracking-[-0.02em] text-[#1A1A1A]">Overview</h2>
+        <p className="text-sm text-[#5C5C5C] mt-1">Platform statistics at a glance</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -42,7 +42,7 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="mb-4">
-        <h3 className="text-base font-semibold text-[#1A1A1A] mb-3">Quick Actions</h3>
+        <h3 className="text-base font-medium tracking-[-0.02em] text-[#1A1A1A] mb-3">Quick Actions</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: 'Review Users', href: '/admin/users?status=pending_verification', desc: 'Pending verification' },
@@ -53,10 +53,10 @@ export default async function AdminDashboard() {
             <Link
               key={action.href}
               href={action.href}
-              className="bg-white rounded-2xl p-4 shadow-sm border border-[#EBEBEB] hover:border-[#AF4D98] hover:bg-[#F5E6F2] transition-colors"
+              className="bg-white rounded-[16px] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3] hover:border-[#AF4D98] hover:bg-[#F9F0F6] transition-colors"
             >
-              <p className="text-sm font-semibold text-[#1A1A1A]">{action.label}</p>
-              <p className="text-xs text-[#6B6B6B] mt-0.5">{action.desc}</p>
+              <p className="text-sm font-medium text-[#1A1A1A]">{action.label}</p>
+              <p className="text-xs text-[#5C5C5C] mt-0.5">{action.desc}</p>
             </Link>
           ))}
         </div>

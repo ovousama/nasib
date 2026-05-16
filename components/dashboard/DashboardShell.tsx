@@ -111,20 +111,21 @@ export default function DashboardShell({ userId, initialUnreadCount, children }:
         {toasts.map(toast => (
           <div
             key={toast.id}
-            className="bg-[#AF4D98] text-white rounded-2xl shadow-xl px-4 py-3 max-w-[280px] w-full pointer-events-auto cursor-pointer animate-in slide-in-from-right-4 fade-in duration-300"
+            className="bg-white border border-[#EDE8E3] shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-[16px] px-4 py-3 max-w-[280px] w-full pointer-events-auto cursor-pointer"
             onClick={() => {
               dismissToast(toast.id)
               router.push(toast.route)
             }}
           >
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 rounded-full bg-[#AF4D98] flex-shrink-0 mt-1.5" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold leading-tight">{toast.title}</p>
-                <p className="text-xs text-white/70 mt-0.5 line-clamp-2">{toast.body}</p>
+                <p className="text-sm font-medium text-[#1A1A1A] leading-tight">{toast.title}</p>
+                <p className="text-xs text-[#9B9B9B] mt-0.5 line-clamp-2">{toast.body}</p>
               </div>
               <button
                 onClick={e => { e.stopPropagation(); dismissToast(toast.id) }}
-                className="text-white/60 hover:text-white flex-shrink-0 mt-0.5 transition-colors"
+                className="text-[#9B9B9B] hover:text-[#5C5C5C] flex-shrink-0 mt-0.5 transition-colors"
                 aria-label="Dismiss"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">

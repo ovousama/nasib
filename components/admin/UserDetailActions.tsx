@@ -30,11 +30,11 @@ export default function UserDetailActions({ userId, currentStatus, verificationB
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#EBEBEB]">
-      <h3 className="text-sm font-semibold text-[#6B6B6B] uppercase tracking-wide mb-4">Actions</h3>
+    <div className="bg-white rounded-[16px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3]">
+      <h3 className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Actions</h3>
 
       {error && (
-        <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">{error}</div>
+        <div className="mb-3 bg-red-50 border border-red-200 rounded-[10px] p-3 text-sm text-red-700">{error}</div>
       )}
 
       <div className="space-y-2">
@@ -42,7 +42,7 @@ export default function UserDetailActions({ userId, currentStatus, verificationB
           <button
             onClick={() => run('verify', () => adminVerifyUser(userId))}
             disabled={loading !== null}
-            className="w-full bg-[#AF4D98] text-white text-sm font-medium py-2.5 rounded-xl hover:bg-[#9B3D85] disabled:opacity-50 transition-colors"
+            className="w-full rounded-full bg-[#AF4D98] text-white text-sm font-medium py-2 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors"
           >
             {loading === 'verify' ? 'Verifying…' : 'Verify Profile'}
           </button>
@@ -52,7 +52,7 @@ export default function UserDetailActions({ userId, currentStatus, verificationB
           <button
             onClick={() => run('unverify', () => adminUnverifyUser(userId))}
             disabled={loading !== null}
-            className="w-full border border-amber-300 text-amber-700 text-sm font-medium py-2.5 rounded-xl hover:bg-amber-50 disabled:opacity-50 transition-colors"
+            className="w-full rounded-full border border-amber-300 text-amber-700 text-sm font-medium py-2 hover:bg-amber-50 disabled:opacity-50 transition-colors"
           >
             {loading === 'unverify' ? 'Removing…' : 'Remove Verification'}
           </button>
@@ -60,7 +60,7 @@ export default function UserDetailActions({ userId, currentStatus, verificationB
 
         <a
           href={`/admin/matches/new?${gender === 'brother' ? 'brotherId' : 'sisterId'}=${userId}`}
-          className="block w-full border border-[#AF4D98] text-[#AF4D98] text-sm font-medium py-2.5 rounded-xl hover:bg-[#F5E6F2] transition-colors text-center"
+          className="block w-full rounded-full border border-[#EDE8E3] text-[#5C5C5C] text-sm font-medium py-2 hover:border-[#D4CBC4] transition-colors text-center"
         >
           Assign Match
         </a>
@@ -70,24 +70,24 @@ export default function UserDetailActions({ userId, currentStatus, verificationB
             {!confirmDeactivate ? (
               <button
                 onClick={() => setConfirmDeactivate(true)}
-                className="w-full border border-red-300 text-red-600 text-sm font-medium py-2.5 rounded-xl hover:bg-red-50 transition-colors"
+                className="w-full text-sm text-[#C13515] py-2"
               >
                 Deactivate Profile
               </button>
             ) : (
-              <div className="border border-red-200 rounded-xl p-3 space-y-2">
+              <div className="border border-red-200 rounded-[10px] p-3 space-y-2">
                 <p className="text-sm text-red-700 font-medium">Confirm deactivation?</p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setConfirmDeactivate(false)}
-                    className="text-sm text-[#6B6B6B] border border-[#EBEBEB] py-2 rounded-lg hover:bg-[#FDFAF7]"
+                    className="text-sm text-[#5C5C5C] rounded-full border border-[#EDE8E3] py-2 hover:border-[#D4CBC4] transition-colors font-medium"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => { setConfirmDeactivate(false); run('deactivate', () => adminDeactivateUser(userId)) }}
                     disabled={loading !== null}
-                    className="text-sm font-medium bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                    className="text-sm font-medium bg-red-600 text-white py-2 rounded-full hover:bg-red-700 disabled:opacity-50 transition-colors"
                   >
                     {loading === 'deactivate' ? '…' : 'Deactivate'}
                   </button>

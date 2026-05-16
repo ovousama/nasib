@@ -11,9 +11,9 @@ export default forwardRef<HTMLInputElement, Props>(function Input(
   ref,
 ) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-[#1A1A1A]">
+        <label htmlFor={id} className="block text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B]">
           {label}
         </label>
       )}
@@ -21,13 +21,13 @@ export default forwardRef<HTMLInputElement, Props>(function Input(
         ref={ref}
         id={id}
         className={`
-          w-full px-4 py-3 rounded-xl
-          border text-[#1A1A1A] placeholder-[#9B9B9B] text-sm
-          transition-all duration-150
+          w-full px-4 py-3.5 rounded-[10px] bg-white
+          border text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px]
+          transition-colors duration-150
           focus:outline-none focus:ring-2 focus:border-[#AF4D98]
           ${error
-            ? 'border-[#C13515] ring-[#C13515]/20 focus:ring-[#C13515]/20'
-            : 'border-[#D4D4D4] focus:ring-[#AF4D98]/20'
+            ? 'border-[#C13515] focus:ring-[#C13515]/10'
+            : 'border-[#EDE8E3] focus:ring-[#AF4D98]/8'
           }
           ${className}
         `}
