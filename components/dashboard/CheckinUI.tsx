@@ -58,11 +58,6 @@ const OPTIONS: Option[] = [
   },
 ]
 
-type CheckinResult = {
-  status: 'confirmed' | 'proposed' | 'continue' | 'closed'
-  message: string
-  connectionId?: string
-}
 
 type Props = {
   connection: ConnectionDetail
@@ -112,16 +107,20 @@ export default function CheckinUI({ connection, connectionId, hasPendingProposal
 
   // ── Submit handler ────────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    if (!selected) return
+    if (!selected) {
+      setError('Please select an option before continuing.')
+      return
+    }
+
+    console.log('Submitting with outcome:', selected)
+
     setLoading(true)
     setError(null)
 
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    console.log('Current user:', user?.id)
 
     if (!user) {
-      console.error('No authenticated user')
       setError('Please log in again to continue.')
       setLoading(false)
       return
@@ -132,36 +131,54 @@ export default function CheckinUI({ connection, connectionId, hasPendingProposal
       p_outcome: selected,
     })
 
-    console.log('Checkin response:', { data, error })
+    console.log('Raw RPC response:', { data, error })
+
     setLoading(false)
 
     if (error) {
-      if (error.message.includes('Unauthorized')) {
-        setError('You are not authorized to submit this check-in.')
-      } else if (error.message.includes('Not authenticated')) {
-        setError('Please log in again to continue.')
-      } else {
-        setError('Something went wrong. Please try again.')
-      }
+      console.error('Checkin error:', error)
+      setError(error.message)
       return
     }
 
-    const result = data as CheckinResult
+    // data is the JSONB result
+    const result = data as {
+      status: 'proposed' | 'confirmed' | 'continue' | 'closed'
+      connectionId?: string
+    }
 
-    if (result.status === 'confirmed') {
-      setSuccessMessage('Mabrook! You are both ready. May Allah bless your union. 🤍')
-      setTimeout(() => router.push(`/dashboard/nikah/${connectionId}`), 2000)
-    } else if (result.status === 'proposed') {
-      setSuccessMessage(
-        'Your response has been sent. We are waiting for the other party to respond. You will be notified when they do.'
-      )
-      setTimeout(() => router.push(`/dashboard/chat/${connectionId}`), 3000)
-    } else if (result.status === 'continue') {
-      setSuccessMessage('May Allah make it easy for you. Keep going.')
-      setTimeout(() => router.push(`/dashboard/chat/${connectionId}`), 2000)
-    } else if (result.status === 'closed') {
-      setSuccessMessage('Jazakallah khair. Connection closed respectfully.')
-      setTimeout(() => router.push('/dashboard'), 2000)
+    console.log('Parsed result:', result)
+
+    if (!result || !result.status) {
+      setError('Unexpected response. Please try again.')
+      return
+    }
+
+    switch (result.status) {
+      case 'proposed':
+        setSuccessMessage(
+          'Your response has been sent. Waiting for your match to respond. You will be notified when they do, in sha Allah.'
+        )
+        setTimeout(() => router.push(`/dashboard/chat/${connectionId}`), 3000)
+        break
+
+      case 'confirmed':
+        setSuccessMessage('Mabrook! You are both ready. May Allah bless your union. 🤍')
+        setTimeout(() => router.push(`/dashboard/nikah/${connectionId}`), 2000)
+        break
+
+      case 'continue':
+        setSuccessMessage('May Allah make it easy for you. Keep going.')
+        setTimeout(() => router.push(`/dashboard/chat/${connectionId}`), 2000)
+        break
+
+      case 'closed':
+        setSuccessMessage('Jazakallah khair. Connection closed respectfully.')
+        setTimeout(() => router.push('/dashboard'), 2000)
+        break
+
+      default:
+        setError('Unexpected response. Please try again.')
     }
   }
 
@@ -245,6 +262,7 @@ export default function CheckinUI({ connection, connectionId, hasPendingProposal
         )}
 
         <button
+          type="button"
           onClick={handleSubmit}
           disabled={!selected || loading}
           className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-3 hover:bg-[#9B3D85] disabled:opacity-40 transition-colors text-sm"
