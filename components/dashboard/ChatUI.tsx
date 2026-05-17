@@ -2,9 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { sendMessage, confirmMeeting, declineMeeting } from '@/app/dashboard/actions'
 import type { Message, MeetingRequest, ConnectionDetail } from '@/lib/database'
+
+type PendingProposal = { id: string; profile_id: string }
 
 const SUGGESTED_QUESTIONS = [
   'What does a typical day look like for you?',
@@ -24,6 +27,7 @@ type Props = {
   initialMeetings: MeetingRequest[]
   currentUserId: string
   checkinDone: boolean
+  initialPendingProposal: PendingProposal | null
 }
 
 function formatTime(dateStr: string) {
@@ -201,13 +205,16 @@ function MeetingCard({
   )
 }
 
-export default function ChatUI({ connection, initialMessages, initialMeetings, currentUserId, checkinDone }: Props) {
+export default function ChatUI({ connection, initialMessages, initialMeetings, currentUserId, checkinDone, initialPendingProposal }: Props) {
+  const router = useRouter()
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [meetings, setMeetings] = useState<MeetingRequest[]>(initialMeetings)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(initialMessages.length === 0 && initialMeetings.length === 0)
   const [isConnected, setIsConnected] = useState(false)
+  const [pendingProposal, setPendingProposal] = useState<PendingProposal | null>(initialPendingProposal)
+  const [checkinLoading, setCheckinLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -243,6 +250,42 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
 
     return () => { supabase.removeChannel(channel) }
   }, [connection.id])
+
+  // Realtime: detect incoming nikah proposals from the other party
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`proposal-${connection.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'post_meeting_checkins', filter: `connection_id=eq.${connection.id}` },
+        (payload) => {
+          const row = payload.new as { outcome: string; is_proposal: boolean; profile_id: string; id: string }
+          if (row.outcome === 'nikah_planning' && row.is_proposal && row.profile_id !== currentUserId) {
+            setPendingProposal({ id: row.id, profile_id: row.profile_id })
+          }
+        }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [connection.id, currentUserId])
+
+  const handleCheckin = async (outcome: 'nikah_planning' | 'continue') => {
+    setCheckinLoading(true)
+    const supabase = createClient()
+    const { data, error } = await supabase.rpc('submit_checkin', {
+      p_connection_id: connection.id,
+      p_outcome: outcome,
+    })
+    setCheckinLoading(false)
+    if (error) return
+    const result = data as { status: string }
+    if (result.status === 'confirmed') {
+      router.push(`/dashboard/nikah/${connection.id}`)
+    } else if (result.status === 'continue') {
+      setPendingProposal(null)
+    }
+  }
 
   const handleSend = async (content: string, isSuggested = false) => {
     if (!content.trim() || sending) return
@@ -314,6 +357,37 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
 
   return (
     <div className="flex flex-col h-full">
+      {/* Nikah proposal banner */}
+      {pendingProposal && (
+        <div
+          className="flex-shrink-0 px-5 py-4 flex flex-col gap-3"
+          style={{ background: 'linear-gradient(135deg, #F5E6F2, #F4E4BA)', borderBottom: '1px solid rgba(175,77,152,0.2)' }}
+        >
+          <div>
+            <p className="text-[15px] font-medium text-[#AF4D98]">🤍 Nikah Planning Proposed</p>
+            <p className="text-[13px] text-[#5C5C5C] mt-1">
+              Your match would like to move forward to nikah planning. Do you agree?
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleCheckin('nikah_planning')}
+              disabled={checkinLoading}
+              className="flex-1 bg-[#AF4D98] text-white rounded-full py-2.5 text-sm font-medium hover:bg-[#9B3D85] disabled:opacity-50 transition-colors"
+            >
+              Yes, I agree 🤍
+            </button>
+            <button
+              onClick={() => handleCheckin('continue')}
+              disabled={checkinLoading}
+              className="flex-1 bg-white text-[#5C5C5C] border border-[#EDE8E3] rounded-full py-2.5 text-sm hover:border-[#D4CBC4] disabled:opacity-50 transition-colors"
+            >
+              Not yet
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Timeline */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-[#FDF8F3]">
         {allItems.length === 0 && (

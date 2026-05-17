@@ -735,10 +735,18 @@ export async function createNotification(
 
 export async function submitCheckin(connectionId: string, outcome: CheckinOutcome): Promise<{ error?: string }> {
   const supabase = await createServerSupabaseClient()
-  const { error } = await supabase.rpc('submit_checkin', {
+  const { data: { user } } = await supabase.auth.getUser()
+  console.log('Submitting checkin:', {
+    connectionId,
+    outcome,
+    currentUserId: user?.id ?? null,
+    userEmail: user?.email ?? null,
+  })
+  const { data, error } = await supabase.rpc('submit_checkin', {
     p_connection_id: connectionId,
     p_outcome: outcome,
   })
+  console.log('Checkin result:', { data, error })
   if (error) return { error: error.message }
   return {}
 }
@@ -749,7 +757,7 @@ export async function getCheckinStatus(connectionId: string, userId: string): Pr
     .from('post_meeting_checkins')
     .select('id')
     .eq('connection_id', connectionId)
-    .eq('submitted_by', userId)
+    .eq('profile_id', userId)
     .maybeSingle()
   return !!data
 }

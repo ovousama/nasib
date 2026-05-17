@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { submitCheckinAction } from '@/app/dashboard/actions'
+import { createClient } from '@/lib/supabase'
 import type { CheckinOutcome, ConnectionDetail } from '@/lib/database'
 
 type Option = {
@@ -58,29 +58,114 @@ const OPTIONS: Option[] = [
   },
 ]
 
-export default function CheckinUI({ connection, connectionId }: { connection: ConnectionDetail; connectionId: string }) {
+type CheckinResult = {
+  status: 'confirmed' | 'proposed' | 'continue' | 'closed'
+  message: string
+  connectionId?: string
+}
+
+type Props = {
+  connection: ConnectionDetail
+  connectionId: string
+  hasPendingProposal: boolean
+}
+
+export default function CheckinUI({ connection, connectionId, hasPendingProposal }: Props) {
   const router = useRouter()
   const [selected, setSelected] = useState<CheckinOutcome | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
+  // ── Waiting screen — user already proposed, other party hasn't responded ──
+  if (hasPendingProposal) {
+    return (
+      <div className="min-h-screen bg-[#FDF8F3] flex flex-col items-center justify-center px-6">
+        <p className="text-[24px] mb-4">🤍</p>
+        <h2
+          className="text-2xl text-[#AF4D98] mb-3 text-center"
+          style={{ fontFamily: 'var(--font-cormorant)', fontWeight: 400 }}
+        >
+          Waiting for their response
+        </h2>
+        <p className="text-sm text-[#9B9B9B] text-center leading-relaxed max-w-xs">
+          You have proposed nikah planning. We will notify you as soon as your match responds, in sha Allah.
+        </p>
+        <button
+          onClick={() => router.push(`/dashboard/chat/${connectionId}`)}
+          className="mt-6 border border-[#EDE8E3] rounded-full px-6 py-2.5 text-sm text-[#9B9B9B] hover:border-[#D4CBC4] transition-colors"
+        >
+          Back to chat
+        </button>
+      </div>
+    )
+  }
+
+  // ── Success screen ────────────────────────────────────────────────────────
+  if (successMessage) {
+    return (
+      <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center px-6">
+        <p className="text-[#1A1A1A] text-lg font-medium text-center">{successMessage}</p>
+      </div>
+    )
+  }
+
+  // ── Submit handler ────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!selected) return
     setLoading(true)
     setError(null)
-    const result = await submitCheckinAction(connectionId, selected)
-    setLoading(false)
-    if (result?.error) {
-      setError(result.error)
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    console.log('Current user:', user?.id)
+
+    if (!user) {
+      console.error('No authenticated user')
+      setError('Please log in again to continue.')
+      setLoading(false)
       return
     }
-    if (selected === 'nikah_planning') {
-      router.push(`/dashboard/nikah/${connectionId}`)
-    } else {
-      router.push(`/dashboard/chat/${connectionId}`)
+
+    const { data, error } = await supabase.rpc('submit_checkin', {
+      p_connection_id: connectionId,
+      p_outcome: selected,
+    })
+
+    console.log('Checkin response:', { data, error })
+    setLoading(false)
+
+    if (error) {
+      if (error.message.includes('Unauthorized')) {
+        setError('You are not authorized to submit this check-in.')
+      } else if (error.message.includes('Not authenticated')) {
+        setError('Please log in again to continue.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
+      return
+    }
+
+    const result = data as CheckinResult
+
+    if (result.status === 'confirmed') {
+      setSuccessMessage('Mabrook! You are both ready. May Allah bless your union. 🤍')
+      setTimeout(() => router.push(`/dashboard/nikah/${connectionId}`), 2000)
+    } else if (result.status === 'proposed') {
+      setSuccessMessage(
+        'Your response has been sent. We are waiting for the other party to respond. You will be notified when they do.'
+      )
+      setTimeout(() => router.push(`/dashboard/chat/${connectionId}`), 3000)
+    } else if (result.status === 'continue') {
+      setSuccessMessage('May Allah make it easy for you. Keep going.')
+      setTimeout(() => router.push(`/dashboard/chat/${connectionId}`), 2000)
+    } else if (result.status === 'closed') {
+      setSuccessMessage('Jazakallah khair. Connection closed respectfully.')
+      setTimeout(() => router.push('/dashboard'), 2000)
     }
   }
 
+  // ── Main form ─────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#FDF8F3] flex flex-col">
       <div className="px-6 pt-8 pb-4 bg-white border-b border-[#EDE8E3]">
@@ -91,17 +176,15 @@ export default function CheckinUI({ connection, connectionId }: { connection: Co
           Back to chat
         </Link>
         <h1 className="text-[26px] font-medium text-[#1A1A1A] tracking-[-0.02em]">Post-Meeting Check-in</h1>
-        <p className="text-sm text-[#9B9B9B] mt-1">
-          With {connection.other_first_name}
-        </p>
+        <p className="text-sm text-[#9B9B9B] mt-1">With {connection.other_first_name}</p>
       </div>
 
       <div className="flex-1 px-6 py-6">
         <p className="text-sm text-[#5C5C5C] mb-6 leading-relaxed">
-          Bismillah. After your meeting, please share how you would like to proceed. Both parties must submit their responses independently.
+          Bismillah. After your meeting, please share how you would like to proceed. Your response is private.
         </p>
 
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3 mb-2">
           {OPTIONS.map(opt => (
             <button
               key={opt.outcome}
@@ -139,9 +222,19 @@ export default function CheckinUI({ connection, connectionId }: { connection: Co
           ))}
         </div>
 
-        <div className="bg-[#FAF4EE] border border-[#EDE8E3] rounded-[12px] px-4 py-3 mb-6">
+        {/* Nikah planning explanation — shown only when that option is selected */}
+        {selected === 'nikah_planning' && (
+          <div className="mt-3 mb-2 rounded-[12px] px-4 py-3" style={{ background: '#F5E6F2', border: '1px solid rgba(175,77,152,0.2)' }}>
+            <p className="text-[13px] font-medium text-[#AF4D98] mb-1">How this works</p>
+            <p className="text-[13px] text-[#5C5C5C] leading-relaxed">
+              Selecting this will send a proposal to your match. Nikah planning will only begin once both of you have agreed. If your match is not ready, your connection will continue as normal.
+            </p>
+          </div>
+        )}
+
+        <div className="bg-[#FAF4EE] border border-[#EDE8E3] rounded-[12px] px-4 py-3 mb-6 mt-4">
           <p className="text-xs text-[#5C5C5C] leading-relaxed">
-            Your response is private. The outcome is only actioned when both parties agree. An admin reviews all nikah planning requests.
+            Your response is private. Nikah planning only begins when both parties agree. An admin reviews all nikah planning requests.
           </p>
         </div>
 

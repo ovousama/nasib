@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Noto_Naskh_Arabic } from 'next/font/google'
+import { Inter, Noto_Naskh_Arabic, Cormorant_Garamond } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({
@@ -12,6 +12,13 @@ const notoArabic = Noto_Naskh_Arabic({
   subsets: ['arabic'],
   variable: '--font-arabic',
   weight: ['400', '500'],
+})
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-cormorant',
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
 })
 
 export const metadata: Metadata = {
@@ -28,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${notoArabic.variable}`}>
+    <html lang="en" className={`${inter.variable} ${notoArabic.variable} ${cormorant.variable}`}>
       <body className={`${inter.variable} antialiased`}>
         {children}
       </body>

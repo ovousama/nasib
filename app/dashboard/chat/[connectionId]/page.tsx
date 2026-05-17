@@ -12,11 +12,20 @@ export default async function ChatPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [connection, messages, meetings, checkinDone] = await Promise.all([
+  const [connection, messages, meetings, checkinDone, { data: pendingProposal }] = await Promise.all([
     getConnection(connectionId, user.id),
     getMessages(connectionId),
     getMeetingRequests(connectionId),
     getCheckinStatus(connectionId, user.id),
+    supabase
+      .from('post_meeting_checkins')
+      .select('id, profile_id')
+      .eq('connection_id', connectionId)
+      .eq('outcome', 'nikah_planning')
+      .eq('is_proposal', true)
+      .eq('proposal_status', 'pending')
+      .neq('profile_id', user.id)
+      .maybeSingle(),
   ])
 
   if (!connection) notFound()
@@ -59,6 +68,7 @@ export default async function ChatPage({ params }: Props) {
         initialMeetings={meetings}
         currentUserId={user.id}
         checkinDone={checkinDone}
+        initialPendingProposal={pendingProposal ?? null}
       />
     </div>
   )
