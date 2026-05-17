@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { signUpWali } from '@/app/auth/actions'
+import NasibLogo from '@/components/ui/NasibLogo'
 
 type Mode = 'brother' | 'sister' | 'wali'
 
@@ -71,8 +72,12 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen bg-[#FDF8F3] flex flex-col items-center justify-center px-6 py-16">
         <div className="w-full max-w-[380px] text-center">
-          <h1 className="text-[32px] font-medium text-[#AF4D98] tracking-[-0.03em] mb-1.5">Nasib</h1>
-          <p className="text-[13px] text-[#9B9B9B] italic mb-12">نصيب — your portion, your destiny</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '48px' }}>
+            <NasibLogo size="lg" theme="light" />
+            <p style={{ marginTop: '16px', fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic', textAlign: 'center' }}>
+              Your portion, your destiny
+            </p>
+          </div>
 
           <div className="bg-white border border-[#EDE8E3] rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="w-12 h-12 bg-[#F9F0F6] rounded-full flex items-center justify-center mx-auto mb-5">
@@ -106,10 +111,12 @@ export default function SignupPage() {
     <div className="min-h-screen bg-[#FDF8F3] flex flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-[380px]">
 
-        {/* Wordmark */}
-        <div className="text-center mb-10">
-          <h1 className="text-[32px] font-medium text-[#AF4D98] tracking-[-0.03em]">Nasib</h1>
-          <p className="text-[13px] text-[#9B9B9B] mt-1.5 italic">نصيب — your portion, your destiny</p>
+        {/* Logo */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '40px' }}>
+          <NasibLogo size="lg" theme="light" />
+          <p style={{ marginTop: '16px', fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic', textAlign: 'center' }}>
+            Your portion, your destiny
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">

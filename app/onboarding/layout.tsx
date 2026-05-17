@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import NasibLogo from '@/components/ui/NasibLogo'
 
 const BROTHER_STEPS = [
   '/onboarding/brother',
@@ -53,7 +54,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
           </div>
         )}
         <div className="max-w-lg mx-auto px-6 h-14 flex items-center justify-between">
-          <span className="text-lg font-medium text-[#AF4D98] tracking-[-0.02em]">Nasib</span>
+          <NasibLogo size="sm" theme="light" />
           {currentStep > 0 && (
             <span className="text-[13px] text-[#9B9B9B] tabular-nums">
               Step {currentStep} of {totalSteps}

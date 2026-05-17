@@ -1,6 +1,12 @@
 import { createServerSupabaseClient } from './supabase-server'
 import { createAdminClient } from './supabase-admin'
 
+function toPublicUrl(pathOrUrl: string | null | undefined, bucket: string): string | null {
+  if (!pathOrUrl) return null
+  if (pathOrUrl.startsWith('http')) return pathOrUrl
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${pathOrUrl}`
+}
+
 // ─── Enum Types ───────────────────────────────────────────────────────────────
 
 export type GenderType = 'brother' | 'sister'
@@ -292,7 +298,8 @@ export async function getBrotherProfile(userId: string): Promise<BrotherProfile 
     .select('*')
     .eq('id', userId)
     .single()
-  return data
+  if (!data) return null
+  return { ...data, photo_url: toPublicUrl(data.photo_url, 'brother-photos') }
 }
 
 export async function getSisterProfile(userId: string): Promise<SisterProfile | null> {
@@ -302,7 +309,11 @@ export async function getSisterProfile(userId: string): Promise<SisterProfile | 
     .select('*')
     .eq('id', userId)
     .single()
-  return data
+  if (!data) return null
+  return {
+    ...data,
+    photo_urls: data.photo_urls?.map((u: string) => toPublicUrl(u, 'sister-photos') ?? u) ?? null,
+  }
 }
 
 export async function getWaliProfile(sisterId: string): Promise<WaliProfile | null> {
@@ -474,7 +485,7 @@ export async function getSisterMatches(userId: string): Promise<SisterMatch[]> {
             religiosity_level: bp.religiosity_level ?? null,
             wants_children: bp.wants_children ?? null,
             timeline_to_marry: bp.timeline_to_marry ?? null,
-            photo_url: bp.photo_url ?? null,
+            photo_url: toPublicUrl(bp.photo_url, 'brother-photos'),
             verification_badge: pf?.verification_badge ?? false,
           }
         : null,
@@ -568,8 +579,8 @@ export async function getIncomingPendingInterests(userId: string, gender: Gender
             verification_badge: ps?.verification_badge ?? false,
             compatibility_note: note?.compatibility_note ?? null,
             photo_url: gender === 'brother'
-              ? (profile.photo_urls?.[0] ?? null)
-              : (profile.photo_url ?? null),
+              ? toPublicUrl(profile.photo_urls?.[0], 'sister-photos')
+              : toPublicUrl(profile.photo_url, 'brother-photos'),
           }
         : null,
     }
@@ -786,7 +797,14 @@ export async function getWaliSisterData(sisterId: string): Promise<{ profile: Pr
     admin.from('sister_profiles').select('*').eq('id', sisterId).single(),
   ])
   if (!profile || !sisterProfile) return null
-  return { profile: profile as Profile, sisterProfile: sisterProfile as SisterProfile }
+  const sp = sisterProfile as SisterProfile
+  return {
+    profile: profile as Profile,
+    sisterProfile: {
+      ...sp,
+      photo_urls: sp.photo_urls?.map(u => toPublicUrl(u, 'sister-photos') ?? u) ?? null,
+    },
+  }
 }
 
 export async function getWaliSisterMatches(sisterId: string): Promise<SisterMatch[]> {
@@ -832,7 +850,7 @@ export async function getWaliSisterMatches(sisterId: string): Promise<SisterMatc
         religiosity_level: null,
         wants_children: null,
         timeline_to_marry: null,
-        photo_url: bp.photo_url ?? null,
+        photo_url: toPublicUrl(bp.photo_url, 'brother-photos'),
         verification_badge: pf?.verification_badge ?? false,
       } : null,
       interest: null,
@@ -904,7 +922,7 @@ export async function getWaliSisterIncomingInterests(sisterId: string): Promise<
         location: bp.location ?? null,
         verification_badge: ps?.verification_badge ?? false,
         compatibility_note: note?.compatibility_note ?? null,
-        photo_url: bp.photo_url ?? null,
+        photo_url: toPublicUrl(bp.photo_url, 'brother-photos'),
       } : null,
     } as InterestWithProfile
   })
@@ -1062,7 +1080,7 @@ export async function getProfileForViewing(userId: string): Promise<ProfileForVi
     has_beard: ext.has_beard ?? null,
     financial_readiness: ext.financial_readiness ?? null,
     polygamy_openness: ext.polygamy_openness ?? null,
-    photo_url: ext.photo_url ?? null,
+    photo_url: toPublicUrl(ext.photo_url, 'brother-photos'),
     wears_hijab: ext.wears_hijab ?? null,
     reference: ref
       ? {

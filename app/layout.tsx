@@ -1,12 +1,25 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Noto_Naskh_Arabic } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  weight: ['200', '300', '400', '500'],
+})
+
+const notoArabic = Noto_Naskh_Arabic({
+  subsets: ['arabic'],
+  variable: '--font-arabic',
+  weight: ['400', '500'],
+})
 
 export const metadata: Metadata = {
-  title: 'Nasib',
-  description: 'Find your nasib, the halal way',
+  title: 'Nasib — نصيب',
+  description: 'Find your nasib. Halal matrimonial platform.',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
@@ -15,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${notoArabic.variable}`}>
       <body className={`${inter.variable} antialiased`}>
         {children}
       </body>

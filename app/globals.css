@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-arabic: 'Noto Naskh Arabic', serif;
+}
+
 /* ── Global base ─────────────────────────────────────────────────────────── */
 
 body {

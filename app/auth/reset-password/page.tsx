@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import NasibLogo from '@/components/ui/NasibLogo'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -74,10 +75,12 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-[#FDF8F3] flex flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-[380px]">
 
-        {/* Wordmark */}
-        <div className="text-center mb-12">
-          <h1 className="text-[32px] font-medium text-[#AF4D98] tracking-[-0.03em]">Nasib</h1>
-          <p className="text-[13px] text-[#9B9B9B] mt-1.5 italic">نصيب — your portion, your destiny</p>
+        {/* Logo */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '48px' }}>
+          <NasibLogo size="lg" theme="light" />
+          <p style={{ marginTop: '16px', fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic', textAlign: 'center' }}>
+            Your portion, your destiny
+          </p>
         </div>
 
         {success ? (

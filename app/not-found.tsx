@@ -1,10 +1,11 @@
 import Link from 'next/link'
+import NasibLogo from '@/components/ui/NasibLogo'
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
-        <h1 className="text-4xl font-medium text-[#AF4D98] mb-2">Nasib</h1>
+        <div className="flex justify-center mb-2"><NasibLogo size="md" theme="light" /></div>
 
         <div className="mt-8 border border-gray-100 rounded-2xl shadow-sm p-8">
           <p className="text-6xl font-medium text-gray-100 mb-4">404</p>

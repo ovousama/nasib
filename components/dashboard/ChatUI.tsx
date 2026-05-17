@@ -207,20 +207,26 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(initialMessages.length === 0 && initialMeetings.length === 0)
+  const [isConnected, setIsConnected] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  useEffect(() => {
+  const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
   }, [messages, meetings])
 
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel(`chat:${connection.id}`)
+      .channel(`chat-${connection.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `connection_id=eq.${connection.id}` }, (payload) => {
         const msg = payload.new as Message
         setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
+        scrollToBottom()
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'meeting_requests', filter: `connection_id=eq.${connection.id}` }, (payload) => {
         const meeting = payload.new as MeetingRequest
@@ -230,7 +236,10 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
         const updated = payload.new as MeetingRequest
         setMeetings(prev => prev.map(m => m.id === updated.id ? updated : m))
       })
-      .subscribe()
+      .subscribe((status) => {
+        console.log('Chat subscription status:', status)
+        setIsConnected(status === 'SUBSCRIBED')
+      })
 
     return () => { supabase.removeChannel(channel) }
   }, [connection.id])
@@ -240,9 +249,31 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
     setSending(true)
     setInput('')
     setShowSuggestions(false)
+
+    const tempId = `temp-${Date.now()}`
+    const optimistic: Message = {
+      id: tempId,
+      connection_id: connection.id,
+      sender_id: currentUserId,
+      content: content.trim(),
+      is_suggested_question: isSuggested,
+      created_at: new Date().toISOString(),
+    }
+    setMessages(prev => [...prev, optimistic])
+    scrollToBottom()
+
     const result = await sendMessage(connection.id, content, isSuggested)
     setSending(false)
-    if (result?.error) setInput(content)
+
+    if (result?.error) {
+      setMessages(prev => prev.filter(m => m.id !== tempId))
+      setInput(content)
+      return
+    }
+
+    if (result?.message) {
+      setMessages(prev => prev.map(m => m.id === tempId ? result.message! : m))
+    }
   }
 
   const handleConfirm = async (meetingId: string, slot: string) => {
@@ -344,10 +375,13 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
       </div>
 
       {/* Wali notice */}
-      <div className="mx-4 mb-2 bg-[#FFF4CC] border border-[#FFB400]/20 rounded-[10px] px-3 py-2">
-        <p className="text-[#6B4F00] text-xs text-center">
+      <div className="mx-4 mb-2 bg-[#FFF4CC] border border-[#FFB400]/20 rounded-[10px] px-3 py-2 flex items-center justify-between gap-2">
+        <p className="text-[#6B4F00] text-xs flex-1 text-center">
           The wali has been notified of this connection and can read this conversation.
         </p>
+        <span className="text-[10px] flex-shrink-0" style={{ color: isConnected ? '#00A699' : '#9B9B9B' }}>
+          {isConnected ? '● Live' : '○ Connecting…'}
+        </span>
       </div>
 
       {/* Suggested questions */}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import NasibLogo from '@/components/ui/NasibLogo'
 
 export default function Error({
   error,
@@ -16,7 +17,7 @@ export default function Error({
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
-        <h1 className="text-4xl font-medium text-[#AF4D98] mb-2">Nasib</h1>
+        <div className="flex justify-center mb-2"><NasibLogo size="md" theme="light" /></div>
 
         <div className="mt-8 bg-red-50 border border-red-100 rounded-2xl p-8">
           <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">

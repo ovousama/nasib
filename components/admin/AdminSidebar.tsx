@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import NasibLogo from '@/components/ui/NasibLogo'
 
 const navItems = [
   {
@@ -65,8 +66,8 @@ export default function AdminSidebar() {
   return (
     <aside className="w-56 bg-white border-r border-[#EDE8E3] min-h-screen flex flex-col flex-shrink-0">
       <div className="px-5 py-6 border-b border-[#EDE8E3]">
-        <p className="text-lg font-medium tracking-[-0.02em] text-[#AF4D98]">Nasib</p>
-        <p className="text-[#9B9B9B] text-xs mt-0.5">Admin Panel</p>
+        <NasibLogo size="sm" theme="light" />
+        <p className="text-[#9B9B9B] text-xs mt-1.5">Admin Panel</p>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import NasibLogo from '@/components/ui/NasibLogo'
 
 export default function TopBar() {
   const router = useRouter()
@@ -13,14 +14,16 @@ export default function TopBar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-[#EDE8E3] px-6 h-[52px] flex items-center justify-between">
-      <span className="text-[18px] font-medium tracking-[-0.02em] text-[#AF4D98]">
-        Nasib
-      </span>
+    <header
+      className="sticky top-0 z-40 bg-white border-b border-[#EDE8E3]"
+      style={{ height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'sticky', top: 0 }}
+    >
+      <NasibLogo size="sm" theme="light" />
       <button
         data-testid="signout-button"
         onClick={handleSignOut}
         className="text-sm text-[#9B9B9B] hover:text-[#5C5C5C] transition-colors"
+        style={{ position: 'absolute', right: '16px' }}
       >
         Sign out
       </button>
