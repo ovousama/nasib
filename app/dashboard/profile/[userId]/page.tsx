@@ -81,10 +81,21 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     getProfileForViewing(userId),
   ])
 
-  if (!targetProfile || !profileData) notFound()
+  if (!targetProfile) notFound()
+
+  if (!profileData) {
+    return (
+      <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+        <p style={{ fontSize: '16px', color: '#9B9B9B' }}>
+          Profile not available
+        </p>
+        <Link href="/dashboard">Go back</Link>
+      </div>
+    )
+  }
 
   const isInterestContext = context === 'interest' && !!interestId
-  const firstName = profileData.full_name.split(' ')[0]
+  const firstName = profileData.full_name?.split(' ')[0] ?? ''
   const isBrother = targetProfile.gender === 'brother'
 
   // A brother viewing a sister sees no photo. A sister viewing a brother sees photo.
@@ -123,7 +134,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
           </div>
         )}
         <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[#AF4D98]/50 mt-4 mb-0.5">نصيب</p>
-        <h2 className="text-[28px] font-medium text-[#1A1A1A] tracking-[-0.02em]">{firstName}</h2>
+        <h2 data-testid="profile-name" className="text-[28px] font-medium text-[#1A1A1A] tracking-[-0.02em]">{firstName}</h2>
         <p className="text-[15px] text-[#9B9B9B] mt-1">
           {[profileData.age ? `${profileData.age} yrs` : null, profileData.location].filter(Boolean).join(' · ')}
         </p>

@@ -60,6 +60,7 @@ export default function ProfileQuickView({
 }: Props) {
   const [data, setData] = useState<QuickViewData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [panelIn, setPanelIn] = useState(false)
 
@@ -84,6 +85,7 @@ export default function ProfileQuickView({
     if (!profileId) return
     setLoading(true)
     setData(null)
+    setError(null)
     try {
       const supabase = createClient()
       const table = gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
@@ -113,7 +115,12 @@ export default function ProfileQuickView({
           photo_url: gender === 'brother' ? (e.photo_url ?? null) : null,
           reference_status: ref?.status ?? null,
         })
+      } else {
+        setError('Profile not available')
       }
+    } catch (err) {
+      console.error('Profile fetch error:', err)
+      setError('Could not load profile')
     } finally {
       setLoading(false)
     }
@@ -194,7 +201,7 @@ export default function ProfileQuickView({
                 )}
               </>
             ) : (
-              <p className="text-sm text-[#9B9B9B]">Profile unavailable</p>
+              <p className="text-sm text-[#9B9B9B]">{error ?? 'Profile unavailable'}</p>
             )}
           </div>
 

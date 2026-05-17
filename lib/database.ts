@@ -1055,41 +1055,62 @@ export type ProfileForViewing = {
 export async function getProfileForViewing(userId: string): Promise<ProfileForViewing | null> {
   const supabase = await createServerSupabaseClient()
 
-  const { data: profile } = await supabase
+  const { data: baseProfile, error: baseError } = await supabase
     .from('profiles')
-    .select('id, gender, verification_badge')
+    .select('id, gender, verification_badge, status')
     .eq('id', userId)
     .single()
 
-  if (!profile) return null
+  console.log('Base profile:', baseProfile, baseError)
 
-  const table = profile.gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
+  if (baseError || !baseProfile) {
+    console.error('Cannot access profile:', baseError)
+    return null
+  }
 
-  const [{ data: extended }, { data: ref }] = await Promise.all([
-    supabase.from(table).select('*').eq('id', userId).single(),
-    supabase
-      .from('references')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let extended: any = null
+
+  if (baseProfile.gender === 'brother') {
+    const { data: brotherProfile, error } = await supabase
+      .from('brother_profiles')
       .select('*')
-      .eq('profile_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ])
+      .eq('id', userId)
+      .single()
 
-  if (!extended) return null
+    console.log('Brother profile:', brotherProfile, error)
+    extended = brotherProfile
+  } else {
+    // Deliberately excludes health_background_disclosure — it is private
+    const { data: sisterProfile, error } = await supabase
+      .from('sister_profiles')
+      .select('id, full_name, age, location, ethnicity, languages, religiosity_level, madhab, prayer_frequency, islamic_knowledge_level, wears_hijab, occupation, education_level, living_situation, willing_to_relocate, previously_married, has_children, wants_children, timeline_to_marry, spouse_religiosity_preference, spouse_age_min, spouse_age_max, dealbreakers, character_description, goals, photos_uploaded, do_you_listen_to_music, celebrate_non_islamic_holidays, hijab_outside_home, islamic_classes_attendance, differing_islamic_opinions, plan_to_work_after_marriage, financial_independence_importance, has_significant_debt, supporting_family_financially, career_ambitions, number_of_children_wanted, primary_caregiver_comfort, household_responsibilities_vision, inlaws_living_together, islamic_schooling_importance, weekend_lifestyle, mixed_gender_social_circle, travel_importance, strict_halal_diet, smoking, conflict_style, introvert_extrovert, love_language, alone_time_importance')
+      .eq('id', userId)
+      .single()
+
+    console.log('Sister profile:', sisterProfile, error)
+    extended = sisterProfile
+  }
+
+  const { data: ref } = await supabase
+    .from('references')
+    .select('*')
+    .eq('profile_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ext = extended as any
 
   return {
-    ...profile,
-    ...ext,
-    // Normalize fields that only exist on one gender
-    has_beard: ext.has_beard ?? null,
-    financial_readiness: ext.financial_readiness ?? null,
-    polygamy_openness: ext.polygamy_openness ?? null,
-    photo_url: toPublicUrl(ext.photo_url, 'brother-photos'),
-    wears_hijab: ext.wears_hijab ?? null,
+    ...baseProfile,
+    ...(ext ?? {}),
+    has_beard: ext?.has_beard ?? null,
+    financial_readiness: ext?.financial_readiness ?? null,
+    polygamy_openness: ext?.polygamy_openness ?? null,
+    photo_url: ext?.photo_url ? toPublicUrl(ext.photo_url, 'brother-photos') : null,
+    wears_hijab: ext?.wears_hijab ?? null,
     reference: ref
       ? {
           ...ref,
