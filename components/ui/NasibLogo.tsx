@@ -54,7 +54,7 @@ export default function NasibLogo({
           lineHeight: 1,
         }}
       >
-        Nasib
+        Naseeb
       </span>
     </div>
   )

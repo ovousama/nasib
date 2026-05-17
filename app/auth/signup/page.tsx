@@ -240,7 +240,7 @@ export default function SignupPage() {
         </p>
 
         <p className="text-center text-xs text-[#9B9B9B] mt-4">
-          By signing up you agree to use Nasib with sincere intention
+          By signing up you agree to use Naseeb with sincere intention
         </p>
 
         {/* Quranic verse */}

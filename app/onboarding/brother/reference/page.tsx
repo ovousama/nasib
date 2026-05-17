@@ -144,7 +144,7 @@ export default function BrotherReference() {
           <div className="bg-[#F9F0F6] border border-[#AF4D98]/20 rounded-[10px] p-4">
             <p className="text-sm text-[#AF4D98] font-medium mb-1">Almost there, mashAllah!</p>
             <p className="text-xs text-[#5C5C5C]">
-              After submitting, your profile will be reviewed by the Nasib team. {"You'll"} be notified once verified.
+              After submitting, your profile will be reviewed by the Naseeb team. {"You'll"} be notified once verified.
             </p>
           </div>
 

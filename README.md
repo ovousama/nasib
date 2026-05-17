@@ -1,10 +1,10 @@
-# Nasib
+# Naseeb
 
-**Nasib** (نصیب) — an Islamic matrimonial platform built to help Muslims find their life partner in a halal, purposeful, and dignified way.
+**Naseeb** (نصیب) — an Islamic matrimonial platform built to help Muslims find their life partner in a halal, purposeful, and dignified way.
 
 ## About
 
-Nasib is a faith-first matrimonial platform designed for Muslims who are serious about marriage. The name "Nasib" means destiny or fate in Arabic/Urdu, reflecting the belief that a spouse is written for you by Allah.
+Naseeb is a faith-first matrimonial platform designed for Muslims who are serious about marriage. The name "Naseeb" means destiny or fate in Arabic/Urdu, reflecting the belief that a spouse is written for you by Allah.
 
 The platform prioritizes:
 - **Islamic values** — built around the principles of nikah and modesty

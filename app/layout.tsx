@@ -15,8 +15,8 @@ const notoArabic = Noto_Naskh_Arabic({
 })
 
 export const metadata: Metadata = {
-  title: 'Nasib — نصيب',
-  description: 'Find your nasib. Halal matrimonial platform.',
+  title: 'Naseeb — نصيب',
+  description: 'Find your naseeb. Halal matrimonial platform.',
   icons: {
     icon: '/favicon.svg',
   },
