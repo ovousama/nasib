@@ -13,9 +13,10 @@ export default function EditPhotosPage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [toast, setToast] = useState<'success' | 'error' | null>(null)
+  const [toast, setToast] = useState(false)
   const [userId, setUserId] = useState<string>('')
   const [photoUrls, setPhotoUrls] = useState<string[]>([])
+  const [confirmRemoveIndex, setConfirmRemoveIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -30,15 +31,31 @@ export default function EditPhotosPage() {
         return
       }
       setUserId(user.id)
-      const { data } = await supabase.from('sister_profiles').select('photo_urls').eq('id', user.id).single()
+      const { data } = await supabase.from('sister_profiles').select('photo_urls, photos_uploaded').eq('id', user.id).single()
       if (data && Array.isArray(data.photo_urls)) setPhotoUrls(data.photo_urls)
       setLoading(false)
     }
     load()
   }, [])
 
-  function removePhoto(index: number) {
-    setPhotoUrls(prev => prev.filter((_, i) => i !== index))
+  async function confirmRemove(index: number) {
+    const url = photoUrls[index]
+    setConfirmRemoveIndex(null)
+
+    const supabase = createClient()
+    const marker = '/object/public/sister-photos/'
+    const idx = url.indexOf(marker)
+    if (idx !== -1) {
+      const path = decodeURIComponent(url.slice(idx + marker.length))
+      await supabase.storage.from('sister-photos').remove([path])
+    }
+
+    const newUrls = photoUrls.filter((_, i) => i !== index)
+    setPhotoUrls(newUrls)
+    await supabase
+      .from('sister_profiles')
+      .update({ photo_urls: newUrls, photos_uploaded: newUrls.length > 0 })
+      .eq('id', userId)
   }
 
   async function handleAddPhoto(file: File) {
@@ -47,22 +64,19 @@ export default function EditPhotosPage() {
       setError(`You can upload a maximum of ${MAX_PHOTOS} photos.`)
       return
     }
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
       setError('Please upload a JPEG, PNG, or WebP image.')
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError('Each image must be under 5MB.')
+      setError('Each photo must be under 5MB.')
       return
     }
     setUploading(true)
     try {
       const supabase = createClient()
-      const ext = file.name.split('.').pop() ?? 'jpg'
-      const timestamp = Date.now()
-      const path = `${userId}/photo-${timestamp}.${ext}`
-      const { error: uploadError } = await supabase.storage.from('sister-photos').upload(path, file, { upsert: true })
+      const path = `${userId}/${Date.now()}-${file.name}`
+      const { error: uploadError } = await supabase.storage.from('sister-photos').upload(path, file)
       if (uploadError) throw uploadError
       const { data: { publicUrl } } = supabase.storage.from('sister-photos').getPublicUrl(path)
       setPhotoUrls(prev => [...prev, publicUrl])
@@ -89,7 +103,7 @@ export default function EditPhotosPage() {
         .update({ photo_urls: photoUrls, photos_uploaded: photoUrls.length > 0 })
         .eq('id', userId)
       if (updateError) throw updateError
-      setToast('success')
+      setToast(true)
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
@@ -130,15 +144,15 @@ export default function EditPhotosPage() {
           </div>
         )}
 
-        <p className="text-sm text-[#9B9B9B] mb-4">{photoUrls.length} / {MAX_PHOTOS} photos</p>
+        <p className="text-sm text-[#9B9B9B] mb-4">{photoUrls.length} of {MAX_PHOTOS} photos</p>
 
-        <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           {photoUrls.map((url, index) => (
             <div key={url + index} className="relative aspect-square rounded-xl overflow-hidden border border-[#EDE8E3]">
               <Image src={url} alt={`Photo ${index + 1}`} width={200} height={200} className="w-full h-full object-cover" />
               <button
                 type="button"
-                onClick={() => removePhoto(index)}
+                onClick={() => setConfirmRemoveIndex(index)}
                 className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
@@ -185,9 +199,34 @@ export default function EditPhotosPage() {
         </Link>
       </div>
 
+      {confirmRemoveIndex !== null && (
+        <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50 px-4 pb-8">
+          <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-lg">
+            <p className="text-base font-medium text-[#1A1A1A] text-center mb-1">Remove this photo?</p>
+            <p className="text-sm text-[#9B9B9B] text-center mb-5">This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmRemoveIndex(null)}
+                className="flex-1 py-3 border border-[#EDE8E3] rounded-full text-sm font-medium text-[#1A1A1A] hover:bg-[#FDF8F3] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => confirmRemove(confirmRemoveIndex)}
+                className="flex-1 py-3 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast && (
-        <div className={`fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center ${toast === 'success' ? 'bg-[#AF4D98] text-white' : 'bg-red-600 text-white'}`}>
-          {toast === 'success' ? 'Photos saved' : 'Something went wrong'}
+        <div className="fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center bg-[#AF4D98] text-white">
+          Photos updated
         </div>
       )}
     </div>

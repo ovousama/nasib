@@ -26,7 +26,7 @@ export default function MatchesTable({ matches }: { matches: AdminMatch[] }) {
   }
 
   return (
-    <div className="bg-white rounded-[16px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3] overflow-hidden">
+    <div data-testid="matches-table" className="bg-white rounded-[16px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3] overflow-hidden">
       {error && (
         <div className="mx-4 mt-4 bg-red-50 border border-red-200 rounded-[10px] p-3 text-sm text-red-700">{error}</div>
       )}

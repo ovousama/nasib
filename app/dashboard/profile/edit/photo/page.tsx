@@ -2,17 +2,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
 
 export default function EditPhotoPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [toast, setToast] = useState<'success' | 'error' | null>(null)
+  const [removeMessage, setRemoveMessage] = useState(false)
+  const [toast, setToast] = useState(false)
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(null)
-  const [dragOver, setDragOver] = useState(false)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -26,6 +28,7 @@ export default function EditPhotoPage() {
         router.push('/dashboard/profile')
         return
       }
+      setUserId(user.id)
       const { data } = await supabase.from('brother_profiles').select('photo_url').eq('id', user.id).single()
       if (data) setCurrentPhotoUrl(data.photo_url ?? null)
       setLoading(false)
@@ -33,49 +36,68 @@ export default function EditPhotoPage() {
     load()
   }, [])
 
-  async function handleFile(file: File) {
+  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     setError(null)
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
+    setRemoveMessage(false)
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
       setError('Please upload a JPEG, PNG, or WebP image.')
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be under 5MB.')
+      setError('Photo must be under 5MB.')
       return
     }
-    setUploading(true)
+
+    setPendingFile(file)
+    const reader = new FileReader()
+    reader.onload = (ev) => setPreviewUrl(ev.target?.result as string)
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
+  function cancelPending() {
+    setPendingFile(null)
+    setPreviewUrl(null)
+    setError(null)
+  }
+
+  async function handleSave() {
+    if (!pendingFile || !userId) return
+    setError(null)
+    setSaving(true)
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-      const ext = file.name.split('.').pop() ?? 'jpg'
-      const path = `${user.id}/photo.${ext}`
-      const { error: uploadError } = await supabase.storage.from('brother-photos').upload(path, file, { upsert: true })
-      if (uploadError) throw uploadError
+      const path = `${userId}/${Date.now()}-${pendingFile.name}`
+      const { error: uploadError } = await supabase.storage.from('brother-photos').upload(path, pendingFile)
+      if (uploadError) throw new Error('Upload failed. Please try again.')
+
       const { data: { publicUrl } } = supabase.storage.from('brother-photos').getPublicUrl(path)
-      const { error: updateError } = await supabase.from('brother_profiles').update({ photo_url: publicUrl }).eq('id', user.id)
+
+      if (currentPhotoUrl) {
+        const marker = '/object/public/brother-photos/'
+        const idx = currentPhotoUrl.indexOf(marker)
+        if (idx !== -1) {
+          const oldPath = decodeURIComponent(currentPhotoUrl.slice(idx + marker.length))
+          await supabase.storage.from('brother-photos').remove([oldPath])
+        }
+      }
+
+      const { error: updateError } = await supabase
+        .from('brother_profiles')
+        .update({ photo_url: publicUrl })
+        .eq('id', userId)
       if (updateError) throw updateError
-      setCurrentPhotoUrl(publicUrl)
-      setToast('success')
+
+      setToast(true)
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
     } finally {
-      setUploading(false)
+      setSaving(false)
     }
-  }
-
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) handleFile(file)
-  }
-
-  function onDrop(e: React.DragEvent) {
-    e.preventDefault()
-    setDragOver(false)
-    const file = e.dataTransfer.files?.[0]
-    if (file) handleFile(file)
   }
 
   if (loading) {
@@ -86,10 +108,12 @@ export default function EditPhotoPage() {
     )
   }
 
+  const displayUrl = previewUrl ?? currentPhotoUrl
+
   return (
     <div className="min-h-screen bg-[#FDF8F3]">
       <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-8">
           <Link href="/dashboard/profile" className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
               <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
@@ -98,59 +122,85 @@ export default function EditPhotoPage() {
           <h1 className="text-base font-medium text-[#1A1A1A]">Edit Photo</h1>
         </div>
 
+        <div className="flex flex-col items-center mb-8">
+          {displayUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={displayUrl}
+              alt="Profile photo"
+              className="w-[120px] h-[120px] rounded-full object-cover ring-2 ring-[#EDE8E3]"
+            />
+          ) : (
+            <div className="w-[120px] h-[120px] rounded-full bg-[#F9F0F6] flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#AF4D98" className="w-12 h-12 opacity-30">
+                <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+              </svg>
+            </div>
+          )}
+          <p className="text-xs text-[#9B9B9B] mt-2.5">{previewUrl ? 'New photo preview' : 'Current photo'}</p>
+        </div>
+
         {error && (
           <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">
             {error}
           </div>
         )}
 
-        {currentPhotoUrl && (
-          <div className="mb-6">
-            <p className="text-sm font-medium text-[#1A1A1A] mb-2">Current Photo</p>
-            <div className="w-32 h-32 rounded-xl overflow-hidden border border-[#EDE8E3]">
-              <Image src={currentPhotoUrl} alt="Current profile photo" width={128} height={128} className="w-full h-full object-cover" />
-            </div>
+        {removeMessage && (
+          <div className="bg-amber-50 border border-amber-100 text-amber-700 text-sm rounded-xl px-4 py-3 mb-4">
+            Brothers must have a photo on their profile.
           </div>
         )}
 
-        <div
-          onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={onDrop}
-          onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all ${
-            dragOver ? 'border-[#AF4D98] bg-[#AF4D98]/5' : 'border-[#EDE8E3] hover:border-[#AF4D98]'
-          }`}
-        >
-          {uploading ? (
-            <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <>
-              <div className="w-12 h-12 rounded-full bg-[#AF4D98]/10 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#AF4D98" strokeWidth={2} className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                </svg>
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-medium text-[#1A1A1A]">Drag & drop or click to upload</p>
-                <p className="text-xs text-[#9B9B9B] mt-1">JPEG, PNG or WebP — max 5MB</p>
-              </div>
-            </>
-          )}
-        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          className="hidden"
+          onChange={onFileChange}
+        />
 
-        <input ref={fileInputRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp" className="hidden" onChange={onFileChange} />
-
-        <div className="mt-6">
-          <Link href="/dashboard/profile" className="block text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
-            Cancel
-          </Link>
-        </div>
+        {pendingFile ? (
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {saving ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={cancelPending}
+              className="w-full py-3 text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => { setRemoveMessage(false); fileInputRef.current?.click() }}
+              className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors"
+            >
+              Change photo
+            </button>
+            <button
+              type="button"
+              onClick={() => { setError(null); setRemoveMessage(true) }}
+              className="w-full py-2 text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors"
+            >
+              Remove photo
+            </button>
+          </div>
+        )}
       </div>
 
       {toast && (
-        <div className={`fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center ${toast === 'success' ? 'bg-[#AF4D98] text-white' : 'bg-red-600 text-white'}`}>
-          {toast === 'success' ? 'Photo updated successfully' : 'Something went wrong'}
+        <div className="fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center bg-[#AF4D98] text-white">
+          Photo updated
         </div>
       )}
     </div>

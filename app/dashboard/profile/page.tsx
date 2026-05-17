@@ -101,12 +101,18 @@ function StatusHeader({
   location,
   photoUrl,
   verificationBadge,
+  changePhotoHref,
+  sisterPhotoCount,
+  photosUploaded,
 }: {
   name: string
   age: number
   location: string | null
   photoUrl?: string | null
   verificationBadge: boolean
+  changePhotoHref?: string
+  sisterPhotoCount?: number
+  photosUploaded?: boolean
 }) {
   const firstName = name.split(' ')[0]
   return (
@@ -119,7 +125,7 @@ function StatusHeader({
           {firstName[0]?.toUpperCase()}
         </div>
       )}
-      <h1 className="text-[22px] font-medium tracking-[-0.02em] text-[#1A1A1A] mt-3">{firstName}</h1>
+      <h1 data-testid="profile-name" className="text-[22px] font-medium tracking-[-0.02em] text-[#1A1A1A] mt-3">{firstName}</h1>
       <p className="text-sm text-[#9B9B9B] mt-0.5">
         {age} years{location ? ` · ${location}` : ''}
       </p>
@@ -140,6 +146,31 @@ function StatusHeader({
           </span>
         )}
       </div>
+      {changePhotoHref && (
+        <Link href={changePhotoHref} className="text-xs text-[#AF4D98] mt-2.5 hover:underline">
+          Change photo
+        </Link>
+      )}
+      {sisterPhotoCount !== undefined && (
+        <div className="mt-2.5 flex flex-col items-center gap-2 w-full">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#9B9B9B]">{sisterPhotoCount} photos (private)</span>
+            <Link href="/dashboard/profile/edit/photos" className="text-xs text-[#AF4D98] hover:underline">
+              Manage photos
+            </Link>
+          </div>
+          {!photosUploaded && (
+            <div className="bg-amber-50 border border-amber-100 rounded-[10px] px-3 py-2.5 text-left w-full max-w-[280px]">
+              <p className="text-xs text-amber-700 leading-relaxed mb-1">
+                No photos yet. Add photos to share when you accept an interest.
+              </p>
+              <Link href="/dashboard/profile/edit/photos" className="text-xs font-medium text-amber-700 underline">
+                Add photos
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -203,6 +234,7 @@ function BrotherProfileView({
         location={brotherProfile.location}
         photoUrl={brotherProfile.photo_url}
         verificationBadge={profile.verification_badge}
+        changePhotoHref="/dashboard/profile/edit/photo"
       />
 
       <div className="px-4 py-4">
@@ -419,6 +451,8 @@ function SisterProfileView({
         location={sisterProfile.location}
         photoUrl={sisterProfile.photo_urls?.[0]}
         verificationBadge={profile.verification_badge}
+        sisterPhotoCount={sisterProfile.photo_urls?.length ?? 0}
+        photosUploaded={sisterProfile.photos_uploaded ?? false}
       />
 
       <div className="px-4 py-4">

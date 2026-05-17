@@ -236,27 +236,24 @@ export default function BrotherDashboard({
       </div>
 
       <div className="px-6 pb-6 space-y-8">
-        {/* ── Incoming Interests ───────────────────────────────── */}
+        {/* ── Pending Interests (sister expressed interest in brother) ─── */}
         {visibleIncoming.length > 0 && (
-          <section id="interests">
-            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">New Interest</p>
+          <section id="interests" data-testid="pending-interests-section">
+            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Pending Interests</p>
             <div className="space-y-3">
               {visibleIncoming.map(interest => {
                 const op = interest.other_profile
+                const sisterFirstName = op?.full_name?.split(' ')[0] ?? 'Sister'
                 return (
-                  <div key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
+                  <div data-testid="pending-interest-card" key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
                     <div className="p-5">
                       <div className="flex items-start gap-3 mb-3">
-                        {op?.photo_url ? (
-                          <Image src={op.photo_url} alt={op.full_name} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
-                        ) : (
-                          <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
-                            {(op?.full_name ?? 'S')[0]?.toUpperCase()}
-                          </div>
-                        )}
+                        <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
+                          {sisterFirstName[0]?.toUpperCase()}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{op?.full_name ?? 'Sister'}</span>
+                            <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{sisterFirstName}</span>
                             {op?.verification_badge && <VerifiedBadge />}
                           </div>
                           <p className="text-sm text-[#9B9B9B] mt-0.5">
@@ -273,7 +270,7 @@ export default function BrotherDashboard({
 
                       {interest.intro_message && (
                         <div className="bg-[#FAF4EE] rounded-[12px] px-3 py-2.5 mb-3 border border-[#EDE8E3]">
-                          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Their message</p>
+                          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Her message</p>
                           <p className="text-sm text-[#1A1A1A] italic">&ldquo;{interest.intro_message}&rdquo;</p>
                         </div>
                       )}
@@ -284,6 +281,7 @@ export default function BrotherDashboard({
 
                       <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#EDE8E3]">
                         <button
+                          data-testid="decline-btn"
                           onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
                           disabled={declining === interest.id}
                           className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
@@ -291,6 +289,7 @@ export default function BrotherDashboard({
                           {declining === interest.id ? '…' : 'Decline'}
                         </button>
                         <button
+                          data-testid="accept-btn"
                           onClick={e => {
                             e.stopPropagation()
                             if (connectionsFull) {
@@ -315,7 +314,7 @@ export default function BrotherDashboard({
         )}
 
         {/* ── Matches ─────────────────────────────────────────── */}
-        <section id="matches">
+        <section id="matches" data-testid="matches-section">
           <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
 
           {matches.length === 0 ? (
@@ -324,12 +323,14 @@ export default function BrotherDashboard({
             <div className="space-y-3">
               {matches.map(match => {
                 const sisterFirstName = match.sister?.full_name?.split(' ')[0] ?? 'Sister'
+                // Interests the brother sent (initiated_by = brother)
                 const hasSent = localSentIds.includes(match.sister_id)
                 const hasConnection = connections.some(c => c.sister_id === match.sister_id)
+                // Interests the sister sent to the brother (initiated_by = sister)
                 const incomingFromThis = incomingInterests.find(i => i.sister_id === match.sister_id && !localDeclinedIds.has(i.id))
 
                 return (
-                  <div key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
+                  <div data-testid="match-card" key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
                     <div className="p-5">
                       <div className="flex items-start gap-3 mb-3">
                         <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
@@ -397,6 +398,7 @@ export default function BrotherDashboard({
                         ) : (
                           <div className="flex items-center justify-end">
                             <button
+                              data-testid="express-interest-btn"
                               onClick={e => { e.stopPropagation(); openInterestModal(profile.id, match.sister_id, sisterFirstName) }}
                               disabled={connectionsFull}
                               title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
@@ -428,7 +430,7 @@ export default function BrotherDashboard({
         </section>
 
         {/* ── Active Connections ───────────────────────────────── */}
-        <section id="connections">
+        <section id="connections" data-testid="connections-section">
           <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Active Connections</p>
 
           {connections.length === 0 ? (
@@ -436,13 +438,14 @@ export default function BrotherDashboard({
           ) : (
             <div className="space-y-3">
               {connections.map(conn => (
-                <div key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <div data-testid="connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
                     <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <Link
+                      data-testid="open-chat-btn"
                       href={`/dashboard/chat/${conn.id}`}
                       className="text-center text-sm font-medium text-[#AF4D98] py-2"
                     >
@@ -468,7 +471,7 @@ export default function BrotherDashboard({
         </section>
 
         {/* ── Notifications ────────────────────────────────────── */}
-        <section id="notifications">
+        <section id="notifications" data-testid="notifications-section">
           <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Notifications</p>
 
           {visibleNotifications.length === 0 ? (
@@ -564,7 +567,7 @@ export default function BrotherDashboard({
 
       {/* ── Express Interest Modal ───────────────────────────────── */}
       {interestModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
+        <div data-testid="interest-modal" className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
           <div className="bg-white rounded-[24px] p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-medium text-[#1A1A1A] tracking-[-0.02em]">
@@ -586,6 +589,7 @@ export default function BrotherDashboard({
             </p>
 
             <textarea
+              data-testid="intro-message-input"
               value={introMessage}
               onChange={e => setIntroMessage(e.target.value)}
               placeholder="Assalamu Alaikum, I came across your profile and felt it aligned well with what I am looking for…"
@@ -603,6 +607,7 @@ export default function BrotherDashboard({
 
             <div className="space-y-2">
               <button
+                data-testid="send-interest-btn"
                 onClick={handleSendInterest}
                 disabled={interestLoading}
                 className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-3 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors text-sm"

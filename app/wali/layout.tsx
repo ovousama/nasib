@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { getWaliForCurrentUser } from '@/lib/database'
+import { createAdminClient } from '@/lib/supabase-admin'
 import WaliTopBar from '@/components/wali/WaliTopBar'
 
 export default async function WaliLayout({ children }: { children: React.ReactNode }) {
@@ -10,14 +10,28 @@ export default async function WaliLayout({ children }: { children: React.ReactNo
   if (!user) redirect('/auth/login')
   if (user.app_metadata?.role !== 'wali') redirect('/dashboard')
 
-  const waliProfile = await getWaliForCurrentUser()
+  // Fetch wali profile using admin client (bypasses RLS)
+  const admin = createAdminClient()
+  const { data: waliProfile } = await admin
+    .from('wali_profiles')
+    .select('sister_id, full_name')
+    .eq('email', user.email!)
+    .single()
+
   if (!waliProfile) redirect('/auth/login')
 
-  const sisterName = waliProfile.full_name.split(' ')[0]
+  // Fetch sister's name — we show "Viewing [Sister]'s journey" not the wali's name
+  const { data: sisterProfile } = await admin
+    .from('sister_profiles')
+    .select('full_name')
+    .eq('id', waliProfile.sister_id)
+    .single()
+
+  const sisterFirstName = sisterProfile?.full_name?.split(' ')[0] ?? 'Sister'
 
   return (
     <div className="min-h-screen bg-[#FDF8F3] flex flex-col max-w-lg mx-auto">
-      <WaliTopBar sisterName={sisterName} />
+      <WaliTopBar sisterName={sisterFirstName} />
 
       {/* Read-only observer banner */}
       <div className="bg-[#F5E6F2] border-b border-[#AF4D98]/10 px-6 py-2.5">

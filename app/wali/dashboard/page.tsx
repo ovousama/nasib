@@ -41,9 +41,18 @@ export default async function WaliDashboardPage() {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+  if (user.app_metadata?.role !== 'wali') redirect('/dashboard')
+
+  console.log('[Wali Dashboard] user:', user.email)
+  console.log('[Wali Dashboard] app_metadata:', user.app_metadata)
 
   const waliProfile = await getWaliForCurrentUser()
+
+  console.log('[Wali Dashboard] waliProfile:', waliProfile)
+
   if (!waliProfile) redirect('/auth/login')
+
+  console.log('[Wali Dashboard] sister_id:', waliProfile.sister_id)
 
   const [sisterData, matches, connections, interests, notifications] = await Promise.all([
     getWaliSisterData(waliProfile.sister_id),
@@ -52,6 +61,9 @@ export default async function WaliDashboardPage() {
     getWaliSisterIncomingInterests(waliProfile.sister_id),
     getWaliSisterNotifications(waliProfile.sister_id),
   ])
+
+  console.log('[Wali Dashboard] matches count:', matches?.length)
+  console.log('[Wali Dashboard] connections count:', connections?.length)
 
   if (!sisterData) {
     return (
@@ -86,7 +98,7 @@ export default async function WaliDashboardPage() {
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-medium text-[#1A1A1A]">{sisterProfile.full_name}</h2>
+                <h2 data-testid="wali-sister-name" className="font-medium text-[#1A1A1A]">{sisterProfile.full_name}</h2>
                 {profile.verification_badge && (
                   <span className="inline-flex items-center gap-1 bg-[#E6F9F7] text-[#00A699] text-xs font-medium px-2.5 py-1 rounded-full">
                     ✓ Verified
@@ -240,6 +252,7 @@ export default async function WaliDashboardPage() {
                   <span className="text-xs text-[#00A699] bg-[#E6F9F7] px-2 py-0.5 rounded-full ml-auto font-medium">Active</span>
                 </div>
                 <Link
+                  data-testid="wali-view-chat-btn"
                   href={`/wali/chat/${conn.id}`}
                   className="block text-center text-sm font-medium text-[#AF4D98] border border-[#AF4D98] py-2.5 rounded-full hover:bg-[#F5E6F2] transition-colors"
                 >

@@ -84,7 +84,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">
+            <div data-testid="auth-error" className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">
               {error}
             </div>
           )}

@@ -89,6 +89,7 @@ export default function NotificationsCenter({ notifications }: Props) {
         </div>
         {hasUnread && (
           <button
+            data-testid="mark-all-read-btn"
             onClick={handleMarkAll}
             disabled={markingAll || isPending}
             className="text-sm font-medium text-[#AF4D98] disabled:opacity-50 transition-colors"

@@ -528,7 +528,7 @@ export async function getIncomingPendingInterests(userId: string, gender: Gender
     .order('created_at', { ascending: false })
 
   if (gender === 'brother') {
-    query = query.not('initiated_by', 'is', null).neq('initiated_by', userId)
+    query = query.neq('initiated_by', userId)
   } else {
     query = query.or(`initiated_by.is.null,initiated_by.neq.${userId}`)
   }
@@ -588,11 +588,7 @@ export async function getSentPendingInterestOtherIds(userId: string, gender: Gen
     .eq(userCol, userId)
     .eq('status', 'pending')
 
-  if (gender === 'brother') {
-    query = query.or(`initiated_by.eq.${userId},initiated_by.is.null`)
-  } else {
-    query = query.eq('initiated_by', userId)
-  }
+  query = query.eq('initiated_by', userId)
 
   const { data } = await query
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -174,11 +174,16 @@ export async function acceptInterest(interestId: string) {
 
   if (!interest) return { error: 'Interest not found' }
 
-  const { data, error } = await supabase.rpc('accept_interest', { p_interest_id: interestId })
+  const isParty = user.id === interest.brother_id || user.id === interest.sister_id
+  const isInitiator = interest.initiated_by === user.id
+  if (!isParty || isInitiator) return { error: 'Not authorized to accept this interest' }
+
+  // Use admin client so RPC works regardless of which party (brother or sister) accepts
+  const admin = createAdminClient()
+  const { data, error } = await admin.rpc('accept_interest', { p_interest_id: interestId })
   if (error) return { error: error.message }
 
   const initiatorId = interest.initiated_by ?? interest.brother_id
-  const admin = createAdminClient()
   await admin.from('notifications').insert({
     profile_id: initiatorId,
     type: 'interest_accepted',
@@ -194,6 +199,8 @@ export async function acceptInterest(interestId: string) {
 
 export async function declineInterest(interestId: string) {
   const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
   const { data: interest } = await supabase
     .from('interests')
@@ -203,7 +210,13 @@ export async function declineInterest(interestId: string) {
 
   if (!interest) return { error: 'Interest not found' }
 
-  const { error } = await supabase
+  const isParty = user.id === interest.brother_id || user.id === interest.sister_id
+  const isInitiator = interest.initiated_by === user.id
+  if (!isParty || isInitiator) return { error: 'Not authorized to decline this interest' }
+
+  // Use admin client so the update works regardless of which party (brother or sister) declines
+  const admin = createAdminClient()
+  const { error } = await admin
     .from('interests')
     .update({ status: 'declined', responded_at: new Date().toISOString() })
     .eq('id', interestId)
@@ -213,7 +226,6 @@ export async function declineInterest(interestId: string) {
   const initiatorId = interest.initiated_by ?? interest.brother_id
   const initiatorGender: GenderType = initiatorId === interest.brother_id ? 'brother' : 'sister'
 
-  const admin = createAdminClient()
   await admin.from('notifications').insert({
     profile_id: initiatorId,
     type: 'interest_declined',

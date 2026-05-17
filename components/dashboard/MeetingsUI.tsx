@@ -99,6 +99,7 @@ export default function MeetingsUI({ connection, initialMeetings, currentUserId 
       {/* Request new meeting */}
       {!showForm ? (
         <button
+          data-testid="request-meeting-btn"
           onClick={() => setShowForm(true)}
           className="w-full bg-[#AF4D98] text-white font-medium py-3 rounded-2xl hover:bg-[#9B3D85] transition-colors text-sm"
         >
@@ -115,6 +116,7 @@ export default function MeetingsUI({ connection, initialMeetings, currentUserId 
               {(['virtual', 'in_person'] as const).map(f => (
                 <button
                   key={f}
+                  data-testid={f === 'virtual' ? 'format-virtual' : 'format-in-person'}
                   onClick={() => setFormat(f)}
                   className={`py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                     format === f

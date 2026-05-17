@@ -48,10 +48,10 @@ function BellIcon({ active }: { active: boolean }) {
 }
 
 const navItems = [
-  { label: 'Home',        href: '/dashboard',              icon: HomeIcon },
-  { label: 'Matches',     href: '/dashboard#matches',      icon: HeartIcon },
-  { label: 'Connections', href: '/dashboard#connections',  icon: LinkIcon },
-  { label: 'Profile',     href: '/dashboard/profile',      icon: PersonIcon },
+  { label: 'Home',        href: '/dashboard',              icon: HomeIcon,   testId: 'nav-home' },
+  { label: 'Matches',     href: '/dashboard#matches',      icon: HeartIcon,  testId: 'nav-matches' },
+  { label: 'Connections', href: '/dashboard#connections',  icon: LinkIcon,   testId: 'nav-connections' },
+  { label: 'Profile',     href: '/dashboard/profile',      icon: PersonIcon, testId: 'nav-profile' },
 ]
 
 export default function BottomNav({ unreadCount }: Props) {
@@ -60,7 +60,7 @@ export default function BottomNav({ unreadCount }: Props) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#EDE8E3] safe-area-pb">
       <div className="flex items-stretch h-[60px] max-w-lg mx-auto">
-        {navItems.map(({ label, href, icon: Icon }) => {
+        {navItems.map(({ label, href, icon: Icon, testId }) => {
           const active = label === 'Profile'
             ? pathname.startsWith('/dashboard/profile')
             : label === 'Home'
@@ -70,6 +70,7 @@ export default function BottomNav({ unreadCount }: Props) {
             <Link
               key={href}
               href={href}
+              data-testid={testId}
               className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors ${
                 active ? 'text-[#AF4D98]' : 'text-[#9B9B9B] hover:text-[#5C5C5C]'
               }`}
@@ -85,6 +86,7 @@ export default function BottomNav({ unreadCount }: Props) {
           return (
             <Link
               href="/dashboard/notifications"
+              data-testid="nav-notifications"
               className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors relative ${
                 active ? 'text-[#AF4D98]' : 'text-[#9B9B9B] hover:text-[#5C5C5C]'
               }`}

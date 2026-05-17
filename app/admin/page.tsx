@@ -32,7 +32,7 @@ export default async function AdminDashboard() {
         <p className="text-sm text-[#5C5C5C] mt-1">Platform statistics at a glance</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div data-testid="admin-stats" className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <StatCard label="Brothers" value={stats.total_brothers} href="/admin/users?gender=brother" color="green" />
         <StatCard label="Sisters" value={stats.total_sisters} href="/admin/users?gender=sister" color="green" />
         <StatCard label="Pending Verification" value={stats.pending_verification} href="/admin/users?status=pending_verification" color="amber" />

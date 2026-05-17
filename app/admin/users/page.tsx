@@ -61,7 +61,7 @@ export default async function UsersPage({ searchParams }: Props) {
         <UsersFilter />
       </Suspense>
 
-      <div className="bg-white rounded-[16px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3] overflow-hidden">
+      <div data-testid="users-table" className="bg-white rounded-[16px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>

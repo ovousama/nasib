@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -24,41 +25,65 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  const path = request.nextUrl.pathname
 
-  const { pathname } = request.nextUrl
-  const isAuthRoute = pathname.startsWith('/auth/')
-  const isWaliRoute = pathname.startsWith('/wali/')
-  const isDashboardRoute = pathname.startsWith('/dashboard')
-  const isWali = user?.app_metadata?.role === 'wali'
+  // Public routes — no auth needed
+  const publicRoutes = [
+    '/auth/login',
+    '/auth/signup',
+    '/auth/callback',
+    '/auth/forgot-password',
+    '/auth/reset-password',
+  ]
+  if (publicRoutes.some(r => path.startsWith(r))) {
+    return supabaseResponse
+  }
 
-  // Unauthenticated user → login
-  if (!user && !isAuthRoute) {
+  // Not logged in — redirect to login
+  if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
     return NextResponse.redirect(url)
   }
 
-  if (user) {
-    // Authenticated wali on auth pages → wali dashboard
-    if (isAuthRoute) {
+  const role = user.app_metadata?.role
+
+  // Admin routing
+  if (role === 'admin') {
+    if (
+      path.startsWith('/dashboard') ||
+      path.startsWith('/wali') ||
+      path.startsWith('/onboarding')
+    ) {
       const url = request.nextUrl.clone()
-      url.pathname = isWali ? '/wali/dashboard' : '/dashboard'
+      url.pathname = '/admin'
       return NextResponse.redirect(url)
     }
+    return supabaseResponse
+  }
 
-    // Wali trying to access regular dashboard → redirect to wali dashboard
-    if (isWali && isDashboardRoute) {
+  // Wali routing
+  if (role === 'wali') {
+    if (!path.startsWith('/wali') && !path.startsWith('/auth')) {
       const url = request.nextUrl.clone()
       url.pathname = '/wali/dashboard'
       return NextResponse.redirect(url)
     }
+    return supabaseResponse
+  }
 
-    // Non-wali trying to access wali routes → redirect to dashboard
-    if (!isWali && isWaliRoute) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
-    }
+  // Regular user (no role or role === 'user')
+  // Block access to wali or admin routes
+  if (path.startsWith('/wali') || path.startsWith('/admin')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+  // Redirect away from auth routes when already logged in
+  if (path.startsWith('/auth')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
   }
 
   return supabaseResponse

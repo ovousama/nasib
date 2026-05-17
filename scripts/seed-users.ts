@@ -1458,6 +1458,17 @@ async function seedWali(
   const created = await createOrGetUser(wali.email)
   if (!created) return { email: wali.email, success: false, error: 'Failed to create auth user' }
 
+  // Ensure app_metadata.role = 'wali' — this is critical for middleware routing
+  const { error: metaError } = await supabase.auth.admin.updateUserById(created, {
+    app_metadata: { role: 'wali' },
+    user_metadata: { full_name: wali.full_name },
+  })
+  if (metaError) {
+    console.warn(`  ⚠  Failed to set wali role for ${wali.email}: ${metaError.message}`)
+  } else {
+    console.log(`  ✓  app_metadata.role = 'wali' set for ${wali.email}`)
+  }
+
   const sisterId = sisterIdMap.get(wali.sisterEmail)
   if (!sisterId) {
     console.warn(`  ⚠  Sister ${wali.sisterEmail} not found in map — skipping wali_profiles insert`)

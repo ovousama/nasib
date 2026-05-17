@@ -135,6 +135,7 @@ export default function ProfileQuickView({
 
       {/* Bottom sheet */}
       <div
+        data-testid="quick-view-modal"
         className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-[28px] z-50 transition-transform duration-300 ease-out ${panelIn ? 'translate-y-0' : 'translate-y-full'}`}
         style={{ maxHeight: '85vh', overflowY: 'auto' }}
       >
@@ -168,6 +169,7 @@ export default function ProfileQuickView({
                 {gender === 'brother' && data.photo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
+                    data-testid="sister-photo"
                     src={data.photo_url}
                     alt={data.first_name}
                     className="w-20 h-20 rounded-full object-cover ring-2 ring-[#EDE8E3] mb-3"
@@ -178,8 +180,8 @@ export default function ProfileQuickView({
                   </div>
                 )}
                 <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#AF4D98]/60 mb-0.5">نصيب</p>
-                <h2 className="text-[24px] font-medium text-[#1A1A1A] tracking-[-0.02em]">{data.first_name}</h2>
-                <p className="text-[15px] text-[#9B9B9B] mt-0.5">
+                <h2 data-testid="quick-view-name" className="text-[24px] font-medium text-[#1A1A1A] tracking-[-0.02em]">{data.first_name}</h2>
+                <p data-testid="quick-view-age-location" className="text-[15px] text-[#9B9B9B] mt-0.5">
                   {[data.age ? `${data.age} yrs` : null, data.location].filter(Boolean).join(' · ')}
                 </p>
                 {data.verification_badge && (
@@ -262,6 +264,7 @@ export default function ProfileQuickView({
           {/* Actions */}
           <div className="space-y-2.5">
             <Link
+              data-testid="view-full-profile-btn"
               href={fullProfileHref}
               className="block w-full text-center py-3 border border-[#EDE8E3] rounded-full text-sm font-medium text-[#1A1A1A] hover:border-[#D4CBC4] hover:bg-[#FAF4EE] transition-all"
             >
@@ -271,12 +274,14 @@ export default function ProfileQuickView({
             {showActions && (
               <div className="grid grid-cols-2 gap-2.5">
                 <button
+                  data-testid="decline-btn"
                   onClick={onDecline}
                   className="py-3 text-sm font-medium text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors"
                 >
                   Decline
                 </button>
                 <button
+                  data-testid="accept-btn"
                   onClick={onAccept}
                   className="py-3 bg-[#AF4D98] text-white text-sm font-medium rounded-full hover:bg-[#9B3D85] transition-colors"
                 >

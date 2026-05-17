@@ -45,6 +45,7 @@ export default async function ChatPage({ params }: Props) {
           <p className="text-xs text-[#00A699]">Active connection</p>
         </div>
         <Link
+          data-testid="request-meeting-btn"
           href={`/dashboard/meetings/${connectionId}`}
           className="text-sm font-medium text-[#AF4D98] border border-[#AF4D98] px-4 py-1.5 rounded-full hover:bg-[#F5E6F2] transition-colors"
         >

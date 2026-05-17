@@ -352,7 +352,7 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
 
       {/* Suggested questions */}
       {showSuggestions && (
-        <div className="border-t border-[#EDE8E3] flex gap-2 px-4 py-2.5 overflow-x-auto">
+        <div data-testid="suggested-questions" className="border-t border-[#EDE8E3] flex gap-2 px-4 py-2.5 overflow-x-auto">
           {SUGGESTED_QUESTIONS.map((q) => (
             <button
               key={q}
@@ -377,6 +377,7 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
           </svg>
         </button>
         <textarea
+          data-testid="message-input"
           ref={inputRef}
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -393,6 +394,7 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
           }}
         />
         <button
+          data-testid="send-btn"
           onClick={() => handleSend(input)}
           disabled={!input.trim() || sending}
           className="flex-shrink-0 w-10 h-10 rounded-full bg-[#AF4D98] flex items-center justify-center hover:bg-[#9B3D85] transition-colors disabled:opacity-40"

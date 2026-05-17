@@ -18,6 +18,7 @@ export default function TopBar() {
         Nasib
       </span>
       <button
+        data-testid="signout-button"
         onClick={handleSignOut}
         className="text-sm text-[#9B9B9B] hover:text-[#5C5C5C] transition-colors"
       >

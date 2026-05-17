@@ -289,7 +289,7 @@ export default function SisterDashboard({
             {profile.verification_badge ? <VerifiedBadge /> : <PendingBadge />}
 
             {waliProfile && (
-              <div className="inline-flex items-center gap-1.5 bg-[#FAF4EE] text-[#5C5C5C] text-xs font-medium px-3 py-1.5 rounded-full border border-[#EDE8E3]">
+              <div data-testid="wali-status" className="inline-flex items-center gap-1.5 bg-[#FAF4EE] text-[#5C5C5C] text-xs font-medium px-3 py-1.5 rounded-full border border-[#EDE8E3]">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
                   <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
                 </svg>
@@ -301,7 +301,7 @@ export default function SisterDashboard({
 
         <div className="px-6 pb-6 space-y-8">
           {/* ── Connections Counter ──────────────────────────────── */}
-          <div className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div data-testid="connections-counter" className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <p className="text-sm text-[#5C5C5C] mb-3 leading-relaxed">
               You have{' '}
               <span className="font-medium text-[#1A1A1A]">{connections.length}</span> of 3
@@ -327,7 +327,7 @@ export default function SisterDashboard({
                 {visibleInterests.map(interest => {
                   const op = interest.other_profile
                   return (
-                    <div key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
+                    <div data-testid="pending-interest-card" key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
                       <div className="p-5">
                         <div className="flex items-start gap-3 mb-3">
                           {op?.photo_url ? (
@@ -370,6 +370,7 @@ export default function SisterDashboard({
                             View
                           </Link>
                           <button
+                            data-testid="accept-btn"
                             onClick={e => {
                               e.stopPropagation()
                               if (connectionsFull) setActionError('Close an active connection before accepting a new one.')
@@ -380,6 +381,7 @@ export default function SisterDashboard({
                             Accept
                           </button>
                           <button
+                            data-testid="decline-btn"
                             onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
                             disabled={declining === interest.id}
                             className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
@@ -402,7 +404,7 @@ export default function SisterDashboard({
           )}
 
           {/* ── Matches ─────────────────────────────────────────── */}
-          <section id="matches">
+          <section id="matches" data-testid="matches-section">
             <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
 
             {matches.length === 0 ? (
@@ -419,7 +421,7 @@ export default function SisterDashboard({
                   const hasAnyInterest = match.interest !== null || localSentIds.includes(match.brother_id)
 
                   return (
-                    <div key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
+                    <div data-testid="match-card" key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
                       <div className="p-5">
                         <div className="flex items-start gap-3 mb-3">
                           {b?.photo_url ? (
@@ -490,6 +492,7 @@ export default function SisterDashboard({
                           ) : !hasAnyInterest && !hasConnection ? (
                             <div className="flex items-center justify-end">
                               <button
+                                data-testid="express-interest-btn"
                                 onClick={e => { e.stopPropagation(); openInterestModal(match.brother_id, match.sister_id, brotherFirstName) }}
                                 disabled={connectionsFull}
                                 title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
@@ -515,7 +518,7 @@ export default function SisterDashboard({
           </section>
 
           {/* ── Active Connections ───────────────────────────────── */}
-          <section id="connections">
+          <section id="connections" data-testid="connections-section">
             <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Active Connections</p>
 
             {connections.length === 0 ? (
@@ -523,13 +526,14 @@ export default function SisterDashboard({
             ) : (
               <div className="space-y-3">
                 {connections.map(conn => (
-                  <div key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                  <div data-testid="connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                     <div className="flex items-center gap-2 mb-4">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
                       <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <Link
+                        data-testid="open-chat-btn"
                         href={`/dashboard/chat/${conn.id}`}
                         className="text-center text-sm font-medium text-[#AF4D98] py-2"
                       >
@@ -555,7 +559,7 @@ export default function SisterDashboard({
           </section>
 
           {/* ── Notifications ────────────────────────────────────── */}
-          <section id="notifications">
+          <section id="notifications" data-testid="notifications-section">
             <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Notifications</p>
 
             {visibleNotifications.length === 0 ? (
