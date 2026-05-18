@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import GenderSelectionPage from '@/components/onboarding/GenderSelectionPage'
 
 export default async function OnboardingPage() {
   const supabase = await createServerSupabaseClient()
@@ -9,11 +10,13 @@ export default async function OnboardingPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('gender')
+    .select('id, gender, status')
     .eq('id', user.id)
     .single()
 
-  if (!profile) redirect('/auth/signup')
+  if (profile?.gender === 'brother') redirect('/onboarding/brother')
+  if (profile?.gender === 'sister') redirect('/onboarding/sister')
 
-  redirect(profile.gender === 'brother' ? '/onboarding/brother' : '/onboarding/sister')
+  // No profile row or no gender set — show gender selection screen
+  return <GenderSelectionPage />
 }

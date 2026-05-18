@@ -92,11 +92,11 @@ export default function SisterDashboard({
   notifications,
 }: Props) {
   const router = useRouter()
-  const firstName = sisterProfile.full_name.split(' ')[0]
+  const firstName = sisterProfile?.full_name?.split(' ')[0] ?? 'there'
 
-  const [matches, setMatches] = useState<SisterMatch[]>(initialMatches)
-  const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections)
-  const [hasPhotos, setHasPhotos] = useState<boolean>(sisterProfile.photos_uploaded)
+  const [matches, setMatches] = useState<SisterMatch[]>(initialMatches ?? [])
+  const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections ?? [])
+  const [hasPhotos, setHasPhotos] = useState<boolean>(sisterProfile?.photos_uploaded ?? false)
 
   useEffect(() => {
     function onMatchExpired(e: Event) {
@@ -286,7 +286,7 @@ export default function SisterDashboard({
           <p className="text-sm text-[#9B9B9B]">Assalamu Alaikum,</p>
           <h1 className="text-[26px] font-medium text-[#1A1A1A] tracking-[-0.02em] leading-snug mb-1">{firstName}</h1>
           <div className="mt-2 space-y-2">
-            {profile.verification_badge ? <VerifiedBadge /> : <PendingBadge />}
+            {profile?.verification_badge ? <VerifiedBadge /> : <PendingBadge />}
 
             {waliProfile && (
               <div data-testid="wali-status" className="inline-flex items-center gap-1.5 bg-[#FAF4EE] text-[#5C5C5C] text-xs font-medium px-3 py-1.5 rounded-full border border-[#EDE8E3]">

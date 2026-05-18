@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   if (!user) redirect('/auth/login')
 
   const profile = await getProfile(user.id)
-  if (!profile) redirect('/auth/login')
+  if (!profile) redirect('/onboarding')
 
   if (profile.status === 'pending_verification') {
     return <PendingVerification />

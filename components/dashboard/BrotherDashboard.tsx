@@ -89,10 +89,10 @@ export default function BrotherDashboard({
   notifications,
 }: Props) {
   const router = useRouter()
-  const firstName = brotherProfile.full_name.split(' ')[0]
+  const firstName = brotherProfile?.full_name?.split(' ')[0] ?? 'there'
 
-  const [matches, setMatches] = useState<BrotherMatch[]>(initialMatches)
-  const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections)
+  const [matches, setMatches] = useState<BrotherMatch[]>(initialMatches ?? [])
+  const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections ?? [])
   const connectionsFull = connections.length >= 3
 
   useEffect(() => {
@@ -230,7 +230,7 @@ export default function BrotherDashboard({
         <p className="text-sm text-[#9B9B9B]">Assalamu Alaikum,</p>
         <h1 className="text-[26px] font-medium text-[#1A1A1A] tracking-[-0.02em] leading-snug mb-1">{firstName}</h1>
         <div className="mt-2">
-          {profile.verification_badge ? <VerifiedBadge /> : <PendingBadge />}
+          {profile?.verification_badge ? <VerifiedBadge /> : <PendingBadge />}
         </div>
       </div>
 
