@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 import { createMeetingRequest, confirmMeetingSlot } from '@/app/dashboard/actions'
 import type { MeetingRequest, ConnectionDetail } from '@/lib/database'
 
@@ -46,6 +47,25 @@ export default function MeetingsUI({ connection, initialMeetings, currentUserId 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`meetings:${connection.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'meeting_requests', filter: `connection_id=eq.${connection.id}` },
+        payload => {
+          if (payload.eventType === 'INSERT') {
+            setMeetings(prev => [...prev, payload.new as MeetingRequest])
+          } else if (payload.eventType === 'UPDATE') {
+            setMeetings(prev => prev.map(m => m.id === (payload.new as MeetingRequest).id ? payload.new as MeetingRequest : m))
+          }
+        },
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [connection.id])
 
   const handleSubmit = async () => {
     if (!slot1) { setError('Please provide at least one time slot.'); return }

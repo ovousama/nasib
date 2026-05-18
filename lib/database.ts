@@ -502,9 +502,8 @@ export async function getActiveConnections(userId: string, gender: GenderType): 
     .from('connections')
     .select('id, brother_id, sister_id, interest_id, status, photos_released, created_at, closed_at')
     .eq(isBrother ? 'brother_id' : 'sister_id', userId)
-    .eq('status', 'active')
+    .in('status', ['active', 'nikah_planning'])
     .order('created_at', { ascending: false })
-    .limit(3)
 
   if (!conns?.length) return []
 

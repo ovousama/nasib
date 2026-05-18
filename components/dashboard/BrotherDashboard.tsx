@@ -222,6 +222,7 @@ export default function BrotherDashboard({
 
   const visibleNotifications = notifications.filter(n => !readNotifIds.has(n.id))
   const visibleIncoming = incomingInterests.filter(i => !localDeclinedIds.has(i.id))
+  const visibleMatches = matches.filter(m => !connections.some(c => c.sister_id === m.sister_id))
 
   return (
     <div className="bg-[#FDF8F3] min-h-screen">
@@ -316,11 +317,11 @@ export default function BrotherDashboard({
         <section id="matches" data-testid="matches-section">
           <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
 
-          {matches.length === 0 ? (
+          {visibleMatches.length === 0 ? (
             <EmptyState message="Your matches are being prepared. We will notify you when they are ready, in sha Allah." />
           ) : (
             <div className="space-y-3">
-              {matches.map(match => {
+              {visibleMatches.map(match => {
                 const sisterFirstName = match.sister?.full_name?.split(' ')[0] ?? 'Sister'
                 // Interests the brother sent (initiated_by = brother)
                 const hasSent = localSentIds.includes(match.sister_id)

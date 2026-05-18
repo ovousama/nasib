@@ -29,7 +29,7 @@ export default async function ChatPage({ params }: Props) {
   ])
 
   if (!connection) notFound()
-  if (connection.status !== 'active') {
+  if (connection.status !== 'active' && connection.status !== 'nikah_planning') {
     return (
       <div className="flex flex-col h-full items-center justify-center p-8 text-center">
         <p className="text-[#5C5C5C] text-sm">This connection has been closed.</p>

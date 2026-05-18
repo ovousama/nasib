@@ -6,12 +6,13 @@ import { createClient } from '@/lib/supabase'
 import CheckinUI from '@/components/dashboard/CheckinUI'
 import type { ConnectionDetail } from '@/lib/database'
 
+type PageState = 'loading' | 'checkin' | 'waiting_for_response'
+
 export default function CheckinPage() {
   const { connectionId } = useParams<{ connectionId: string }>()
   const router = useRouter()
+  const [pageState, setPageState] = useState<PageState>('loading')
   const [connection, setConnection] = useState<ConnectionDetail | null>(null)
-  const [hasPendingProposal, setHasPendingProposal] = useState(false)
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
@@ -39,23 +40,21 @@ export default function CheckinPage() {
         return
       }
 
-      // Check for an existing checkin from this user
       const { data: myCheckin } = await supabase
         .from('post_meeting_checkins')
-        .select('id, is_proposal, proposal_status')
+        .select('id, outcome')
         .eq('connection_id', connectionId)
         .eq('profile_id', user.id)
         .order('created_at', { ascending: false })
         .maybeSingle()
 
-      if (myCheckin) {
-        const isPendingProposal = myCheckin.is_proposal && myCheckin.proposal_status === 'pending'
-        if (!isPendingProposal) {
-          // Already submitted a final answer — nothing left to do here
-          router.replace(`/dashboard/chat/${connectionId}`)
+      if (myCheckin?.outcome) {
+        if (myCheckin.outcome === 'nikah_planning') {
+          setPageState('waiting_for_response')
           return
         }
-        setHasPendingProposal(true)
+        router.replace(`/dashboard/chat/${connectionId}`)
+        return
       }
 
       const isBrother = conn.brother_id === user.id
@@ -82,19 +81,31 @@ export default function CheckinPage() {
         other_id: otherId,
         current_user_gender: isBrother ? 'brother' : 'sister',
       })
-      setLoading(false)
+      setPageState('checkin')
     }
 
     load()
   }, [connectionId, router])
 
-  if (loading || !connection) return null
+  if (pageState === 'loading' || (pageState === 'checkin' && !connection)) return null
+
+  if (pageState === 'waiting_for_response') {
+    return (
+      <div style={{ minHeight: '100vh', background: '#FDF8F3', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', textAlign: 'center' }}>
+        <p style={{ fontSize: '40px', marginBottom: '16px' }}>🤍</p>
+        <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#1A1A1A', marginBottom: '8px' }}>Waiting for their response</h2>
+        <p style={{ fontSize: '14px', color: '#5C5C5C', maxWidth: '300px', lineHeight: 1.6 }}>
+          Your response has been recorded. You will be notified when your match responds, in sha Allah.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <CheckinUI
-      connection={connection}
+      connection={connection!}
       connectionId={connectionId}
-      hasPendingProposal={hasPendingProposal}
+      hasPendingProposal={false}
     />
   )
 }

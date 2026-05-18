@@ -277,6 +277,7 @@ export default function SisterDashboard({
 
   const visibleInterests = incomingInterests.filter(i => !localDeclinedIds.has(i.id))
   const visibleNotifications = notifications.filter(n => !readNotifIds.has(n.id))
+  const visibleMatches = matches.filter(m => !connections.some(c => c.brother_id === m.brother_id))
 
   return (
     <>
@@ -407,11 +408,11 @@ export default function SisterDashboard({
           <section id="matches" data-testid="matches-section">
             <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
 
-            {matches.length === 0 ? (
+            {visibleMatches.length === 0 ? (
               <EmptyState message="Your matches are being prepared. We will notify you when they are ready, in sha Allah." />
             ) : (
               <div className="space-y-3">
-                {matches.map(match => {
+                {visibleMatches.map(match => {
                   const b = match.brother
                   const brotherFirstName = b?.full_name?.split(' ')[0] ?? 'Brother'
                   const incomingFromThis = incomingInterests.find(i => i.brother_id === match.brother_id && !localDeclinedIds.has(i.id))
