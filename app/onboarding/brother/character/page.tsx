@@ -34,7 +34,7 @@ export default function BrotherCharacter() {
       character_description: character.trim(),
       goals:                 goals.trim() || null,
     }))
-    router.push('/onboarding/brother/photo')
+    router.push('/onboarding/brother/additional')
   }
 
   return (

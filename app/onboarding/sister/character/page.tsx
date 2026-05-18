@@ -34,7 +34,7 @@ export default function SisterCharacter() {
       character_description: character.trim(),
       goals:                 goals.trim() || null,
     }))
-    router.push('/onboarding/sister/photos')
+    router.push('/onboarding/sister/additional')
   }
 
   return (
