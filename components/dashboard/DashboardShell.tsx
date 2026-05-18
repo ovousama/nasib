@@ -23,6 +23,7 @@ type RealtimeNotif = {
 type Props = {
   userId: string
   initialUnreadCount: number
+  nikahConnectionId: string | null
   children: React.ReactNode
 }
 
@@ -53,7 +54,7 @@ export function getNotificationRoute(type: string, metadata: Record<string, stri
   }
 }
 
-export default function DashboardShell({ userId, initialUnreadCount, children }: Props) {
+export default function DashboardShell({ userId, initialUnreadCount, nikahConnectionId, children }: Props) {
   const router = useRouter()
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount)
   const [toasts, setToasts] = useState<ToastItem[]>([])
@@ -118,7 +119,7 @@ export default function DashboardShell({ userId, initialUnreadCount, children }:
       <main className="flex-1 pb-20">
         {children}
       </main>
-      <BottomNav unreadCount={unreadCount} />
+      <BottomNav unreadCount={unreadCount} nikahConnectionId={nikahConnectionId} />
 
       {/* Toast notifications */}
       <div className="fixed bottom-24 right-4 z-50 flex flex-col gap-2 items-end pointer-events-none">

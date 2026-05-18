@@ -278,6 +278,8 @@ export default function SisterDashboard({
   const visibleInterests = incomingInterests.filter(i => !localDeclinedIds.has(i.id))
   const visibleNotifications = notifications.filter(n => !readNotifIds.has(n.id))
   const visibleMatches = matches.filter(m => !connections.some(c => c.brother_id === m.brother_id))
+  const activeConns = connections.filter(c => c.status === 'active')
+  const nikahConns = connections.filter(c => c.status === 'nikah_planning')
 
   return (
     <>
@@ -518,15 +520,48 @@ export default function SisterDashboard({
             )}
           </section>
 
+          {/* ── Nikah Planning Connections ───────────────────────── */}
+          {nikahConns.length > 0 && (
+            <section id="nikah" data-testid="nikah-connections-section">
+              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Nikah Planning</p>
+              <div className="space-y-3">
+                {nikahConns.map(conn => (
+                  <div data-testid="nikah-connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#AF4D98]/30 shadow-[0_1px_3px_rgba(175,77,152,0.12)]">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-base mr-1">🤍</span>
+                      <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
+                      <span className="ml-auto text-xs font-medium text-[#AF4D98] bg-[#F5E6F2] px-2.5 py-1 rounded-full">Nikah Planning</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link
+                        href={`/dashboard/chat/${conn.id}`}
+                        className="text-center text-sm font-medium text-[#AF4D98] py-2"
+                      >
+                        Open Chat
+                      </Link>
+                      <Link
+                        data-testid="view-nikah-plan-btn"
+                        href={`/dashboard/nikah/${conn.id}`}
+                        className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
+                      >
+                        View Plan
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* ── Active Connections ───────────────────────────────── */}
           <section id="connections" data-testid="connections-section">
             <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Active Connections</p>
 
-            {connections.length === 0 ? (
+            {activeConns.length === 0 ? (
               <EmptyState message="No active connections yet. When a match interest is accepted, a connection will appear here." />
             ) : (
               <div className="space-y-3">
-                {connections.map(conn => (
+                {activeConns.map(conn => (
                   <div data-testid="connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                     <div className="flex items-center gap-2 mb-4">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />

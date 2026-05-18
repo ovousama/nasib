@@ -42,6 +42,22 @@ export default async function ChatPage({ params }: Props) {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
+      {/* Nikah planning banner */}
+      {connection.status === 'nikah_planning' && (
+        <div className="flex items-center justify-between px-4 py-2.5 bg-[#F5E6F2] border-b border-[#E5C8E0]">
+          <div className="flex items-center gap-2">
+            <span className="text-base">🤍</span>
+            <p className="text-sm font-medium text-[#AF4D98]">Nikah planning in progress</p>
+          </div>
+          <Link
+            href={`/dashboard/nikah/${connectionId}`}
+            className="text-xs font-medium text-[#AF4D98] border border-[#AF4D98] px-3 py-1 rounded-full hover:bg-white transition-colors"
+          >
+            View plan →
+          </Link>
+        </div>
+      )}
+
       {/* Chat header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-[#EDE8E3] bg-white">
         <Link href="/dashboard" className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
@@ -51,7 +67,9 @@ export default async function ChatPage({ params }: Props) {
         </Link>
         <div className="flex-1 min-w-0">
           <p className="font-medium text-[#1A1A1A] truncate">{connection.other_first_name}</p>
-          <p className="text-xs text-[#00A699]">Active connection</p>
+          <p className="text-xs text-[#00A699]">
+            {connection.status === 'nikah_planning' ? 'Nikah planning' : 'Active connection'}
+          </p>
         </div>
         <Link
           data-testid="request-meeting-btn"
