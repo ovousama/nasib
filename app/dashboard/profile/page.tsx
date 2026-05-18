@@ -417,6 +417,12 @@ function BrotherProfileView({
         </SectionCard>
 
         <ReferenceCard reference={reference} />
+
+        <div className="mt-2 mb-2 flex justify-center">
+          <Link href="/dashboard/how-it-works" className="text-sm text-[#9B9B9B] hover:text-[#AF4D98] transition-colors">
+            How does Naseeb work? →
+          </Link>
+        </div>
       </div>
     </div>
   )
@@ -661,6 +667,12 @@ function SisterProfileView({
         </SectionCard>
 
         <ReferenceCard reference={reference} />
+
+        <div className="mt-2 mb-2 flex justify-center">
+          <Link href="/dashboard/how-it-works" className="text-sm text-[#9B9B9B] hover:text-[#AF4D98] transition-colors">
+            How does Naseeb work? →
+          </Link>
+        </div>
       </div>
     </div>
   )

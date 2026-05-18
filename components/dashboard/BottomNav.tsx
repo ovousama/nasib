@@ -48,6 +48,16 @@ function NikahIcon({ active }: { active: boolean }) {
   )
 }
 
+function HelpIcon({ active }: { active: boolean }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} className="w-[22px] h-[22px]">
+      <circle cx="12" cy="12" r="9" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.87 8.88A3 3 0 1112 15" />
+      <path strokeLinecap="round" d="M12 18h.01" />
+    </svg>
+  )
+}
+
 function BellIcon({ active }: { active: boolean }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} className="w-[22px] h-[22px]">
@@ -102,6 +112,22 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
             >
               <NikahIcon active={active} />
               <span className="text-[10px] font-medium">Nikah</span>
+            </Link>
+          )
+        })()}
+
+        {(() => {
+          const active = pathname.startsWith('/dashboard/how-it-works')
+          return (
+            <Link
+              href="/dashboard/how-it-works"
+              data-testid="nav-help"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors ${
+                active ? 'text-[#AF4D98]' : 'text-[#9B9B9B] hover:text-[#5C5C5C]'
+              }`}
+            >
+              <HelpIcon active={active} />
+              <span className="text-[10px] font-medium">Help</span>
             </Link>
           )
         })()}
