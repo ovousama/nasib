@@ -24,66 +24,61 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
   const path = request.nextUrl.pathname
 
-  // Public routes — no auth needed
-  const publicRoutes = [
-    '/auth/login',
-    '/auth/signup',
+  // ALWAYS let these through — no auth check
+  const alwaysPublic = [
     '/auth/callback',
-    '/auth/forgot-password',
     '/auth/reset-password',
+    '/auth/forgot-password',
   ]
-  if (publicRoutes.some(r => path.startsWith(r))) {
+  if (alwaysPublic.some(r => path.startsWith(r))) {
     return supabaseResponse
   }
 
-  // Not logged in — redirect to login
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Not logged in — allow login/signup, block everything else
   if (!user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
-    return NextResponse.redirect(url)
+    if (path.startsWith('/auth')) return supabaseResponse
+    return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
   const role = user.app_metadata?.role
 
-  // Admin routing
+  // ADMIN
   if (role === 'admin') {
+    if (path === '/auth/login' || path === '/auth/signup') {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
     if (
       path.startsWith('/dashboard') ||
       path.startsWith('/wali') ||
       path.startsWith('/onboarding')
     ) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/admin'
-      return NextResponse.redirect(url)
+      return NextResponse.redirect(new URL('/admin', request.url))
     }
     return supabaseResponse
   }
 
-  // Wali routing
+  // WALI
   if (role === 'wali') {
-    if (!path.startsWith('/wali') && !path.startsWith('/auth')) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/wali/dashboard'
-      return NextResponse.redirect(url)
+    if (path === '/auth/login' || path === '/auth/signup') {
+      return NextResponse.redirect(new URL('/wali/dashboard', request.url))
+    }
+    if (!path.startsWith('/wali')) {
+      return NextResponse.redirect(new URL('/wali/dashboard', request.url))
     }
     return supabaseResponse
   }
 
-  // Regular user (no role or role === 'user')
-  // Block access to wali or admin routes
-  if (path.startsWith('/wali') || path.startsWith('/admin')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
+  // REGULAR USER (brother or sister)
+  if (path === '/auth/login' || path === '/auth/signup') {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
-  // Redirect away from auth routes when already logged in
-  if (path.startsWith('/auth')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
+
+  if (path.startsWith('/wali') || path.startsWith('/admin')) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return supabaseResponse
@@ -91,6 +86,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|favicon.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

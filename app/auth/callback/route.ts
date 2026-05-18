@@ -45,12 +45,11 @@ export async function GET(request: NextRequest) {
   const gender = user.user_metadata?.gender as 'brother' | 'sister' | undefined
 
   if (gender) {
-    // Upsert so this is safe whether or not the profile was created during signup
     await supabase
       .from('profiles')
       .upsert(
         { id: user.id, gender, status: 'pending_verification' },
-        { onConflict: 'id' }
+        { onConflict: 'id', ignoreDuplicates: true }
       )
   }
 
