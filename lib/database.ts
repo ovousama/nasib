@@ -28,6 +28,8 @@ export type Profile = {
   verification_badge: boolean
   created_at: string
   updated_at: string
+  profile_complete: boolean
+  profile_completion_percentage: number
 }
 
 export type BrotherProfile = {

@@ -13,6 +13,8 @@ export type AdminUser = {
   location: string | null
   reference_status: string | null
   created_at: string
+  profile_complete: boolean
+  profile_completion_percentage: number
 }
 
 export type AdminStats = {
@@ -138,7 +140,7 @@ export async function getAllUsers(options: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query: any = admin
     .from('profiles')
-    .select('id, gender, status, verification_badge, created_at, brother_profiles(full_name, age, location), sister_profiles(full_name, age, location)')
+    .select('id, gender, status, verification_badge, created_at, profile_complete, profile_completion_percentage, brother_profiles(full_name, age, location), sister_profiles(full_name, age, location)')
     .order('created_at', { ascending: false })
 
   if (gender) query = query.eq('gender', gender)
@@ -169,6 +171,8 @@ export async function getAllUsers(options: {
       location: bp?.location ?? sp?.location ?? null,
       reference_status: refMap[p.id] ?? null,
       created_at: p.created_at,
+      profile_complete: p.profile_complete ?? false,
+      profile_completion_percentage: p.profile_completion_percentage ?? 0,
     }
   })
 
@@ -409,16 +413,34 @@ export async function closeConnection(connectionId: string): Promise<void> {
   if (error) throw error
 }
 
-export async function getAllBrothers(): Promise<{ id: string; full_name: string }[]> {
+export async function getAllBrothers(): Promise<{ id: string; full_name: string; profile_complete: boolean; profile_completion_percentage: number }[]> {
   const admin = createAdminClient()
-  const { data } = await admin.from('brother_profiles').select('id, full_name').order('full_name')
-  return data ?? []
+  const { data: brotherData } = await admin.from('brother_profiles').select('id, full_name').order('full_name')
+  if (!brotherData?.length) return []
+  const ids = brotherData.map(b => b.id)
+  const { data: profileData } = await admin.from('profiles').select('id, profile_complete, profile_completion_percentage').in('id', ids)
+  const profileMap = Object.fromEntries((profileData ?? []).map(p => [p.id, p]))
+  return brotherData.map(b => ({
+    id: b.id,
+    full_name: b.full_name,
+    profile_complete: profileMap[b.id]?.profile_complete ?? false,
+    profile_completion_percentage: profileMap[b.id]?.profile_completion_percentage ?? 0,
+  }))
 }
 
-export async function getAllSisters(): Promise<{ id: string; full_name: string }[]> {
+export async function getAllSisters(): Promise<{ id: string; full_name: string; profile_complete: boolean; profile_completion_percentage: number }[]> {
   const admin = createAdminClient()
-  const { data } = await admin.from('sister_profiles').select('id, full_name').order('full_name')
-  return data ?? []
+  const { data: sisterData } = await admin.from('sister_profiles').select('id, full_name').order('full_name')
+  if (!sisterData?.length) return []
+  const ids = sisterData.map(s => s.id)
+  const { data: profileData } = await admin.from('profiles').select('id, profile_complete, profile_completion_percentage').in('id', ids)
+  const profileMap = Object.fromEntries((profileData ?? []).map(p => [p.id, p]))
+  return sisterData.map(s => ({
+    id: s.id,
+    full_name: s.full_name,
+    profile_complete: profileMap[s.id]?.profile_complete ?? false,
+    profile_completion_percentage: profileMap[s.id]?.profile_completion_percentage ?? 0,
+  }))
 }
 
 export async function getUsersNeedingMatchRefresh(): Promise<string[]> {

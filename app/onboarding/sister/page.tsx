@@ -17,6 +17,10 @@ export default function SisterWali() {
   const [error,        setError]        = useState<string | null>(null)
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('naseeb_onboarding_started')) {
+      router.replace('/onboarding/start')
+      return
+    }
     try {
       const s = JSON.parse(localStorage.getItem(KEY) || '{}')
       if (s.wali_full_name)          setWaliName(s.wali_full_name)

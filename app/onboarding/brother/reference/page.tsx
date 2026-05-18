@@ -37,6 +37,8 @@ export default function BrotherReference() {
       if (!user) throw new Error('Not authenticated')
 
       const s = JSON.parse(localStorage.getItem(KEY) || '{}')
+      const a = JSON.parse(localStorage.getItem('nasib_brother_additional') || '{}')
+      const d = JSON.parse(localStorage.getItem('naseeb_brother_deepdive') || '{}')
 
       // 1. Upsert brother_profiles
       const { error: profileErr } = await supabase
@@ -70,9 +72,23 @@ export default function BrotherReference() {
           character_description:        s.character_description ?? null,
           goals:                        s.goals ?? null,
           photo_url:                    s.photo_url ?? null,
+          ...a,
+          ...d,
         }, { onConflict: 'id' })
 
       if (profileErr) throw profileErr
+
+      // 1b. Calculate and persist profile completion
+      const { data: fullProfile } = await supabase.from('brother_profiles').select('*').eq('id', user.id).single()
+      if (fullProfile) {
+        const { calculateCompletion } = await import('@/lib/profile-completion')
+        const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'brother')
+        await supabase.from('profiles').update({
+          profile_complete: isComplete,
+          profile_completion_percentage: percentage,
+          status: isComplete ? 'active' : 'pending_verification',
+        }).eq('id', user.id)
+      }
 
       // 2. Insert reference
       const { error: refErr } = await supabase
@@ -90,6 +106,9 @@ export default function BrotherReference() {
 
       // 3. Clear onboarding data
       localStorage.removeItem(KEY)
+      localStorage.removeItem('nasib_brother_additional')
+      localStorage.removeItem('naseeb_brother_deepdive')
+      localStorage.removeItem('naseeb_onboarding_started')
 
       router.push('/dashboard')
     } catch (err: unknown) {

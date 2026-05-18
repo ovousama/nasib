@@ -29,6 +29,18 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })
 }
 
+function CompletionBadge({ complete, percentage }: { complete: boolean; percentage: number }) {
+  if (complete) return (
+    <span className="inline-block text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#E6F9F7] text-[#00857A]">Complete ✓</span>
+  )
+  if (percentage >= 75) return (
+    <span className="inline-block text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#FEF9EC] text-[#8A6A00]">{percentage}%</span>
+  )
+  return (
+    <span className="inline-block text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#FDECEA] text-[#C13515]">{percentage}%</span>
+  )
+}
+
 export default async function UsersPage({ searchParams }: Props) {
   const params = await searchParams
   const page = parseInt(str(params.page) ?? '1')
@@ -66,7 +78,7 @@ export default async function UsersPage({ searchParams }: Props) {
           <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-[#EDE8E3]">
-                {['Name', 'Gender', 'Age', 'Location', 'Status', 'Verified', 'Reference', 'Joined', ''].map(h => (
+                {['Name', 'Gender', 'Age', 'Location', 'Status', 'Verified', 'Reference', 'Completion', 'Joined', ''].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] whitespace-nowrap">
                     {h}
                   </th>
@@ -76,7 +88,7 @@ export default async function UsersPage({ searchParams }: Props) {
             <tbody>
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-[#9B9B9B] text-sm">
+                  <td colSpan={10} className="px-4 py-8 text-center text-[#9B9B9B] text-sm">
                     No users found
                   </td>
                 </tr>
@@ -122,6 +134,9 @@ export default async function UsersPage({ searchParams }: Props) {
                     ) : (
                       <span className="text-[#9B9B9B] text-[11px]">—</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <CompletionBadge complete={user.profile_complete} percentage={user.profile_completion_percentage} />
                   </td>
                   <td className="px-4 py-3 text-[#9B9B9B] text-xs whitespace-nowrap">{formatDate(user.created_at)}</td>
                   <td className="px-4 py-3">

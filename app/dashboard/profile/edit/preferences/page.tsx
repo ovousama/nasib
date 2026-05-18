@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { recalculateProfileCompletion } from '../recalculate-action'
 
 export default function EditPreferencesPage() {
   const router = useRouter()
@@ -64,6 +65,7 @@ export default function EditPreferencesPage() {
         })
         .eq('id', userId)
       if (updateError) throw updateError
+      recalculateProfileCompletion().catch(() => {})
       setToast('success')
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {

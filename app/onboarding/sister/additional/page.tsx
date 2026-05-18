@@ -275,7 +275,7 @@ export default function SisterAdditional() {
 
       if (upsertError) throw upsertError
 
-      router.push('/onboarding/sister/photos')
+      router.push('/onboarding/sister/deepdive')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
       setLoading(false)

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { recalculateProfileCompletion } from '../recalculate-action'
 
 export default function EditPhotoPage() {
   const router = useRouter()
@@ -91,6 +92,7 @@ export default function EditPhotoPage() {
         .eq('id', userId)
       if (updateError) throw updateError
 
+      recalculateProfileCompletion().catch(() => {})
       setToast(true)
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {

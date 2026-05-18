@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
+import { recalculateProfileCompletion } from '../recalculate-action'
 
 const MAX_PHOTOS = 5
 
@@ -103,6 +104,7 @@ export default function EditPhotosPage() {
         .update({ photo_urls: photoUrls, photos_uploaded: photoUrls.length > 0 })
         .eq('id', userId)
       if (updateError) throw updateError
+      recalculateProfileCompletion().catch(() => {})
       setToast(true)
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { recalculateProfileCompletion } from '../recalculate-action'
 
 const TIMELINE_OPTIONS = ['asap', 'within 6 months', 'within a year', '1-2 years']
 
@@ -92,6 +93,7 @@ export default function EditMarriagePage() {
           .eq('id', userId)
         if (updateError) throw updateError
       }
+      recalculateProfileCompletion().catch(() => {})
       setToast('success')
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {

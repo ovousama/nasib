@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { recalculateProfileCompletion } from '../recalculate-action'
 
 const EDUCATION_OPTIONS = ['high school', 'bachelors', 'masters', 'phd', 'trade', 'other']
 const LIVING_OPTIONS = ['alone', 'with family', 'with roommates']
@@ -94,6 +95,7 @@ export default function EditLifestylePage() {
           .eq('id', userId)
         if (updateError) throw updateError
       }
+      recalculateProfileCompletion().catch(() => {})
       setToast('success')
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {

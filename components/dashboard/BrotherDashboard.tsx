@@ -28,6 +28,8 @@ type Props = {
   sentInterestOtherIds: string[]
   incomingInterests: InterestWithProfile[]
   notifications: Notification[]
+  profileComplete: boolean
+  completionPercentage: number
 }
 
 function VerifiedBadge({ dark = false }: { dark?: boolean }) {
@@ -87,6 +89,8 @@ export default function BrotherDashboard({
   sentInterestOtherIds,
   incomingInterests,
   notifications,
+  profileComplete,
+  completionPercentage,
 }: Props) {
   const router = useRouter()
   const firstName = brotherProfile?.full_name?.split(' ')[0] ?? 'there'
@@ -228,6 +232,41 @@ export default function BrotherDashboard({
 
   return (
     <div className="bg-[#FDF8F3] min-h-screen">
+      {!profileComplete && (
+        <div className="px-6 pt-6">
+          <div style={{
+            background: 'linear-gradient(135deg, #F5E6F2, #F4E4BA)',
+            border: '1px solid rgba(175,77,152,0.2)',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '0',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '15px', fontWeight: 500, color: '#AF4D98', marginBottom: '4px' }}>
+                  Complete your profile to get matches
+                </p>
+                <p style={{ fontSize: '13px', color: '#5C5C5C', lineHeight: 1.5 }}>
+                  Your profile is {completionPercentage}% complete. You will not appear in any matches until your profile is fully complete.
+                </p>
+              </div>
+              <span style={{ fontSize: '18px', fontWeight: 500, color: '#AF4D98', marginLeft: '12px' }}>
+                {completionPercentage}%
+              </span>
+            </div>
+            <div style={{ height: '6px', background: '#EDE8E3', borderRadius: '3px', overflow: 'hidden', marginBottom: '16px' }}>
+              <div style={{ height: '100%', width: `${completionPercentage}%`, background: 'linear-gradient(90deg, #AF4D98, #D66BA0)', borderRadius: '3px', transition: 'width 0.3s ease' }} />
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push('/onboarding/brother')}
+              style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '10px 24px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', width: '100%' }}
+            >
+              Continue completing my profile →
+            </button>
+          </div>
+        </div>
+      )}
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="px-6 pt-10 pb-8">
         <p className="text-sm text-[#9B9B9B]">Assalamu Alaikum,</p>
@@ -319,7 +358,7 @@ export default function BrotherDashboard({
         <section id="matches" data-testid="matches-section">
           <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
 
-          {visibleMatches.length === 0 ? (
+          {!profileComplete ? null : visibleMatches.length === 0 ? (
             <EmptyState message="Your matches are being prepared. We will notify you when they are ready, in sha Allah." />
           ) : (
             <div className="space-y-3">

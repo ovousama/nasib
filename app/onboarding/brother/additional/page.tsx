@@ -278,7 +278,7 @@ export default function BrotherAdditional() {
 
       if (upsertError) throw upsertError
 
-      router.push('/onboarding/brother/photo')
+      router.push('/onboarding/brother/deepdive')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
       setLoading(false)

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { recalculateProfileCompletion } from '../recalculate-action'
 
 const LEVELS = [
   { value: 'practicing', label: 'Practicing', sub: 'Actively following the Sunnah' },
@@ -105,6 +106,7 @@ export default function EditDeenPage() {
           .eq('id', userId)
         if (updateError) throw updateError
       }
+      recalculateProfileCompletion().catch(() => {})
       setToast('success')
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {

@@ -11,6 +11,7 @@ const BROTHER_STEPS = [
   '/onboarding/brother/preferences',
   '/onboarding/brother/character',
   '/onboarding/brother/additional',
+  '/onboarding/brother/deepdive',
   '/onboarding/brother/photo',
   '/onboarding/brother/reference',
 ]
@@ -24,6 +25,7 @@ const SISTER_STEPS = [
   '/onboarding/sister/preferences',
   '/onboarding/sister/character',
   '/onboarding/sister/additional',
+  '/onboarding/sister/deepdive',
   '/onboarding/sister/photos',
   '/onboarding/sister/reference',
 ]

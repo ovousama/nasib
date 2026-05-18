@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { recalculateProfileCompletion } from '../recalculate-action'
 
 const CONTACT_METHODS = ['email', 'phone', 'whatsapp']
 
@@ -62,6 +63,7 @@ export default function EditWaliPage() {
         .update({ full_name: fullName.trim(), relationship: relationship.trim(), email: email.trim(), phone: phone.trim() || null, preferred_contact_method: preferredContactMethod || null })
         .eq('sister_id', userId)
       if (updateError) throw updateError
+      recalculateProfileCompletion().catch(() => {})
       setToast('success')
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {

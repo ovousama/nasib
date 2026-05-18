@@ -17,6 +17,10 @@ export default function BrotherBasicInfo() {
   const [error,     setError]     = useState<string | null>(null)
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('naseeb_onboarding_started')) {
+      router.replace('/onboarding/start')
+      return
+    }
     try {
       const s = JSON.parse(localStorage.getItem(KEY) || '{}')
       if (s.full_name)  setFullName(s.full_name)

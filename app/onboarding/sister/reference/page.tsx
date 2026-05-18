@@ -37,6 +37,8 @@ export default function SisterReference() {
       if (!user) throw new Error('Not authenticated')
 
       const s = JSON.parse(localStorage.getItem(KEY) || '{}')
+      const a = JSON.parse(localStorage.getItem('nasib_sister_additional') || '{}')
+      const d = JSON.parse(localStorage.getItem('naseeb_sister_deepdive') || '{}')
 
       // 1. Upsert sister_profiles
       const { error: profileErr } = await supabase
@@ -69,9 +71,23 @@ export default function SisterReference() {
           goals:                        s.goals ?? null,
           photo_urls:                   s.photo_urls ?? [],
           photos_uploaded:              (s.photo_urls?.length ?? 0) > 0,
+          ...a,
+          ...d,
         }, { onConflict: 'id' })
 
       if (profileErr) throw profileErr
+
+      // 1b. Calculate and persist profile completion
+      const { data: fullProfile } = await supabase.from('sister_profiles').select('*').eq('id', user.id).single()
+      if (fullProfile) {
+        const { calculateCompletion } = await import('@/lib/profile-completion')
+        const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'sister')
+        await supabase.from('profiles').update({
+          profile_complete: isComplete,
+          profile_completion_percentage: percentage,
+          status: isComplete ? 'active' : 'pending_verification',
+        }).eq('id', user.id)
+      }
 
       // 2. Insert wali_profiles
       const { error: waliErr } = await supabase
@@ -103,6 +119,9 @@ export default function SisterReference() {
 
       // 4. Clear onboarding data
       localStorage.removeItem(KEY)
+      localStorage.removeItem('nasib_sister_additional')
+      localStorage.removeItem('naseeb_sister_deepdive')
+      localStorage.removeItem('naseeb_onboarding_started')
 
       router.push('/dashboard')
     } catch (err: unknown) {

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { recalculateProfileCompletion } from '../recalculate-action'
 
 type Reference = {
   id: string
@@ -59,6 +60,7 @@ export default function EditReferencePage() {
         .update({ referee_name: refereeName.trim() || null, referee_relationship: refereeRelationship.trim() || null, referee_email: refereeEmail.trim() || null, referee_phone: refereePhone.trim() || null })
         .eq('id', reference!.id)
       if (updateError) throw updateError
+      recalculateProfileCompletion().catch(() => {})
       setToast('success')
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {

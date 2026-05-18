@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { recalculateProfileCompletion } from '../recalculate-action'
 
 export default function EditBasicPage() {
   const router = useRouter()
@@ -69,6 +70,7 @@ export default function EditBasicPage() {
         .update({ full_name: fullName.trim(), age: Number(age), location: location.trim(), ethnicity: ethnicity.trim() || null, languages: languagesArr })
         .eq('id', userId)
       if (updateError) throw updateError
+      recalculateProfileCompletion().catch(() => {})
       setToast('success')
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {

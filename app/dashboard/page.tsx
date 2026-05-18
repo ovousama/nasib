@@ -49,6 +49,8 @@ export default async function DashboardPage() {
         sentInterestOtherIds={sentInterestOtherIds}
         incomingInterests={incomingInterests}
         notifications={notifications}
+        profileComplete={profile.profile_complete ?? false}
+        completionPercentage={profile.profile_completion_percentage ?? 0}
       />
     )
   }
@@ -75,6 +77,8 @@ export default async function DashboardPage() {
         connections={connections}
         incomingInterests={incomingInterests}
         notifications={notifications}
+        profileComplete={profile.profile_complete ?? false}
+        completionPercentage={profile.profile_completion_percentage ?? 0}
       />
     )
   }
