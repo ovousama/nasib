@@ -416,6 +416,98 @@ function BrotherProfileView({
           </div>
         </SectionCard>
 
+        {/* Deep Dive Questions */}
+        <SectionCard title="Deep Dive — Faith & Deen">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Quran Listening" value={bp.quran_listening} />
+            <Field label="Quran Memorisation" value={bp.quran_memorisation} />
+            <Field label="Zakah & Sadaqah" value={bp.zakah_sadaqah} />
+            <Field label="Madhab Consistency" value={bp.madhab_consistency} />
+            <Field label="Mawlid View" value={bp.mawlid_view} />
+            <Field label="Missed Prayer Approach" value={bp.missed_prayer_approach} />
+            <Field label="Spouse Islamic Knowledge" value={bp.spouse_islamic_knowledge} />
+            <Field label="Wife Niqab Preference" value={bp.wife_niqab_preference} />
+            {bp.traditional_vs_reformist !== undefined && bp.traditional_vs_reformist !== null && (
+              <Field label="Traditional ↔ Reformist" value={`${bp.traditional_vs_reformist} / 100`} />
+            )}
+            {bp.deen_growth && <FieldFull label="Deen Growth" value={bp.deen_growth} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Family Dynamics">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Wife–Family Interaction" value={bp.wife_family_interaction} />
+            <Field label="Eldest Responsibilities" value={bp.eldest_responsibilities} />
+            <Field label="Family Conflict Style" value={bp.family_conflict_style} />
+            <Field label="Child Caregiving" value={bp.child_caregiving} />
+            <Field label="Wife–Family Relationship" value={bp.wife_family_relationship} />
+            <Field label="Living Near Parents" value={bp.living_near_parents} />
+            {bp.parent_relationship && <FieldFull label="Parent Relationship" value={bp.parent_relationship} />}
+            {bp.family_spouse_disagreement && <FieldFull label="Family vs Spouse Disagreement" value={bp.family_spouse_disagreement} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Mental & Emotional Health">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Therapy Experience" value={bp.therapy_experience} />
+            <Field label="Couples Therapy View" value={bp.couples_therapy_view} />
+            <Field label="Mental Health Challenges" value={bp.mental_health_challenges} />
+            <Field label="Emotional Availability" value={bp.emotional_availability} />
+            <Field label="Emotional Expression" value={bp.emotional_expression_view} />
+            {bp.stress_management && <FieldFull label="Stress Management" value={bp.stress_management} />}
+            {bp.emotional_support_style && <FieldFull label="Emotional Support Style" value={bp.emotional_support_style} />}
+            {bp.significant_hardship && <FieldFull label="Significant Hardship" value={bp.significant_hardship} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Conflict & Communication">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Friendship Ended" value={bp.friendship_ended} />
+            <Field label="Apology Speed" value={bp.apology_speed} />
+            <Field label="Husband Final Say" value={bp.husband_final_say} />
+            <Field label="Communication When Upset" value={bp.communication_when_upset} />
+            <Field label="Wife Opinion Importance" value={bp.wife_opinion_importance} />
+            {bp.healthy_argument_view && <FieldFull label="Healthy Argument View" value={bp.healthy_argument_view} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Financial">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Savings Plan" value={bp.savings_plan} />
+            <Field label="Financial Planning" value={bp.financial_planning_approach} />
+            <Field label="Wife Financial Independence" value={bp.wife_financial_independence} />
+            <Field label="Hajj Status" value={bp.hajj_status} />
+            <Field label="Wife Earning More" value={bp.wife_earning_more} />
+            {bp.financial_stress_approach && <FieldFull label="Financial Stress Approach" value={bp.financial_stress_approach} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Lifestyle & Values">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Political Views" value={bp.political_views} />
+            <Field label="Cultural Background" value={bp.cultural_background_importance} />
+            <Field label="Exercise Frequency" value={bp.exercise_frequency} />
+            <Field label="Social Media" value={bp.social_media_view} />
+            <Field label="Home Organisation" value={bp.home_organisation} />
+            <Field label="Pets" value={bp.pets_view} />
+            <Field label="Healthy Eating" value={bp.healthy_eating_importance} />
+            {bp.ramadan_routine && <FieldFull label="Ramadan Routine" value={bp.ramadan_routine} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Marriage Vision">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Physical Intimacy" value={bp.physical_intimacy_importance} />
+            <Field label="Spouse Friendships" value={bp.spouse_friendships_view} />
+            <Field label="Polygamy (own marriage)" value={bp.polygamy_own_marriage} />
+            {bp.marriage_vision_10_years && <FieldFull label="10-Year Vision" value={bp.marriage_vision_10_years} />}
+            {bp.first_year_vision && <FieldFull label="First Year Vision" value={bp.first_year_vision} />}
+            {bp.romance_view && <FieldFull label="Romance View" value={bp.romance_view} />}
+            {bp.marriage_fear && <FieldFull label="Marriage Fear" value={bp.marriage_fear} />}
+            {bp.unique_contribution && <FieldFull label="Unique Contribution" value={bp.unique_contribution} />}
+          </div>
+        </SectionCard>
+
         <ReferenceCard reference={reference} />
 
         <div className="mt-2 mb-2 flex justify-center">
@@ -663,6 +755,98 @@ function SisterProfileView({
                 </div>
               </div>
             ) : null}
+          </div>
+        </SectionCard>
+
+        {/* Deep Dive Questions */}
+        <SectionCard title="Deep Dive — Faith & Deen">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Quran Listening" value={sp.quran_listening} />
+            <Field label="Quran Memorisation" value={sp.quran_memorisation} />
+            <Field label="Zakah & Sadaqah" value={sp.zakah_sadaqah} />
+            <Field label="Madhab Consistency" value={sp.madhab_consistency} />
+            <Field label="Mawlid View" value={sp.mawlid_view} />
+            <Field label="Spouse Islamic Knowledge" value={sp.spouse_islamic_knowledge} />
+            <Field label="Islamic Home Importance" value={sp.islamic_home_importance} />
+            {sp.traditional_vs_reformist !== undefined && sp.traditional_vs_reformist !== null && (
+              <Field label="Traditional ↔ Reformist" value={`${sp.traditional_vs_reformist} / 100`} />
+            )}
+            {sp.deen_growth && <FieldFull label="Deen Growth" value={sp.deen_growth} />}
+            {sp.deen_when_busy && <FieldFull label="Deen When Busy" value={sp.deen_when_busy} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Family Dynamics">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Family Balance After Marriage" value={sp.family_balance_after_marriage} />
+            <Field label="Family Financial Responsibility" value={sp.family_financial_responsibility} />
+            <Field label="Family Conflict Style" value={sp.family_conflict_style} />
+            <Field label="In-Laws Comfort" value={sp.inlaws_comfort} />
+            <Field label="Husband–Family Relationship" value={sp.husband_family_relationship} />
+            <Field label="Family: Traditional vs Modern" value={sp.family_traditional_vs_modern} />
+            {sp.parent_relationship && <FieldFull label="Parent Relationship" value={sp.parent_relationship} />}
+            {sp.family_spouse_disagreement && <FieldFull label="Family vs Spouse Disagreement" value={sp.family_spouse_disagreement} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Mental & Emotional Health">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Therapy Experience" value={sp.therapy_experience} />
+            <Field label="Couples Therapy View" value={sp.couples_therapy_view} />
+            <Field label="Mental Health Challenges" value={sp.mental_health_challenges} />
+            <Field label="Emotional Availability" value={sp.emotional_availability} />
+            <Field label="Emotional Expression" value={sp.emotional_expression_view} />
+            {sp.stress_management && <FieldFull label="Stress Management" value={sp.stress_management} />}
+            {sp.emotional_support_style && <FieldFull label="Emotional Support Style" value={sp.emotional_support_style} />}
+            {sp.significant_hardship && <FieldFull label="Significant Hardship" value={sp.significant_hardship} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Conflict & Communication">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Apology Speed" value={sp.apology_speed} />
+            <Field label="Communication When Upset" value={sp.communication_when_upset} />
+            <Field label="Husband Opinion Importance" value={sp.husband_opinion_importance} />
+            <Field label="Receiving Love Language" value={sp.receiving_love_language} />
+            <Field label="Qawwam View" value={sp.qawwam_view} />
+            {sp.healthy_argument_view && <FieldFull label="Healthy Argument View" value={sp.healthy_argument_view} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Career & Finance">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Career Identity Importance" value={sp.career_identity_importance} />
+            <Field label="Career Pause for Children" value={sp.career_pause_for_children} />
+            <Field label="Financial Dependence View" value={sp.financial_dependence_view} />
+            <Field label="Savings Plan" value={sp.savings_plan} />
+            {sp.career_five_years && <FieldFull label="Career in 5 Years" value={sp.career_five_years} />}
+            {sp.financial_stress_approach && <FieldFull label="Financial Stress Approach" value={sp.financial_stress_approach} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Lifestyle & Values">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Political Views" value={sp.political_views} />
+            <Field label="Cultural Background" value={sp.cultural_background_importance} />
+            <Field label="Exercise Frequency" value={sp.exercise_frequency} />
+            <Field label="Social Media" value={sp.social_media_view} />
+            <Field label="Home Organisation" value={sp.home_organisation} />
+            <Field label="Pets" value={sp.pets_view} />
+            <Field label="Healthy Eating" value={sp.healthy_eating_importance} />
+            {sp.ramadan_routine && <FieldFull label="Ramadan Routine" value={sp.ramadan_routine} />}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deep Dive — Marriage Vision">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Physical Intimacy" value={sp.physical_intimacy_importance} />
+            <Field label="Spouse Friendships" value={sp.spouse_friendships_view} />
+            {sp.marriage_vision_10_years && <FieldFull label="10-Year Vision" value={sp.marriage_vision_10_years} />}
+            {sp.first_year_vision && <FieldFull label="First Year Vision" value={sp.first_year_vision} />}
+            {sp.romance_view && <FieldFull label="Romance View" value={sp.romance_view} />}
+            {sp.marriage_fear && <FieldFull label="Marriage Fear" value={sp.marriage_fear} />}
+            {sp.unique_contribution && <FieldFull label="Unique Contribution" value={sp.unique_contribution} />}
+            {sp.ideal_husband_description && <FieldFull label="Ideal Husband" value={sp.ideal_husband_description} />}
           </div>
         </SectionCard>
 
