@@ -5,6 +5,22 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
 
+function toStoragePath(urlOrPath: string): string {
+  const marker = '/object/public/brother-photos/'
+  const idx = urlOrPath.indexOf(marker)
+  if (idx !== -1) return decodeURIComponent(urlOrPath.slice(idx + marker.length))
+  const signMarker = '/object/sign/brother-photos/'
+  const signIdx = urlOrPath.indexOf(signMarker)
+  if (signIdx !== -1) return decodeURIComponent(urlOrPath.slice(signIdx + signMarker.length).split('?')[0])
+  return urlOrPath
+}
+
+async function getSignedUrl(path: string): Promise<string> {
+  const supabase = createClient()
+  const { data } = await supabase.storage.from('brother-photos').createSignedUrl(path, 3600)
+  return data?.signedUrl ?? ''
+}
+
 export default function EditPhotoPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -12,7 +28,8 @@ export default function EditPhotoPage() {
   const [error, setError] = useState<string | null>(null)
   const [removeMessage, setRemoveMessage] = useState(false)
   const [toast, setToast] = useState(false)
-  const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(null)
+  const [currentPath, setCurrentPath] = useState<string | null>(null)
+  const [currentDisplayUrl, setCurrentDisplayUrl] = useState<string | null>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [userId, setUserId] = useState<string>('')
@@ -31,7 +48,12 @@ export default function EditPhotoPage() {
       }
       setUserId(user.id)
       const { data } = await supabase.from('brother_profiles').select('photo_url').eq('id', user.id).single()
-      if (data) setCurrentPhotoUrl(data.photo_url ?? null)
+      if (data?.photo_url) {
+        const path = toStoragePath(data.photo_url)
+        setCurrentPath(path)
+        const signed = await getSignedUrl(path)
+        setCurrentDisplayUrl(signed)
+      }
       setLoading(false)
     }
     load()
@@ -71,24 +93,19 @@ export default function EditPhotoPage() {
     setSaving(true)
     try {
       const supabase = createClient()
-      const path = `${userId}/${Date.now()}-${pendingFile.name}`
+      const ext = pendingFile.name.split('.').pop() ?? 'jpg'
+      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const { error: uploadError } = await supabase.storage.from('brother-photos').upload(path, pendingFile)
       if (uploadError) throw new Error('Upload failed. Please try again.')
 
-      const { data: { publicUrl } } = supabase.storage.from('brother-photos').getPublicUrl(path)
-
-      if (currentPhotoUrl) {
-        const marker = '/object/public/brother-photos/'
-        const idx = currentPhotoUrl.indexOf(marker)
-        if (idx !== -1) {
-          const oldPath = decodeURIComponent(currentPhotoUrl.slice(idx + marker.length))
-          await supabase.storage.from('brother-photos').remove([oldPath])
-        }
+      // Remove the old file from storage
+      if (currentPath) {
+        await supabase.storage.from('brother-photos').remove([currentPath])
       }
 
       const { error: updateError } = await supabase
         .from('brother_profiles')
-        .update({ photo_url: publicUrl })
+        .update({ photo_url: path })
         .eq('id', userId)
       if (updateError) throw updateError
 
@@ -110,7 +127,7 @@ export default function EditPhotoPage() {
     )
   }
 
-  const displayUrl = previewUrl ?? currentPhotoUrl
+  const displayUrl = previewUrl ?? currentDisplayUrl
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]">

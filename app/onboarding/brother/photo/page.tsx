@@ -7,6 +7,16 @@ import { createClient } from '@/lib/supabase'
 
 const KEY = 'nasib_onboarding_brother'
 
+function toStoragePath(urlOrPath: string): string {
+  const marker = '/object/public/brother-photos/'
+  const idx = urlOrPath.indexOf(marker)
+  if (idx !== -1) return decodeURIComponent(urlOrPath.slice(idx + marker.length))
+  const signMarker = '/object/sign/brother-photos/'
+  const signIdx = urlOrPath.indexOf(signMarker)
+  if (signIdx !== -1) return decodeURIComponent(urlOrPath.slice(signIdx + signMarker.length).split('?')[0])
+  return urlOrPath
+}
+
 export default function BrotherPhoto() {
   const router      = useRouter()
   const inputRef    = useRef<HTMLInputElement>(null)
@@ -16,10 +26,18 @@ export default function BrotherPhoto() {
   const [error,     setError]     = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s.photo_url) setUploaded(true)
-    } catch {}
+    async function loadSaved() {
+      try {
+        const s = JSON.parse(localStorage.getItem(KEY) || '{}')
+        if (!s.photo_url) return
+        setUploaded(true)
+        const path = toStoragePath(s.photo_url)
+        const supabase = createClient()
+        const { data } = await supabase.storage.from('brother-photos').createSignedUrl(path, 3600)
+        if (data?.signedUrl) setPreview(data.signedUrl)
+      } catch {}
+    }
+    loadSaved()
   }, [])
 
   async function handleFile(file: File) {
@@ -50,12 +68,9 @@ export default function BrotherPhoto() {
 
       if (uploadError) throw uploadError
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('brother-photos')
-        .getPublicUrl(path)
-
+      // Store the storage path (not a public URL) — signed URL generated at display time
       const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      localStorage.setItem(KEY, JSON.stringify({ ...s, photo_url: publicUrl }))
+      localStorage.setItem(KEY, JSON.stringify({ ...s, photo_url: path }))
       setUploaded(true)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
@@ -98,16 +113,10 @@ export default function BrotherPhoto() {
           style={{ minHeight: 280 }}
         >
           {preview ? (
-            <img src={preview} alt="Preview" className="w-full h-72 object-cover rounded-2xl" />
+            <img src={preview} alt="Your photo" className="w-full h-72 object-cover rounded-2xl" />
           ) : uploaded ? (
             <div className="flex flex-col items-center justify-center h-72 gap-3">
-              <div className="w-14 h-14 bg-[#AF4D98] rounded-full flex items-center justify-center">
-                <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <p className="text-[#AF4D98] font-medium text-sm">Photo uploaded</p>
-              <p className="text-[#9B9B9B] text-xs">Click to replace</p>
+              <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-72 gap-3 px-4 text-center">
