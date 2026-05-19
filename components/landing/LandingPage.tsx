@@ -3,9 +3,6 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import NasibLogo from '@/components/ui/NasibLogo'
-import BrotherIllustration from '@/components/illustrations/BrotherIllustration'
-import SisterIllustration from '@/components/illustrations/SisterIllustration'
-import IslamicPatternBg from '@/components/illustrations/IslamicPatternBg'
 
 const cormorant = "var(--font-cormorant, 'Cormorant Garamond', serif)"
 const arabic = "var(--font-arabic, 'Noto Naskh Arabic', serif)"
@@ -214,14 +211,9 @@ export default function LandingPage() {
       <section
         data-testid="landing-hero"
         style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5E6F2 100%)' }}
-        className="px-6 pt-[80px] pb-[60px] lg:pt-[120px] lg:pb-[60px] relative overflow-hidden lg:min-h-[90vh] lg:flex lg:flex-col lg:justify-center"
+        className="px-6 pt-[80px] pb-[60px] lg:pt-[120px] lg:pb-[60px] lg:min-h-[90vh] lg:flex lg:flex-col lg:justify-center"
       >
-        <IslamicPatternBg opacity={0.04} color="#AF4D98" />
-        <div className="hidden lg:flex absolute right-8 bottom-0 items-end pointer-events-none" style={{ opacity: 0.85 }}>
-          <BrotherIllustration size={220} />
-          <SisterIllustration size={220} />
-        </div>
-        <div className="max-w-[700px] mx-auto text-center" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="max-w-[700px] mx-auto text-center">
           {/* Ar-Rum verse — first element */}
           <p
             className="mb-2 text-[#AF4D98]"
@@ -356,10 +348,9 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             {/* Brothers */}
             <div>
-              <BrotherIllustration size={100} className="illustration-enter mb-4" />
+              <p style={{ fontFamily: arabic, fontSize: '28px', color: '#AF4D98', marginBottom: '12px' }}>الإخوة</p>
               <div className="mb-4">
                 <h3 className="text-[18px] font-medium text-[#1A1A1A]">Brothers</h3>
-                <p style={{ fontFamily: arabic, fontSize: '16px' }} className="text-[#AF4D98]">الإخوة</p>
               </div>
               <ul className="space-y-3">
                 {[
@@ -378,10 +369,9 @@ export default function LandingPage() {
 
             {/* Sisters */}
             <div>
-              <SisterIllustration size={100} className="illustration-enter mb-4" />
+              <p style={{ fontFamily: arabic, fontSize: '28px', color: '#AF4D98', marginBottom: '12px' }}>الأخوات</p>
               <div className="mb-4">
                 <h3 className="text-[18px] font-medium text-[#1A1A1A]">Sisters</h3>
-                <p style={{ fontFamily: arabic, fontSize: '16px' }} className="text-[#AF4D98]">الأخوات</p>
               </div>
               <ul className="space-y-3">
                 {[

@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import SisterIllustration from '@/components/illustrations/SisterIllustration'
 import {
   getWaliForCurrentUser,
   getWaliSisterData,
@@ -93,8 +92,8 @@ export default async function WaliDashboardPage() {
                 className="w-14 h-14 rounded-full object-cover ring-2 ring-white shadow-sm flex-shrink-0"
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-[#F5E6F2] overflow-hidden flex items-center justify-center flex-shrink-0">
-                <SisterIllustration size={56} />
+              <div className="w-14 h-14 rounded-full bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
+                {sisterFirstName[0]?.toUpperCase()}
               </div>
             )}
             <div className="flex-1 min-w-0">

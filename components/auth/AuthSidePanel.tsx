@@ -1,10 +1,7 @@
-import BrotherIllustration from '@/components/illustrations/BrotherIllustration'
-import SisterIllustration from '@/components/illustrations/SisterIllustration'
-
 export default function AuthSidePanel({ headline }: { headline: string }) {
   return (
     <div
-      className="hidden lg:flex lg:flex-col lg:justify-between lg:px-12 lg:py-16 lg:min-h-screen relative overflow-hidden"
+      className="hidden lg:flex lg:flex-col lg:justify-between lg:px-12 lg:py-16 lg:min-h-screen"
       style={{ background: 'linear-gradient(160deg, #AF4D98, #D66BA0)' }}
     >
       {/* Logo */}
@@ -36,21 +33,6 @@ export default function AuthSidePanel({ headline }: { headline: string }) {
         Seek with sincerity · نصيب
       </p>
 
-      {/* Illustrations */}
-      <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '0px',
-        opacity: 0.3,
-        pointerEvents: 'none',
-      }}>
-        <BrotherIllustration size={140} />
-        <SisterIllustration size={140} />
-      </div>
     </div>
   )
 }
