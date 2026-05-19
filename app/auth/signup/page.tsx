@@ -75,9 +75,6 @@ export default function SignupPage() {
         <div className="w-full max-w-[380px] text-center">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '48px' }}>
             <NasibLogo size="lg" theme="light" />
-            <p style={{ marginTop: '16px', fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic', textAlign: 'center' }}>
-              Seek with sincerity
-            </p>
           </div>
 
           <div className="bg-white border border-[#EDE8E3] rounded-[20px] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
@@ -110,16 +107,13 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF8F3] lg:grid lg:grid-cols-2">
-      <AuthSidePanel headline="Your journey begins here. Find your spouse the halal way." />
+      <AuthSidePanel headline="Halal matchmaking built around your deen. Wali involvement, deep compatibility, and serious intent — from the very first step." />
       <div className="flex flex-col items-center justify-center px-6 py-16 lg:py-0 lg:overflow-y-auto">
       <div className="w-full max-w-[380px]">
 
         {/* Logo */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '40px' }}>
           <NasibLogo size="lg" theme="light" />
-          <p style={{ marginTop: '16px', fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic', textAlign: 'center' }}>
-            Seek with sincerity
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">

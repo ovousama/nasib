@@ -13,6 +13,8 @@ import {
   closeConnection,
   markNotificationRead,
 } from '@/app/dashboard/actions'
+import BrotherIllustration from '@/components/illustrations/BrotherIllustration'
+import SisterIllustration from '@/components/illustrations/SisterIllustration'
 import type {
   Profile,
   SisterProfile,
@@ -326,8 +328,15 @@ export default function SisterDashboard({
         )}
         {/* ── Header ──────────────────────────────────────────── */}
         <div className="px-6 pt-10 pb-8 lg:px-8">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
           <p className="text-sm text-[#9B9B9B]">Assalamu Alaikum,</p>
           <h1 className="text-[26px] lg:text-[32px] font-medium text-[#1A1A1A] tracking-[-0.02em] leading-snug mb-1">{firstName}</h1>
+          </div>
+          <div style={{ opacity: 0.8 }} className="illustration-enter">
+            <SisterIllustration size={72} />
+          </div>
+          </div>
           <div className="mt-2 space-y-2">
             {profile?.verification_badge ? <VerifiedBadge /> : <PendingBadge />}
 
@@ -452,7 +461,15 @@ export default function SisterDashboard({
             <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
 
             {!profileComplete ? null : visibleMatches.length === 0 ? (
-              <EmptyState message="Your matches are being prepared. We will notify you when they are ready, in sha Allah." />
+              <div className="rounded-[16px] border border-[#EDE8E3] bg-[#FAF4EE] text-center illustration-enter" style={{ padding: '40px 20px', position: 'relative', overflow: 'hidden' }}>
+                <BrotherIllustration size={140} className="mx-auto mb-4" />
+                <p style={{ fontFamily: 'var(--font-cormorant, "Cormorant Garamond", serif)', fontSize: '20px', fontWeight: 400, color: '#AF4D98', marginBottom: '8px' }}>
+                  Your matches are being prepared
+                </p>
+                <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '260px', margin: '0 auto' }}>
+                  We will notify you when your matches are ready, in sha Allah.
+                </p>
+              </div>
             ) : (
               <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
                 {visibleMatches.map(match => {

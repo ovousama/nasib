@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import CoupleIllustration from '@/components/illustrations/CoupleIllustration'
+import IslamicPatternBg from '@/components/illustrations/IslamicPatternBg'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -117,9 +119,12 @@ function CelebrationHeader({ brotherName, sisterName }: { brotherName: string; s
   return (
     <div
       className="rounded-[20px] p-10 text-center mb-8"
-      style={{ background: 'linear-gradient(135deg, #F5E6F2 0%, #F4E4BA 100%)' }}
+      style={{ background: 'linear-gradient(135deg, #F5E6F2 0%, #F4E4BA 100%)', position: 'relative', overflow: 'hidden' }}
       data-testid="celebration-header"
     >
+      <IslamicPatternBg opacity={0.04} color="#AF4D98" />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+      <CoupleIllustration size={100} className="mx-auto mb-4 illustration-enter" />
       <p
         className="mb-1 leading-loose"
         style={{ fontFamily: 'var(--font-arabic)', fontSize: 32, color: '#AF4D98', direction: 'rtl' }}
@@ -151,6 +156,7 @@ function CelebrationHeader({ brotherName, sisterName }: { brotherName: string; s
           &ldquo;O Allah, bless them, and shower blessings upon them, and join them together in goodness.&rdquo;
         </p>
         <p className="text-[11px] text-[#9B9B9B]">— Du&apos;a at Nikah</p>
+      </div>
       </div>
     </div>
   )

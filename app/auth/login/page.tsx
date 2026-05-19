@@ -38,16 +38,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF8F3] lg:grid lg:grid-cols-2">
-      <AuthSidePanel headline="Join thousands of Muslims finding their nasib the halal way." />
+      <AuthSidePanel headline="Halal matchmaking built around your deen. Wali involvement, deep compatibility, and serious intent — from the very first step." />
       <div className="flex flex-col items-center justify-center px-6 py-16 lg:py-0">
       <div className="w-full max-w-[380px]">
 
         {/* Logo */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '48px' }}>
           <NasibLogo size="lg" theme="light" />
-          <p style={{ marginTop: '16px', fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic', textAlign: 'center' }}>
-            Seek with sincerity
-          </p>
         </div>
 
         {/* Form */}

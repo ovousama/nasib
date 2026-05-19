@@ -1,7 +1,10 @@
+import BrotherIllustration from '@/components/illustrations/BrotherIllustration'
+import SisterIllustration from '@/components/illustrations/SisterIllustration'
+
 export default function AuthSidePanel({ headline }: { headline: string }) {
   return (
     <div
-      className="hidden lg:flex lg:flex-col lg:justify-between lg:px-12 lg:py-16 lg:min-h-screen"
+      className="hidden lg:flex lg:flex-col lg:justify-between lg:px-12 lg:py-16 lg:min-h-screen relative overflow-hidden"
       style={{ background: 'linear-gradient(160deg, #AF4D98, #D66BA0)' }}
     >
       {/* Logo */}
@@ -15,7 +18,7 @@ export default function AuthSidePanel({ headline }: { headline: string }) {
       </div>
 
       {/* Center content */}
-      <div>
+      <div style={{ position: 'relative', zIndex: 1 }}>
         <p style={{ fontFamily: 'var(--font-arabic, "Noto Naskh Arabic", serif)', fontSize: '26px', color: '#fff', lineHeight: 1.6, marginBottom: '12px' }}>
           وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا
         </p>
@@ -23,15 +26,31 @@ export default function AuthSidePanel({ headline }: { headline: string }) {
           &ldquo;And of His signs is that He created for you mates from among yourselves&rdquo;
         </p>
         <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>— Ar-Rum 30:21</p>
-        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.9)', marginTop: '32px', lineHeight: 1.6 }}>
+        <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.8)', marginTop: '32px', lineHeight: 1.7 }}>
           {headline}
         </p>
       </div>
 
       {/* Footer */}
-      <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
-        Finding your nasib, the halal way.
+      <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', position: 'relative', zIndex: 1 }}>
+        Seek with sincerity · نصيب
       </p>
+
+      {/* Illustrations */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '0px',
+        opacity: 0.3,
+        pointerEvents: 'none',
+      }}>
+        <BrotherIllustration size={140} />
+        <SisterIllustration size={140} />
+      </div>
     </div>
   )
 }

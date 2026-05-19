@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import BrotherIllustration from '@/components/illustrations/BrotherIllustration'
+import SisterIllustration from '@/components/illustrations/SisterIllustration'
+import IslamicPatternBg from '@/components/illustrations/IslamicPatternBg'
 
 export default function OnboardingStart() {
   const router = useRouter()
@@ -52,8 +55,20 @@ export default function OnboardingStart() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '24px',
+      position: 'relative',
+      overflow: 'hidden',
     }}>
-      <div style={{ maxWidth: '480px', width: '100%' }}>
+      <IslamicPatternBg opacity={0.03} color="#AF4D98" />
+      <div style={{ maxWidth: '480px', width: '100%', position: 'relative', zIndex: 1 }}>
+
+        {/* Gender-appropriate illustration */}
+        {!loading && gender && (
+          <div className="illustration-enter" style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+            {gender === 'sister'
+              ? <SisterIllustration size={160} />
+              : <BrotherIllustration size={160} />}
+          </div>
+        )}
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>

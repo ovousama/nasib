@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import BrotherIllustration from '@/components/illustrations/BrotherIllustration'
+import SisterIllustration from '@/components/illustrations/SisterIllustration'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyData = any
@@ -235,7 +237,6 @@ export default function ProfilePageClient({
       : 'bg-red-50 text-red-600'
 
   const photoUrl = isBrother ? p?.photo_url : p?.photo_urls?.[0]
-  const initials = (p?.full_name ?? '?').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]" data-testid="profile-page">
@@ -249,7 +250,7 @@ export default function ProfilePageClient({
             <div className="w-16 h-16 rounded-full border-2 border-white shadow overflow-hidden bg-[#F5E6F2] flex items-center justify-center mx-auto mb-3">
               {photoUrl
                 ? <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
-                : <span className="text-[20px] font-medium text-[#AF4D98]">{initials}</span>}
+                : (isBrother ? <BrotherIllustration size={64} /> : <SisterIllustration size={64} />)}
             </div>
             <p className="text-[14px] font-medium text-[#1A1A1A] truncate">{p?.full_name ?? '—'}</p>
             <p className="text-[12px] text-[#9B9B9B] mt-0.5">{p?.age ? `${p.age} years` : ''}</p>
@@ -291,7 +292,7 @@ export default function ProfilePageClient({
           <div className="w-24 h-24 rounded-full border-2 border-white shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden bg-[#F5E6F2] flex items-center justify-center mb-3">
             {photoUrl
               ? <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
-              : <span className="text-[28px] font-medium text-[#AF4D98]">{initials}</span>}
+              : (isBrother ? <BrotherIllustration size={96} /> : <SisterIllustration size={96} />)}
           </div>
           <h1 className="text-[22px] font-medium text-[#1A1A1A] text-center">{p?.full_name ?? '—'}</h1>
           <p className="text-[14px] text-[#9B9B9B] text-center mt-0.5">

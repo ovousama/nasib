@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import CheckinUI from '@/components/dashboard/CheckinUI'
+import CoupleIllustration from '@/components/illustrations/CoupleIllustration'
 import type { ConnectionDetail } from '@/lib/database'
 
 type PageState = 'loading' | 'checkin' | 'waiting_for_response'
@@ -92,7 +93,7 @@ export default function CheckinPage() {
   if (pageState === 'waiting_for_response') {
     return (
       <div style={{ minHeight: '100vh', background: '#FDF8F3', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', textAlign: 'center' }}>
-        <p style={{ fontSize: '40px', marginBottom: '16px' }}>🤍</p>
+        <CoupleIllustration size={120} className="illustration-enter mb-4" />
         <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#1A1A1A', marginBottom: '8px' }}>Waiting for their response</h2>
         <p style={{ fontSize: '14px', color: '#5C5C5C', maxWidth: '300px', lineHeight: 1.6 }}>
           Your response has been recorded. You will be notified when your match responds, in sha Allah.
@@ -102,10 +103,15 @@ export default function CheckinPage() {
   }
 
   return (
-    <CheckinUI
-      connection={connection!}
-      connectionId={connectionId}
-      hasPendingProposal={false}
-    />
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '32px', paddingBottom: '8px' }}>
+        <CoupleIllustration size={120} className="illustration-enter" />
+      </div>
+      <CheckinUI
+        connection={connection!}
+        connectionId={connectionId}
+        hasPendingProposal={false}
+      />
+    </div>
   )
 }
