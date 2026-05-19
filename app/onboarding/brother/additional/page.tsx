@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
 
 const KEY = 'nasib_brother_additional'
-const MAIN_KEY = 'nasib_onboarding_brother'
 
 const textareaCls =
   'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors resize-none'
@@ -234,55 +232,7 @@ export default function BrotherAdditional() {
     }
 
     save(additionalData)
-
-    try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const m = JSON.parse(localStorage.getItem(MAIN_KEY) || '{}')
-
-      const { error: upsertError } = await supabase
-        .from('brother_profiles')
-        .upsert({
-          id:                            user.id,
-          full_name:                     m.full_name                     ?? null,
-          age:                           m.age                           ?? null,
-          location:                      m.location                      ?? null,
-          ethnicity:                     m.ethnicity                     ?? null,
-          languages:                     m.languages                     ?? [],
-          religiosity_level:             m.religiosity_level             ?? null,
-          madhab:                        m.madhab                        ?? null,
-          prayer_frequency:              m.prayer_frequency              ?? null,
-          islamic_knowledge_level:       m.islamic_knowledge_level       ?? null,
-          has_beard:                     m.has_beard                     ?? null,
-          occupation:                    m.occupation                    ?? null,
-          education_level:               m.education_level               ?? null,
-          living_situation:              m.living_situation              ?? null,
-          willing_to_relocate:           m.willing_to_relocate           ?? null,
-          financial_readiness:           m.financial_readiness           ?? null,
-          polygamy_openness:             m.polygamy_openness             ?? null,
-          previously_married:            m.previously_married            ?? null,
-          has_children:                  m.has_children                  ?? null,
-          wants_children:                m.wants_children                ?? null,
-          timeline_to_marry:             m.timeline_to_marry             ?? null,
-          spouse_religiosity_preference: m.spouse_religiosity_preference ?? null,
-          spouse_age_min:                m.spouse_age_min                ?? null,
-          spouse_age_max:                m.spouse_age_max                ?? null,
-          dealbreakers:                  m.dealbreakers                  ?? [],
-          character_description:         m.character_description         ?? null,
-          goals:                         m.goals                         ?? null,
-          photo_url:                     m.photo_url                     ?? null,
-          ...additionalData,
-        }, { onConflict: 'id' })
-
-      if (upsertError) throw upsertError
-
-      router.push('/onboarding/brother/deepdive')
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
-      setLoading(false)
-    }
+    router.push('/onboarding/brother/deepdive')
   }
 
   return (

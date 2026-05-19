@@ -89,31 +89,31 @@ export default function SisterReference() {
         }).eq('id', user.id)
       }
 
-      // 2. Insert wali_profiles
+      // 2. Upsert wali_profiles (safe on retry)
       const { error: waliErr } = await supabase
         .from('wali_profiles')
-        .insert({
+        .upsert({
           sister_id:               user.id,
           full_name:               s.wali_full_name,
           relationship:            s.wali_relationship,
           email:                   s.wali_email,
           phone:                   s.wali_phone ?? null,
           preferred_contact_method: s.wali_preferred_contact ?? 'email',
-        })
+        }, { onConflict: 'sister_id' })
 
       if (waliErr) throw waliErr
 
-      // 3. Insert reference
+      // 3. Upsert reference (safe on retry)
       const { error: refErr } = await supabase
         .from('references')
-        .insert({
+        .upsert({
           profile_id:           user.id,
           referee_name:         refName.trim(),
           referee_relationship: refRelationship.trim(),
           referee_email:        refEmail.trim(),
           referee_phone:        refPhone.trim() || null,
           status:               'pending',
-        })
+        }, { onConflict: 'profile_id' })
 
       if (refErr) throw refErr
 

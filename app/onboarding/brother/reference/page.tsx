@@ -90,17 +90,17 @@ export default function BrotherReference() {
         }).eq('id', user.id)
       }
 
-      // 2. Insert reference
+      // 2. Upsert reference (safe on retry)
       const { error: refErr } = await supabase
         .from('references')
-        .insert({
+        .upsert({
           profile_id:           user.id,
           referee_name:         refName.trim(),
           referee_relationship: refRelationship.trim(),
           referee_email:        refEmail.trim(),
           referee_phone:        refPhone.trim() || null,
           status:               'pending',
-        })
+        }, { onConflict: 'profile_id' })
 
       if (refErr) throw refErr
 

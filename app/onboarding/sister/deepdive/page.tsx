@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
 import Slider from '@/components/ui/Slider'
 
 const KEY = 'naseeb_sister_deepdive'
@@ -312,23 +311,7 @@ export default function SisterDeepdive() {
     }
 
     save(deepdiveData)
-
-    try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const { error: upsertError } = await supabase
-        .from('sister_profiles')
-        .upsert({ id: user.id, ...deepdiveData }, { onConflict: 'id' })
-
-      if (upsertError) throw upsertError
-
-      router.push('/onboarding/sister/photos')
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
-      setLoading(false)
-    }
+    router.push('/onboarding/sister/photos')
   }
 
   return (
