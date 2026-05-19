@@ -6,12 +6,14 @@ type SliderProps = {
   leftLabel: string
   rightLabel: string
   centerLabel?: string
+  label?: string
 }
 
-export default function Slider({ value, onChange, leftLabel, rightLabel, centerLabel }: SliderProps) {
+export default function Slider({ value, onChange, leftLabel, rightLabel, centerLabel, label }: SliderProps) {
   const pct = value
   return (
     <div style={{ width: '100%' }}>
+      {label && <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '8px' }}>{label}</label>}
       <input
         type="range"
         min={0}

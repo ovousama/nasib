@@ -136,6 +136,7 @@ export const SISTER_REQUIRED_FIELDS: string[] = [
 
 function isMissing(value: unknown): boolean {
   if (value === null || value === undefined) return true
+  if (typeof value === 'number') return false  // 0 is a valid slider answer
   if (typeof value === 'string' && value.trim() === '') return true
   if (Array.isArray(value) && value.length === 0) return true
   return false

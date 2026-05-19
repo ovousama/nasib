@@ -19,5 +19,6 @@ export async function recalculateProfileCompletion(): Promise<void> {
   await supabase.from('profiles').update({
     profile_complete: isComplete,
     profile_completion_percentage: percentage,
+    status: isComplete ? 'active' : 'pending_verification',
   }).eq('id', user.id)
 }

@@ -4,10 +4,56 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
+import Slider from '@/components/ui/Slider'
 
 const EDUCATION_OPTIONS = ['high school', 'bachelors', 'masters', 'phd', 'trade', 'other']
 const LIVING_OPTIONS = ['alone', 'with family', 'with roommates']
 const FINANCIAL_OPTIONS = ['fully ready', 'almost ready', 'working towards it']
+
+const EXERCISE_FREQ = ['Daily', 'Several times a week', 'Weekly', 'Occasionally', 'Rarely']
+const HALAL_DIET = ['Always strictly halal', 'Halal but flexible on source', 'Vegetarian/vegan', 'Not strict']
+const SMOKING = ['Never', 'Occasionally', 'Regularly', 'Trying to quit']
+const PETS_VIEW = ['Love them', 'Fine with them', 'Prefer not', 'Allergic/no']
+const HEALTHY_EATING = ['Very important', 'Important', 'Somewhat important', 'Not a priority']
+const SOCIAL_MEDIA = ['Very active', 'Moderate use', 'Minimal', 'Avoid it']
+const HOME_ORGANISATION = ['Very organised', 'Mostly organised', 'Somewhere in between', 'More relaxed']
+const POLITICAL_VIEWS = ['Conservative', 'Moderate', 'Progressive', 'Prefer not to say']
+const WEEKEND_LIFESTYLE = ['Very social — always out', 'Mix of social and home', 'Mostly home', 'Prefer quiet weekends']
+const MIXED_GENDER = ['Yes — mixed freely', 'Some — professional/unavoidable', 'Prefer gender-separated', 'Strictly separated']
+const MUSIC = ['Yes — regularly', 'Occasionally', 'Nasheeds/instrumentals only', 'No music']
+const TRAVEL = ['Love to travel', 'Travel occasionally', 'Prefer to stay local', 'Open to it']
+
+function Pill({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick}
+      className={`px-4 py-2 rounded-full text-sm font-medium border transition-all cursor-pointer ${
+        selected ? 'bg-[#AF4D98] text-white border-[#AF4D98]' : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#AF4D98]'
+      }`}>
+      {label}
+    </button>
+  )
+}
+
+function PillGroup({ label, options, value, onChange, optional }: { label: string; options: string[]; value: string; onChange: (v: string) => void; optional?: boolean }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-[#1A1A1A] mb-2">{label}{optional && <span className="text-[#9B9B9B] font-normal"> (optional)</span>}</label>
+      <div className="flex flex-wrap gap-2">
+        {options.map(o => <Pill key={o} label={o} selected={value === o} onClick={() => onChange(o)} />)}
+      </div>
+    </div>
+  )
+}
+
+function TA({ label, value, onChange, placeholder, optional }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; optional?: boolean }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">{label}{optional && <span className="text-[#9B9B9B] font-normal"> (optional)</span>}</label>
+      <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} placeholder={placeholder}
+        className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 resize-none" />
+    </div>
+  )
+}
 
 function YesNo({ label, value, onChange }: { label: string; value: boolean | null; onChange: (v: boolean) => void }) {
   return (
@@ -37,11 +83,28 @@ export default function EditLifestylePage() {
   const [userId, setUserId] = useState<string>('')
   const [gender, setGender] = useState<string>('')
 
+  // Core fields
   const [occupation, setOccupation] = useState('')
   const [educationLevel, setEducationLevel] = useState('')
   const [livingSituation, setLivingSituation] = useState('')
   const [willingToRelocate, setWillingToRelocate] = useState<boolean | null>(null)
   const [financialReadiness, setFinancialReadiness] = useState('')
+
+  // Deepdive lifestyle fields
+  const [exerciseFrequency, setExerciseFrequency] = useState('')
+  const [strictHalalDiet, setStrictHalalDiet] = useState('')
+  const [smoking, setSmoking] = useState('')
+  const [petsView, setPetsView] = useState('')
+  const [healthyEatingImportance, setHealthyEatingImportance] = useState('')
+  const [socialMediaView, setSocialMediaView] = useState('')
+  const [homeOrganisation, setHomeOrganisation] = useState('')
+  const [politicalViews, setPoliticalViews] = useState('')
+  const [culturalBackgroundImportance, setCulturalBackgroundImportance] = useState(50)
+  const [weekendLifestyle, setWeekendLifestyle] = useState('')
+  const [mixedGenderSocialCircle, setMixedGenderSocialCircle] = useState('')
+  const [doYouListenToMusic, setDoYouListenToMusic] = useState('')
+  const [travelImportance, setTravelImportance] = useState('')
+  const [ramadanRoutine, setRamadanRoutine] = useState('')
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -53,22 +116,30 @@ export default function EditLifestylePage() {
       const { data: profile } = await supabase.from('profiles').select('gender').eq('id', user.id).single()
       if (!profile) { router.push('/auth/login'); return }
       setGender(profile.gender)
-      if (profile.gender === 'brother') {
-        const { data } = await supabase.from('brother_profiles').select('occupation, education_level, living_situation, willing_to_relocate, financial_readiness').eq('id', user.id).single()
-        if (data) {
-          setOccupation(data.occupation ?? '')
-          setEducationLevel(data.education_level ?? '')
-          setLivingSituation(data.living_situation ?? '')
-          setWillingToRelocate(data.willing_to_relocate ?? null)
+      const table = profile.gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await supabase.from(table).select('*').eq('id', user.id).single() as { data: any }
+      if (data) {
+        setOccupation(data.occupation ?? '')
+        setEducationLevel(data.education_level ?? '')
+        setLivingSituation(data.living_situation ?? '')
+        setWillingToRelocate(data.willing_to_relocate ?? null)
+        setExerciseFrequency(data.exercise_frequency ?? '')
+        setStrictHalalDiet(data.strict_halal_diet ?? '')
+        setSmoking(data.smoking ?? '')
+        setPetsView(data.pets_view ?? '')
+        setHealthyEatingImportance(data.healthy_eating_importance ?? '')
+        setSocialMediaView(data.social_media_view ?? '')
+        setHomeOrganisation(data.home_organisation ?? '')
+        setPoliticalViews(data.political_views ?? '')
+        setCulturalBackgroundImportance(data.cultural_background_importance ?? 50)
+        setWeekendLifestyle(data.weekend_lifestyle ?? '')
+        setMixedGenderSocialCircle(data.mixed_gender_social_circle ?? '')
+        setDoYouListenToMusic(data.do_you_listen_to_music ?? '')
+        setTravelImportance(data.travel_importance ?? '')
+        setRamadanRoutine(data.ramadan_routine ?? '')
+        if (profile.gender === 'brother') {
           setFinancialReadiness(data.financial_readiness ?? '')
-        }
-      } else {
-        const { data } = await supabase.from('sister_profiles').select('occupation, education_level, living_situation, willing_to_relocate').eq('id', user.id).single()
-        if (data) {
-          setOccupation(data.occupation ?? '')
-          setEducationLevel(data.education_level ?? '')
-          setLivingSituation(data.living_situation ?? '')
-          setWillingToRelocate(data.willing_to_relocate ?? null)
         }
       }
       setLoading(false)
@@ -82,92 +153,83 @@ export default function EditLifestylePage() {
     setError(null)
     try {
       const supabase = createClient()
+      const shared = {
+        occupation: occupation.trim() || null,
+        education_level: educationLevel || null,
+        living_situation: livingSituation || null,
+        willing_to_relocate: willingToRelocate,
+        exercise_frequency: exerciseFrequency || null,
+        strict_halal_diet: strictHalalDiet || null,
+        smoking: smoking || null,
+        pets_view: petsView || null,
+        healthy_eating_importance: healthyEatingImportance || null,
+        social_media_view: socialMediaView || null,
+        home_organisation: homeOrganisation || null,
+        political_views: politicalViews || null,
+        cultural_background_importance: culturalBackgroundImportance,
+        weekend_lifestyle: weekendLifestyle || null,
+        mixed_gender_social_circle: mixedGenderSocialCircle || null,
+        do_you_listen_to_music: doYouListenToMusic || null,
+        travel_importance: travelImportance || null,
+        ramadan_routine: ramadanRoutine || null,
+      }
       if (gender === 'brother') {
-        const { error: updateError } = await supabase
-          .from('brother_profiles')
-          .update({ occupation: occupation.trim() || null, education_level: educationLevel || null, living_situation: livingSituation || null, willing_to_relocate: willingToRelocate, financial_readiness: financialReadiness || null })
-          .eq('id', userId)
-        if (updateError) throw updateError
+        const { error: e2 } = await supabase.from('brother_profiles').update({
+          ...shared,
+          financial_readiness: financialReadiness || null,
+        }).eq('id', userId)
+        if (e2) throw e2
       } else {
-        const { error: updateError } = await supabase
-          .from('sister_profiles')
-          .update({ occupation: occupation.trim() || null, education_level: educationLevel || null, living_situation: livingSituation || null, willing_to_relocate: willingToRelocate })
-          .eq('id', userId)
-        if (updateError) throw updateError
+        const { error: e2 } = await supabase.from('sister_profiles').update(shared).eq('id', userId)
+        if (e2) throw e2
       }
       recalculateProfileCompletion().catch(() => {})
       setToast('success')
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      setError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
+  if (loading) return <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" /></div>
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]">
       <div className="max-w-lg mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
           <Link href="/dashboard/profile" className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-              <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" /></svg>
           </Link>
           <h1 className="text-base font-medium text-[#1A1A1A]">Edit Lifestyle</h1>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">
-            {error}
-          </div>
-        )}
+        {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">{error}</div>}
 
-        <form onSubmit={handleSave} className="flex flex-col gap-4">
+        <form onSubmit={handleSave} className="flex flex-col gap-5">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Occupation</label>
-            <input
-              type="text"
-              value={occupation}
-              onChange={e => setOccupation(e.target.value)}
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Occupation <span className="text-[#9B9B9B] font-normal">(optional)</span></label>
+            <input type="text" value={occupation} onChange={e => setOccupation(e.target.value)}
               className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-              placeholder="Optional"
-            />
+              placeholder="e.g. Software Engineer, Teacher, Doctor..." />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Education Level</label>
-            <select
-              value={educationLevel}
-              onChange={e => setEducationLevel(e.target.value)}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-            >
+            <select value={educationLevel} onChange={e => setEducationLevel(e.target.value)}
+              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white">
               <option value="">Select...</option>
-              {EDUCATION_OPTIONS.map(opt => (
-                <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
-              ))}
+              {EDUCATION_OPTIONS.map(opt => <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Living Situation</label>
-            <select
-              value={livingSituation}
-              onChange={e => setLivingSituation(e.target.value)}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-            >
+            <select value={livingSituation} onChange={e => setLivingSituation(e.target.value)}
+              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white">
               <option value="">Select...</option>
-              {LIVING_OPTIONS.map(opt => (
-                <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
-              ))}
+              {LIVING_OPTIONS.map(opt => <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
             </select>
           </div>
 
@@ -176,30 +238,42 @@ export default function EditLifestylePage() {
           {gender === 'brother' && (
             <div>
               <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Financial Readiness</label>
-              <select
-                value={financialReadiness}
-                onChange={e => setFinancialReadiness(e.target.value)}
-                className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-              >
+              <select value={financialReadiness} onChange={e => setFinancialReadiness(e.target.value)}
+                className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white">
                 <option value="">Select...</option>
-                {FINANCIAL_OPTIONS.map(opt => (
-                  <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
-                ))}
+                {FINANCIAL_OPTIONS.map(opt => <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
               </select>
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60 transition-opacity"
-          >
+          <PillGroup label="Exercise frequency" options={EXERCISE_FREQ} value={exerciseFrequency} onChange={setExerciseFrequency} optional />
+          <PillGroup label="Halal diet approach" options={HALAL_DIET} value={strictHalalDiet} onChange={setStrictHalalDiet} optional />
+          <PillGroup label="Smoking" options={SMOKING} value={smoking} onChange={setSmoking} optional />
+          <PillGroup label="Pets" options={PETS_VIEW} value={petsView} onChange={setPetsView} optional />
+          <PillGroup label="Healthy eating importance" options={HEALTHY_EATING} value={healthyEatingImportance} onChange={setHealthyEatingImportance} optional />
+          <PillGroup label="Social media" options={SOCIAL_MEDIA} value={socialMediaView} onChange={setSocialMediaView} optional />
+          <PillGroup label="Home organisation" options={HOME_ORGANISATION} value={homeOrganisation} onChange={setHomeOrganisation} optional />
+          <PillGroup label="Political views" options={POLITICAL_VIEWS} value={politicalViews} onChange={setPoliticalViews} optional />
+
+          <Slider
+            value={culturalBackgroundImportance}
+            onChange={setCulturalBackgroundImportance}
+            label="Cultural background importance in a spouse"
+            leftLabel="Not important"
+            rightLabel="Very important"
+          />
+
+          <PillGroup label="Weekend lifestyle" options={WEEKEND_LIFESTYLE} value={weekendLifestyle} onChange={setWeekendLifestyle} optional />
+          <PillGroup label="Mixed gender social circle" options={MIXED_GENDER} value={mixedGenderSocialCircle} onChange={setMixedGenderSocialCircle} optional />
+          <PillGroup label="Music" options={MUSIC} value={doYouListenToMusic} onChange={setDoYouListenToMusic} optional />
+          <PillGroup label="Travel" options={TRAVEL} value={travelImportance} onChange={setTravelImportance} optional />
+
+          <TA label="Ramadan routine" value={ramadanRoutine} onChange={setRamadanRoutine} placeholder="How do you spend Ramadan? Daily habits, routines, community..." optional />
+
+          <button type="submit" disabled={saving} className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60 transition-opacity">
             {saving ? 'Saving...' : 'Save changes'}
           </button>
-
-          <Link href="/dashboard/profile" className="text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
-            Cancel
-          </Link>
+          <Link href="/dashboard/profile" className="text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">Cancel</Link>
         </form>
       </div>
 
