@@ -2,59 +2,94 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
-const KEY = 'nasib_onboarding_sister'
 type ContactMethod = 'email' | 'phone' | 'whatsapp'
+
 const inputCls = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
 
 export default function SisterWali() {
   const router = useRouter()
-  const [waliName,     setWaliName]     = useState('')
-  const [waliRel,      setWaliRel]      = useState('')
-  const [waliEmail,    setWaliEmail]    = useState('')
-  const [waliPhone,    setWaliPhone]    = useState('')
-  const [contactMethod, setContactMethod] = useState<ContactMethod>('email')
-  const [error,        setError]        = useState<string | null>(null)
+  const [userId,         setUserId]         = useState('')
+  const [loading,        setLoading]        = useState(true)
+  const [saving,         setSaving]         = useState(false)
+  const [waliName,       setWaliName]       = useState('')
+  const [waliRel,        setWaliRel]        = useState('')
+  const [waliEmail,      setWaliEmail]      = useState('')
+  const [waliPhone,      setWaliPhone]      = useState('')
+  const [contactMethod,  setContactMethod]  = useState<ContactMethod>('email')
+  const [error,          setError]          = useState<string | null>(null)
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && !localStorage.getItem('naseeb_onboarding_started')) {
-      router.replace('/onboarding/start')
-      return
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('wali_profiles')
+        .select('full_name, relationship, email, phone, preferred_contact_method')
+        .eq('sister_id', user.id)
+        .single()
+      if (data) {
+        if (data.full_name)                setWaliName(data.full_name)
+        if (data.relationship)             setWaliRel(data.relationship)
+        if (data.email)                    setWaliEmail(data.email)
+        if (data.phone)                    setWaliPhone(data.phone)
+        if (data.preferred_contact_method) setContactMethod(data.preferred_contact_method)
+      }
+      setLoading(false)
     }
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s.wali_full_name)          setWaliName(s.wali_full_name)
-      if (s.wali_relationship)       setWaliRel(s.wali_relationship)
-      if (s.wali_email)              setWaliEmail(s.wali_email)
-      if (s.wali_phone)              setWaliPhone(s.wali_phone)
-      if (s.wali_preferred_contact)  setContactMethod(s.wali_preferred_contact)
-    } catch {}
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handleNext(e: React.FormEvent) {
+  async function handleNext(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-    localStorage.setItem(KEY, JSON.stringify({
-      ...s,
-      wali_full_name:         waliName.trim(),
-      wali_relationship:      waliRel.trim(),
-      wali_email:             waliEmail.trim(),
-      wali_phone:             waliPhone.trim() || null,
-      wali_preferred_contact: contactMethod,
-    }))
+    const hasWali = waliName.trim() || waliEmail.trim()
+    if (hasWali) {
+      if (!waliName.trim())  { setError("Please enter your wali's name."); return }
+      if (!waliEmail.trim()) { setError("Please enter your wali's email."); return }
+    }
+    if (hasWali) {
+      setSaving(true)
+      const supabase = createClient()
+      const { error: saveErr } = await supabase
+        .from('wali_profiles')
+        .upsert({
+          sister_id:               userId,
+          full_name:               waliName.trim(),
+          relationship:            waliRel.trim() || null,
+          email:                   waliEmail.trim(),
+          phone:                   waliPhone.trim() || null,
+          preferred_contact_method: contactMethod,
+        }, { onConflict: 'sister_id' })
+      if (saveErr) { setError(saveErr.message); setSaving(false); return }
+    }
     router.push('/onboarding/sister/info')
   }
 
+  function handleSkip() {
+    router.push('/onboarding/sister/info')
+  }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+
   const CONTACTS: { value: ContactMethod; label: string }[] = [
-    { value: 'email',     label: 'Email' },
-    { value: 'phone',     label: 'Phone' },
-    { value: 'whatsapp',  label: 'WhatsApp' },
+    { value: 'email',    label: 'Email' },
+    { value: 'phone',    label: 'Phone' },
+    { value: 'whatsapp', label: 'WhatsApp' },
   ]
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
       <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Your Wali</h2>
+      <p className="text-[#9B9B9B] text-sm mb-4">Optional — you can add or update this later from your profile.</p>
       <div className="bg-[#F5E6F2] border border-[#AF4D98]/20 rounded-xl p-4 mb-8">
         <p className="text-sm text-[#AF4D98] font-medium mb-1">About your wali&apos;s role</p>
         <p className="text-sm text-[#5C5C5C] leading-relaxed">
@@ -68,19 +103,19 @@ export default function SisterWali() {
 
         <div>
           <label className="block text-sm font-medium text-[#1A1A1A] mb-1">{"Wali's"} Full Name</label>
-          <input type="text" required value={waliName} onChange={e => setWaliName(e.target.value)}
+          <input type="text" value={waliName} onChange={e => setWaliName(e.target.value)}
             placeholder="e.g. Muhammad Ali" className={inputCls} />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Relationship to You</label>
-          <input type="text" required value={waliRel} onChange={e => setWaliRel(e.target.value)}
+          <input type="text" value={waliRel} onChange={e => setWaliRel(e.target.value)}
             placeholder="e.g. Father, Brother, Uncle" className={inputCls} />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-[#1A1A1A] mb-1">{"Wali's"} Email</label>
-          <input type="email" required value={waliEmail} onChange={e => setWaliEmail(e.target.value)}
+          <input type="email" value={waliEmail} onChange={e => setWaliEmail(e.target.value)}
             placeholder="wali@example.com" className={inputCls} />
         </div>
 
@@ -112,9 +147,14 @@ export default function SisterWali() {
           <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
         )}
 
-        <button type="submit"
-          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm">
-          Next →
+        <button type="submit" disabled={saving}
+          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-50">
+          {saving ? 'Saving...' : 'Next →'}
+        </button>
+
+        <button type="button" onClick={handleSkip}
+          className="w-full text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors mt-3">
+          Skip for now
         </button>
       </form>
     </div>

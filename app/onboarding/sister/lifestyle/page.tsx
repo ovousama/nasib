@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
-const KEY = 'nasib_onboarding_sister'
 const selectCls = 'w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white'
 const inputCls  = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
 
@@ -26,6 +27,9 @@ function YesNo({ value, onChange }: { value: boolean | null; onChange: (v: boole
 
 export default function SisterLifestyle() {
   const router = useRouter()
+  const [userId,            setUserId]            = useState('')
+  const [loading,           setLoading]           = useState(true)
+  const [saving,            setSaving]            = useState(false)
   const [occupation,        setOccupation]        = useState('')
   const [educationLevel,    setEducationLevel]    = useState('')
   const [livingSituation,   setLivingSituation]   = useState('')
@@ -33,31 +37,54 @@ export default function SisterLifestyle() {
   const [error,             setError]             = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s.occupation)       setOccupation(s.occupation)
-      if (s.education_level)  setEducationLevel(s.education_level)
-      if (s.living_situation) setLivingSituation(s.living_situation)
-      if (s.willing_to_relocate !== undefined && s.willing_to_relocate !== null) setWillingToRelocate(s.willing_to_relocate)
-    } catch {}
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('sister_profiles')
+        .select('occupation, education_level, living_situation, willing_to_relocate')
+        .eq('id', user.id)
+        .single()
+      if (data) {
+        if (data.occupation)       setOccupation(data.occupation)
+        if (data.education_level)  setEducationLevel(data.education_level)
+        if (data.living_situation) setLivingSituation(data.living_situation)
+        if (data.willing_to_relocate !== null && data.willing_to_relocate !== undefined) setWillingToRelocate(data.willing_to_relocate)
+      }
+      setLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handleNext(e: React.FormEvent) {
+  async function handleNext(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     if (!educationLevel)  { setError('Please select your education level.'); return }
     if (!livingSituation) { setError('Please select your living situation.'); return }
-
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-    localStorage.setItem(KEY, JSON.stringify({
-      ...s,
-      occupation:          occupation.trim(),
-      education_level:     educationLevel,
-      living_situation:    livingSituation,
-      willing_to_relocate: willingToRelocate,
-    }))
+    setSaving(true)
+    const supabase = createClient()
+    const { error: saveErr } = await supabase
+      .from('sister_profiles')
+      .upsert({
+        id:                  userId,
+        occupation:          occupation.trim() || null,
+        education_level:     educationLevel,
+        living_situation:    livingSituation,
+        willing_to_relocate: willingToRelocate,
+      }, { onConflict: 'id' })
+    if (saveErr) { setError(saveErr.message); setSaving(false); return }
+    await recalculateCompletion(userId, 'sister')
     router.push('/onboarding/sister/marriage')
   }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
@@ -103,9 +130,9 @@ export default function SisterLifestyle() {
           <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
         )}
 
-        <button type="submit"
-          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm">
-          Next →
+        <button type="submit" disabled={saving}
+          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-50">
+          {saving ? 'Saving...' : 'Next →'}
         </button>
       </form>
     </div>

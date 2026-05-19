@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
-const KEY = 'nasib_onboarding_brother'
 const selectCls = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors appearance-none'
 const inputCls  = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors'
 
@@ -26,6 +27,9 @@ function YesNo({ value, onChange }: { value: boolean | null; onChange: (v: boole
 
 export default function BrotherLifestyle() {
   const router = useRouter()
+  const [userId,             setUserId]             = useState('')
+  const [loading,            setLoading]            = useState(true)
+  const [saving,             setSaving]             = useState(false)
   const [occupation,         setOccupation]         = useState('')
   const [educationLevel,     setEducationLevel]     = useState('')
   const [livingSituation,    setLivingSituation]    = useState('')
@@ -34,34 +38,57 @@ export default function BrotherLifestyle() {
   const [error,              setError]              = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s.occupation)          setOccupation(s.occupation)
-      if (s.education_level)     setEducationLevel(s.education_level)
-      if (s.living_situation)    setLivingSituation(s.living_situation)
-      if (s.willing_to_relocate !== undefined && s.willing_to_relocate !== null) setWillingToRelocate(s.willing_to_relocate)
-      if (s.financial_readiness) setFinancialReadiness(s.financial_readiness)
-    } catch {}
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('brother_profiles')
+        .select('occupation, education_level, living_situation, willing_to_relocate, financial_readiness')
+        .eq('id', user.id)
+        .single()
+      if (data) {
+        if (data.occupation)          setOccupation(data.occupation)
+        if (data.education_level)     setEducationLevel(data.education_level)
+        if (data.living_situation)    setLivingSituation(data.living_situation)
+        if (data.willing_to_relocate !== null && data.willing_to_relocate !== undefined) setWillingToRelocate(data.willing_to_relocate)
+        if (data.financial_readiness) setFinancialReadiness(data.financial_readiness)
+      }
+      setLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handleNext(e: React.FormEvent) {
+  async function handleNext(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     if (!educationLevel)     { setError('Please select your education level.'); return }
     if (!livingSituation)    { setError('Please select your living situation.'); return }
     if (!financialReadiness) { setError('Please select your financial readiness.'); return }
-
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-    localStorage.setItem(KEY, JSON.stringify({
-      ...s,
-      occupation:          occupation.trim(),
-      education_level:     educationLevel,
-      living_situation:    livingSituation,
-      willing_to_relocate: willingToRelocate,
-      financial_readiness: financialReadiness,
-    }))
+    setSaving(true)
+    const supabase = createClient()
+    const { error: saveErr } = await supabase
+      .from('brother_profiles')
+      .upsert({
+        id:                  userId,
+        occupation:          occupation.trim() || null,
+        education_level:     educationLevel,
+        living_situation:    livingSituation,
+        willing_to_relocate: willingToRelocate,
+        financial_readiness: financialReadiness,
+      }, { onConflict: 'id' })
+    if (saveErr) { setError(saveErr.message); setSaving(false); return }
+    await recalculateCompletion(userId, 'brother')
     router.push('/onboarding/brother/marriage')
   }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]">
@@ -118,9 +145,9 @@ export default function BrotherLifestyle() {
             <div className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">{error}</div>
           )}
 
-          <button type="submit"
-            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors">
-            Next →
+          <button type="submit" disabled={saving}
+            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors disabled:opacity-50">
+            {saving ? 'Saving...' : 'Next →'}
           </button>
         </form>
       </div>

@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-
-const KEY = 'nasib_brother_additional'
+import { createClient } from '@/lib/supabase'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
 const textareaCls =
   'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors resize-none'
@@ -92,16 +92,11 @@ function MultiPillGroup({
   )
 }
 
-function save(updates: Record<string, unknown>) {
-  try {
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-    localStorage.setItem(KEY, JSON.stringify({ ...s, ...updates }))
-  } catch {}
-}
-
 export default function BrotherAdditional() {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
+  const [userId,   setUserId]   = useState('')
+  const [dataLoading, setDataLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -136,34 +131,47 @@ export default function BrotherAdditional() {
   const [healthBackgroundDisclosure, setHealthBackgroundDisclosure] = useState('')
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s.do_you_listen_to_music)         setDoYouListenToMusic(s.do_you_listen_to_music)
-      if (s.celebrate_non_islamic_holidays)  setCelebrateNonIslamicHolidays(s.celebrate_non_islamic_holidays)
-      if (s.wife_hijab_importance)           setWifeHijabImportance(s.wife_hijab_importance)
-      if (s.jumuah_attendance)               setJumuahAttendance(s.jumuah_attendance)
-      if (s.differing_islamic_opinions)      setDifferingIslamicOpinions(s.differing_islamic_opinions)
-      if (s.annual_income_range)             setAnnualIncomeRange(s.annual_income_range)
-      if (s.own_or_rent)                     setOwnOrRent(s.own_or_rent)
-      if (s.has_significant_debt)            setHasSignificantDebt(s.has_significant_debt)
-      if (s.supporting_family_financially)   setSupportingFamilyFinancially(s.supporting_family_financially)
-      if (s.mahr_approach)                   setMahrApproach(s.mahr_approach)
-      if (s.number_of_children_wanted)       setNumberOfChildrenWanted(s.number_of_children_wanted)
-      if (s.wife_working_openness)           setWifeWorkingOpenness(s.wife_working_openness)
-      if (s.household_management)            setHouseholdManagement(s.household_management)
-      if (s.inlaws_living_together)          setInlawsLivingTogether(s.inlaws_living_together)
-      if (s.islamic_schooling_importance)    setIslamicSchoolingImportance(s.islamic_schooling_importance)
-      if (s.weekend_lifestyle)               setWeekendLifestyle(s.weekend_lifestyle)
-      if (s.mixed_gender_social_circle)      setMixedGenderSocialCircle(s.mixed_gender_social_circle)
-      if (s.travel_frequency)               setTravelFrequency(s.travel_frequency)
-      if (s.strict_halal_diet)              setStrictHalalDiet(s.strict_halal_diet)
-      if (s.smoking)                         setSmoking(s.smoking)
-      if (s.conflict_style)                  setConflictStyle(s.conflict_style)
-      if (s.introvert_extrovert)             setIntrovertExtrovert(s.introvert_extrovert)
-      if (s.love_language)                   setLoveLanguage(s.love_language)
-      if (s.alone_time_importance)           setAloneTimeImportance(s.alone_time_importance)
-      if (s.health_background_disclosure)    setHealthBackgroundDisclosure(s.health_background_disclosure)
-    } catch {}
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('brother_profiles')
+        .select('do_you_listen_to_music, celebrate_non_islamic_holidays, wife_hijab_importance, jumuah_attendance, differing_islamic_opinions, annual_income_range, own_or_rent, has_significant_debt, supporting_family_financially, mahr_approach, number_of_children_wanted, wife_working_openness, household_management, inlaws_living_together, islamic_schooling_importance, weekend_lifestyle, mixed_gender_social_circle, travel_frequency, strict_halal_diet, smoking, conflict_style, introvert_extrovert, love_language, alone_time_importance, health_background_disclosure')
+        .eq('id', user.id)
+        .single()
+      if (data) {
+        if (data.do_you_listen_to_music)        setDoYouListenToMusic(data.do_you_listen_to_music)
+        if (data.celebrate_non_islamic_holidays) setCelebrateNonIslamicHolidays(data.celebrate_non_islamic_holidays)
+        if (data.wife_hijab_importance)          setWifeHijabImportance(data.wife_hijab_importance)
+        if (data.jumuah_attendance)              setJumuahAttendance(data.jumuah_attendance)
+        if (data.differing_islamic_opinions)     setDifferingIslamicOpinions(data.differing_islamic_opinions)
+        if (data.annual_income_range)            setAnnualIncomeRange(data.annual_income_range)
+        if (data.own_or_rent)                    setOwnOrRent(data.own_or_rent)
+        if (data.has_significant_debt)           setHasSignificantDebt(data.has_significant_debt)
+        if (data.supporting_family_financially)  setSupportingFamilyFinancially(data.supporting_family_financially)
+        if (data.mahr_approach)                  setMahrApproach(data.mahr_approach)
+        if (data.number_of_children_wanted)      setNumberOfChildrenWanted(data.number_of_children_wanted)
+        if (data.wife_working_openness)          setWifeWorkingOpenness(data.wife_working_openness)
+        if (data.household_management)           setHouseholdManagement(data.household_management)
+        if (data.inlaws_living_together)         setInlawsLivingTogether(data.inlaws_living_together)
+        if (data.islamic_schooling_importance)   setIslamicSchoolingImportance(data.islamic_schooling_importance)
+        if (data.weekend_lifestyle)              setWeekendLifestyle(data.weekend_lifestyle)
+        if (data.mixed_gender_social_circle)     setMixedGenderSocialCircle(data.mixed_gender_social_circle)
+        if (data.travel_frequency)               setTravelFrequency(data.travel_frequency)
+        if (data.strict_halal_diet)              setStrictHalalDiet(data.strict_halal_diet)
+        if (data.smoking)                        setSmoking(data.smoking)
+        if (data.conflict_style)                 setConflictStyle(data.conflict_style)
+        if (data.introvert_extrovert)            setIntrovertExtrovert(data.introvert_extrovert)
+        if (data.love_language && Array.isArray(data.love_language)) setLoveLanguage(data.love_language)
+        if (data.alone_time_importance)          setAloneTimeImportance(data.alone_time_importance)
+        if (data.health_background_disclosure)   setHealthBackgroundDisclosure(data.health_background_disclosure)
+      }
+      setDataLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -202,38 +210,47 @@ export default function BrotherAdditional() {
     if (loveLanguage.length === 0)        { setError('Please select at least one love language'); return }
 
     setLoading(true)
-
-    const additionalData = {
-      do_you_listen_to_music:        doYouListenToMusic,
-      celebrate_non_islamic_holidays: celebrateNonIslamicHolidays,
-      wife_hijab_importance:          wifeHijabImportance,
-      jumuah_attendance:              jumuahAttendance,
-      differing_islamic_opinions:     differingIslamicOpinions.trim(),
-      annual_income_range:            annualIncomeRange,
-      own_or_rent:                    ownOrRent,
-      has_significant_debt:           hasSignificantDebt,
-      supporting_family_financially:  supportingFamilyFinancially,
-      mahr_approach:                  mahrApproach.trim(),
-      number_of_children_wanted:      numberOfChildrenWanted,
-      wife_working_openness:          wifeWorkingOpenness,
-      household_management:           householdManagement,
-      inlaws_living_together:         inlawsLivingTogether,
-      islamic_schooling_importance:   islamicSchoolingImportance,
-      weekend_lifestyle:              weekendLifestyle.trim(),
-      mixed_gender_social_circle:     mixedGenderSocialCircle,
-      travel_frequency:               travelFrequency,
-      strict_halal_diet:              strictHalalDiet,
-      smoking:                        smoking,
-      conflict_style:                 conflictStyle,
-      introvert_extrovert:            introvertExtrovert,
-      love_language:                  loveLanguage,
-      alone_time_importance:          aloneTimeImportance,
-      health_background_disclosure:   healthBackgroundDisclosure.trim() || null,
-    }
-
-    save(additionalData)
+    const supabase = createClient()
+    const { error: saveErr } = await supabase
+      .from('brother_profiles')
+      .upsert({
+        id:                             userId,
+        do_you_listen_to_music:         doYouListenToMusic,
+        celebrate_non_islamic_holidays: celebrateNonIslamicHolidays,
+        wife_hijab_importance:          wifeHijabImportance,
+        jumuah_attendance:              jumuahAttendance,
+        differing_islamic_opinions:     differingIslamicOpinions.trim(),
+        annual_income_range:            annualIncomeRange,
+        own_or_rent:                    ownOrRent,
+        has_significant_debt:           hasSignificantDebt,
+        supporting_family_financially:  supportingFamilyFinancially,
+        mahr_approach:                  mahrApproach.trim(),
+        number_of_children_wanted:      numberOfChildrenWanted,
+        wife_working_openness:          wifeWorkingOpenness,
+        household_management:           householdManagement,
+        inlaws_living_together:         inlawsLivingTogether,
+        islamic_schooling_importance:   islamicSchoolingImportance,
+        weekend_lifestyle:              weekendLifestyle.trim(),
+        mixed_gender_social_circle:     mixedGenderSocialCircle,
+        travel_frequency:               travelFrequency,
+        strict_halal_diet:              strictHalalDiet,
+        smoking:                        smoking,
+        conflict_style:                 conflictStyle,
+        introvert_extrovert:            introvertExtrovert,
+        love_language:                  loveLanguage,
+        alone_time_importance:          aloneTimeImportance,
+        health_background_disclosure:   healthBackgroundDisclosure.trim() || null,
+      }, { onConflict: 'id' })
+    if (saveErr) { setError(saveErr.message); setLoading(false); return }
+    await recalculateCompletion(userId, 'brother')
     router.push('/onboarding/brother/deepdive')
   }
+
+  if (dataLoading) return (
+    <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]">
@@ -251,34 +268,34 @@ export default function BrotherAdditional() {
                 <PillGroup
                   options={['Yes', 'No', 'Nasheeds only', 'Occasionally']}
                   value={doYouListenToMusic}
-                  onChange={v => { setDoYouListenToMusic(v); save({ do_you_listen_to_music: v }) }}
+                  onChange={v => { setDoYouListenToMusic(v) }}
                 />
               </Question>
               <Question label="Do you celebrate birthdays or non-Islamic holidays?">
                 <PillGroup
                   options={['Yes', 'No', 'Birthdays only', 'Rarely']}
                   value={celebrateNonIslamicHolidays}
-                  onChange={v => { setCelebrateNonIslamicHolidays(v); save({ celebrate_non_islamic_holidays: v }) }}
+                  onChange={v => { setCelebrateNonIslamicHolidays(v) }}
                 />
               </Question>
               <Question label="How important is it that your wife wears hijab?">
                 <PillGroup
                   options={['Required', 'Strongly preferred', 'Preferred', 'Not a requirement']}
                   value={wifeHijabImportance}
-                  onChange={v => { setWifeHijabImportance(v); save({ wife_hijab_importance: v }) }}
+                  onChange={v => { setWifeHijabImportance(v) }}
                 />
               </Question>
               <Question label="How often do you attend Jumu'ah and congregational prayers?">
                 <PillGroup
                   options={['Every week', 'Most weeks', 'When I can', 'Working on it']}
                   value={jumuahAttendance}
-                  onChange={v => { setJumuahAttendance(v); save({ jumuah_attendance: v }) }}
+                  onChange={v => { setJumuahAttendance(v) }}
                 />
               </Question>
               <Question label="How do you approach differences in Islamic opinion between spouses?">
                 <textarea
                   value={differingIslamicOpinions}
-                  onChange={e => { setDifferingIslamicOpinions(e.target.value); save({ differing_islamic_opinions: e.target.value }) }}
+                  onChange={e => { setDifferingIslamicOpinions(e.target.value) }}
                   rows={3}
                   placeholder="e.g. I believe we should discuss openly and respect each other's madhab..."
                   className={textareaCls}
@@ -295,34 +312,34 @@ export default function BrotherAdditional() {
                 <PillGroup
                   options={['Under $30k', '$30k–$60k', '$60k–$100k', '$100k–$150k', '$150k+', 'Prefer not to say']}
                   value={annualIncomeRange}
-                  onChange={v => { setAnnualIncomeRange(v); save({ annual_income_range: v }) }}
+                  onChange={v => { setAnnualIncomeRange(v) }}
                 />
               </Question>
               <Question label="Do you own or rent your home?">
                 <PillGroup
                   options={['Own', 'Rent', 'Living with family', 'Other']}
                   value={ownOrRent}
-                  onChange={v => { setOwnOrRent(v); save({ own_or_rent: v }) }}
+                  onChange={v => { setOwnOrRent(v) }}
                 />
               </Question>
               <Question label="Do you have any significant debt?">
                 <PillGroup
                   options={['No', 'Yes — student loans', 'Yes — other', 'Prefer not to say']}
                   value={hasSignificantDebt}
-                  onChange={v => { setHasSignificantDebt(v); save({ has_significant_debt: v }) }}
+                  onChange={v => { setHasSignificantDebt(v) }}
                 />
               </Question>
               <Question label="Are you currently financially supporting parents or family members?">
                 <PillGroup
                   options={['Yes — significant', 'Yes — some', 'No', 'Occasionally']}
                   value={supportingFamilyFinancially}
-                  onChange={v => { setSupportingFamilyFinancially(v); save({ supporting_family_financially: v }) }}
+                  onChange={v => { setSupportingFamilyFinancially(v) }}
                 />
               </Question>
               <Question label="How do you approach mahr?">
                 <textarea
                   value={mahrApproach}
-                  onChange={e => { setMahrApproach(e.target.value); save({ mahr_approach: e.target.value }) }}
+                  onChange={e => { setMahrApproach(e.target.value) }}
                   rows={3}
                   placeholder="e.g. I believe mahr should be meaningful but not a burden..."
                   className={textareaCls}
@@ -339,35 +356,35 @@ export default function BrotherAdditional() {
                 <PillGroup
                   options={['1–2', '3–4', '5+', 'Open to whatever Allah wills', 'None']}
                   value={numberOfChildrenWanted}
-                  onChange={v => { setNumberOfChildrenWanted(v); save({ number_of_children_wanted: v }) }}
+                  onChange={v => { setNumberOfChildrenWanted(v) }}
                 />
               </Question>
               <Question label="Are you open to your wife working after marriage?">
                 <PillGroup
                   options={["Yes fully", "Yes with conditions", "Prefer she doesn't", "No"]}
                   value={wifeWorkingOpenness}
-                  onChange={v => { setWifeWorkingOpenness(v); save({ wife_working_openness: v }) }}
+                  onChange={v => { setWifeWorkingOpenness(v) }}
                 />
               </Question>
               <Question label="Who do you expect to manage the household day to day?">
                 <PillGroup
                   options={['My wife primarily', 'Shared equally', 'Flexible', 'We would decide together']}
                   value={householdManagement}
-                  onChange={v => { setHouseholdManagement(v); save({ household_management: v }) }}
+                  onChange={v => { setHouseholdManagement(v) }}
                 />
               </Question>
               <Question label="Would you be open to your in-laws living with you?">
                 <PillGroup
                   options={['Yes', 'Possibly', 'No', 'Depends on circumstances']}
                   value={inlawsLivingTogether}
-                  onChange={v => { setInlawsLivingTogether(v); save({ inlaws_living_together: v }) }}
+                  onChange={v => { setInlawsLivingTogether(v) }}
                 />
               </Question>
               <Question label="How important is Islamic schooling for your children?">
                 <PillGroup
                   options={['Very important — required', 'Important', 'Somewhat important', 'Not a priority']}
                   value={islamicSchoolingImportance}
-                  onChange={v => { setIslamicSchoolingImportance(v); save({ islamic_schooling_importance: v }) }}
+                  onChange={v => { setIslamicSchoolingImportance(v) }}
                 />
               </Question>
             </div>
@@ -380,7 +397,7 @@ export default function BrotherAdditional() {
               <Question label="How do you spend your weekends typically?">
                 <textarea
                   value={weekendLifestyle}
-                  onChange={e => { setWeekendLifestyle(e.target.value); save({ weekend_lifestyle: e.target.value }) }}
+                  onChange={e => { setWeekendLifestyle(e.target.value) }}
                   rows={3}
                   placeholder="e.g. Family time, outdoor activities, Islamic studies..."
                   className={textareaCls}
@@ -390,28 +407,28 @@ export default function BrotherAdditional() {
                 <PillGroup
                   options={['Yes', 'No', 'Professionally only', 'Working on changing this']}
                   value={mixedGenderSocialCircle}
-                  onChange={v => { setMixedGenderSocialCircle(v); save({ mixed_gender_social_circle: v }) }}
+                  onChange={v => { setMixedGenderSocialCircle(v) }}
                 />
               </Question>
               <Question label="How often do you travel and would you expect your wife to travel with you?">
                 <PillGroup
                   options={['Rarely', 'A few times a year', 'Monthly', 'Frequently — yes she would join', 'Frequently — independently']}
                   value={travelFrequency}
-                  onChange={v => { setTravelFrequency(v); save({ travel_frequency: v }) }}
+                  onChange={v => { setTravelFrequency(v) }}
                 />
               </Question>
               <Question label="Do you follow a strict halal diet?">
                 <PillGroup
                   options={['Yes — strictly', 'Mostly', 'No pork but not strict', 'Not strictly']}
                   value={strictHalalDiet}
-                  onChange={v => { setStrictHalalDiet(v); save({ strict_halal_diet: v }) }}
+                  onChange={v => { setStrictHalalDiet(v) }}
                 />
               </Question>
               <Question label="Do you smoke or use tobacco products?">
                 <PillGroup
                   options={['No', 'Yes', 'Occasionally', 'Trying to quit']}
                   value={smoking}
-                  onChange={v => { setSmoking(v); save({ smoking: v }) }}
+                  onChange={v => { setSmoking(v) }}
                 />
               </Question>
             </div>
@@ -425,21 +442,21 @@ export default function BrotherAdditional() {
                 <PillGroup
                   options={['Need space first then talk', 'Prefer to resolve immediately', 'Depends on situation', 'Still working on this']}
                   value={conflictStyle}
-                  onChange={v => { setConflictStyle(v); save({ conflict_style: v }) }}
+                  onChange={v => { setConflictStyle(v) }}
                 />
               </Question>
               <Question label="Are you more introverted or extroverted?">
                 <PillGroup
                   options={['Very introverted', 'Mostly introverted', 'Mostly extroverted', 'Very extroverted', 'Ambivert']}
                   value={introvertExtrovert}
-                  onChange={v => { setIntrovertExtrovert(v); save({ introvert_extrovert: v }) }}
+                  onChange={v => { setIntrovertExtrovert(v) }}
                 />
               </Question>
               <Question label="How do you express love and affection?" note="Choose up to 3">
                 <MultiPillGroup
                   options={['Words of affirmation', 'Quality time', 'Acts of service', 'Gift giving', 'Physical affection', 'All of the above']}
                   values={loveLanguage}
-                  onChange={v => { setLoveLanguage(v); save({ love_language: v }) }}
+                  onChange={v => { setLoveLanguage(v) }}
                   max={3}
                 />
               </Question>
@@ -447,7 +464,7 @@ export default function BrotherAdditional() {
                 <PillGroup
                   options={['Very important — I need regular alone time', 'Somewhat important', 'Not very important', 'I prefer company']}
                   value={aloneTimeImportance}
-                  onChange={v => { setAloneTimeImportance(v); save({ alone_time_importance: v }) }}
+                  onChange={v => { setAloneTimeImportance(v) }}
                 />
               </Question>
               <Question
@@ -456,7 +473,7 @@ export default function BrotherAdditional() {
               >
                 <textarea
                   value={healthBackgroundDisclosure}
-                  onChange={e => { setHealthBackgroundDisclosure(e.target.value); save({ health_background_disclosure: e.target.value }) }}
+                  onChange={e => { setHealthBackgroundDisclosure(e.target.value) }}
                   rows={3}
                   placeholder="This is optional but encouraged for transparency. This information is private and only shared with matches."
                   className={textareaCls}

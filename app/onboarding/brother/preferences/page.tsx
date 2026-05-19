@@ -2,13 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
-const KEY = 'nasib_onboarding_brother'
 const inputCls    = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors'
 const textareaCls = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors resize-none'
 
 export default function BrotherPreferences() {
   const router = useRouter()
+  const [userId,            setUserId]            = useState('')
+  const [loading,           setLoading]           = useState(true)
+  const [saving,            setSaving]            = useState(false)
   const [spouseReligiosity, setSpouseReligiosity] = useState('')
   const [ageMin,            setAgeMin]            = useState('')
   const [ageMax,            setAgeMax]            = useState('')
@@ -16,36 +20,58 @@ export default function BrotherPreferences() {
   const [error,             setError]             = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s.spouse_religiosity_preference) setSpouseReligiosity(s.spouse_religiosity_preference)
-      if (s.spouse_age_min) setAgeMin(String(s.spouse_age_min))
-      if (s.spouse_age_max) setAgeMax(String(s.spouse_age_max))
-      if (s.dealbreakers)   setDealbreakers(Array.isArray(s.dealbreakers) ? s.dealbreakers.join(', ') : s.dealbreakers)
-    } catch {}
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('brother_profiles')
+        .select('spouse_religiosity_preference, spouse_age_min, spouse_age_max, dealbreakers')
+        .eq('id', user.id)
+        .single()
+      if (data) {
+        if (data.spouse_religiosity_preference) setSpouseReligiosity(data.spouse_religiosity_preference)
+        if (data.spouse_age_min) setAgeMin(String(data.spouse_age_min))
+        if (data.spouse_age_max) setAgeMax(String(data.spouse_age_max))
+        if (data.dealbreakers && Array.isArray(data.dealbreakers)) setDealbreakers(data.dealbreakers.join(', '))
+      }
+      setLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handleNext(e: React.FormEvent) {
+  async function handleNext(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-
     const minNum = ageMin ? parseInt(ageMin) : null
     const maxNum = ageMax ? parseInt(ageMax) : null
     if (minNum !== null && maxNum !== null && minNum > maxNum) {
       setError('Minimum age cannot be greater than maximum age.')
       return
     }
-
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-    localStorage.setItem(KEY, JSON.stringify({
-      ...s,
-      spouse_religiosity_preference: spouseReligiosity.trim() || null,
-      spouse_age_min:  minNum,
-      spouse_age_max:  maxNum,
-      dealbreakers:    dealbreakers.split(',').map(d => d.trim()).filter(Boolean),
-    }))
+    setSaving(true)
+    const supabase = createClient()
+    const { error: saveErr } = await supabase
+      .from('brother_profiles')
+      .upsert({
+        id:                            userId,
+        spouse_religiosity_preference: spouseReligiosity.trim() || null,
+        spouse_age_min:                minNum,
+        spouse_age_max:                maxNum,
+        dealbreakers:                  dealbreakers.split(',').map(d => d.trim()).filter(Boolean),
+      }, { onConflict: 'id' })
+    if (saveErr) { setError(saveErr.message); setSaving(false); return }
+    await recalculateCompletion(userId, 'brother')
     router.push('/onboarding/brother/character')
   }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]">
@@ -88,9 +114,9 @@ export default function BrotherPreferences() {
             <div className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">{error}</div>
           )}
 
-          <button type="submit"
-            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors">
-            Next →
+          <button type="submit" disabled={saving}
+            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors disabled:opacity-50">
+            {saving ? 'Saving...' : 'Next →'}
           </button>
         </form>
       </div>

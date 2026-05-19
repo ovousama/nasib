@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
-const KEY = 'nasib_onboarding_sister'
 const selectCls = 'w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white'
 
 function YesNo({ value, onChange }: { value: boolean | null; onChange: (v: boolean) => void }) {
@@ -25,37 +26,63 @@ function YesNo({ value, onChange }: { value: boolean | null; onChange: (v: boole
 
 export default function SisterMarriage() {
   const router = useRouter()
+  const [userId,           setUserId]           = useState('')
+  const [loading,          setLoading]          = useState(true)
+  const [saving,           setSaving]           = useState(false)
   const [previouslyMarried, setPreviouslyMarried] = useState<boolean | null>(null)
-  const [hasChildren,       setHasChildren]       = useState<boolean | null>(null)
-  const [wantsChildren,     setWantsChildren]     = useState<boolean | null>(null)
-  const [timeline,          setTimeline]          = useState('')
-  const [error,             setError]             = useState<string | null>(null)
+  const [hasChildren,      setHasChildren]      = useState<boolean | null>(null)
+  const [wantsChildren,    setWantsChildren]    = useState<boolean | null>(null)
+  const [timeline,         setTimeline]         = useState('')
+  const [error,            setError]            = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s.previously_married !== undefined && s.previously_married !== null) setPreviouslyMarried(s.previously_married)
-      if (s.has_children       !== undefined && s.has_children       !== null) setHasChildren(s.has_children)
-      if (s.wants_children     !== undefined && s.wants_children     !== null) setWantsChildren(s.wants_children)
-      if (s.timeline_to_marry) setTimeline(s.timeline_to_marry)
-    } catch {}
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('sister_profiles')
+        .select('previously_married, has_children, wants_children, timeline_to_marry')
+        .eq('id', user.id)
+        .single()
+      if (data) {
+        if (data.previously_married !== null && data.previously_married !== undefined) setPreviouslyMarried(data.previously_married)
+        if (data.has_children       !== null && data.has_children       !== undefined) setHasChildren(data.has_children)
+        if (data.wants_children     !== null && data.wants_children     !== undefined) setWantsChildren(data.wants_children)
+        if (data.timeline_to_marry) setTimeline(data.timeline_to_marry)
+      }
+      setLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handleNext(e: React.FormEvent) {
+  async function handleNext(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     if (!timeline) { setError('Please select your timeline to marry.'); return }
-
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-    localStorage.setItem(KEY, JSON.stringify({
-      ...s,
-      previously_married: previouslyMarried,
-      has_children:       hasChildren,
-      wants_children:     wantsChildren,
-      timeline_to_marry:  timeline,
-    }))
+    setSaving(true)
+    const supabase = createClient()
+    const { error: saveErr } = await supabase
+      .from('sister_profiles')
+      .upsert({
+        id:                userId,
+        previously_married: previouslyMarried,
+        has_children:       hasChildren,
+        wants_children:     wantsChildren,
+        timeline_to_marry:  timeline,
+      }, { onConflict: 'id' })
+    if (saveErr) { setError(saveErr.message); setSaving(false); return }
+    await recalculateCompletion(userId, 'sister')
     router.push('/onboarding/sister/preferences')
   }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
@@ -93,9 +120,9 @@ export default function SisterMarriage() {
           <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
         )}
 
-        <button type="submit"
-          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm">
-          Next →
+        <button type="submit" disabled={saving}
+          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-50">
+          {saving ? 'Saving...' : 'Next →'}
         </button>
       </form>
     </div>

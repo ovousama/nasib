@@ -141,18 +141,18 @@ function Section({
 // ─── Completion banner ─────────────────────────────────────────────────────────
 
 function CompletionBanner({ percentage }: { percentage: number }) {
-  if (percentage >= 100) return null
+  if (percentage >= 80) return null
   return (
     <div className="bg-white border border-[#EDE8E3] rounded-[16px] p-4 mb-4">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[13px] font-medium text-[#1A1A1A]">Complete your profile to receive matches</p>
+        <p className="text-[13px] font-medium text-[#1A1A1A]">Your profile is {percentage}% complete</p>
         <span className="text-[12px] font-medium text-[#AF4D98]">{percentage}%</span>
       </div>
       <div className="h-1.5 bg-[#EDE8E3] rounded-full overflow-hidden mb-3">
         <div className="h-1.5 bg-[#AF4D98] rounded-full transition-all" style={{ width: `${percentage}%` }} />
       </div>
       <p className="text-[12px] text-[#9B9B9B]">
-        Answer all questions to unlock your matches. Each section has an Edit button.
+        Reach 80% to unlock your matches. Each section below has an Edit button.
       </p>
     </div>
   )
@@ -315,13 +315,26 @@ export default function ProfilePageClient({
 
         {/* ── WALI (sisters only) ─────────────────────────────────────────── */}
         {!isBrother && (
-          <Section title="Wali" editHref="/dashboard/profile/edit/wali" testId="section-wali">
-            <F label="Name"><PillValue v={waliProfile?.full_name} /></F>
-            <F label="Relationship"><PillValue v={waliProfile?.relationship} /></F>
-            <F label="Email"><TextValue v={waliProfile?.email} /></F>
-            <F label="Phone"><TextValue v={waliProfile?.phone} /></F>
-            <F label="Preferred Contact"><PillValue v={waliProfile?.preferred_contact_method} /></F>
-          </Section>
+          waliProfile ? (
+            <Section title="Wali" editHref="/dashboard/profile/edit/wali" testId="section-wali">
+              <F label="Name"><PillValue v={waliProfile.full_name} /></F>
+              <F label="Relationship"><PillValue v={waliProfile.relationship} /></F>
+              <F label="Email"><TextValue v={waliProfile.email} /></F>
+              <F label="Phone"><TextValue v={waliProfile.phone} /></F>
+              <F label="Preferred Contact"><PillValue v={waliProfile.preferred_contact_method} /></F>
+            </Section>
+          ) : (
+            <div className="border-2 border-dashed border-[#EDE8E3] rounded-[16px] p-5 mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[13px] font-medium text-[#1A1A1A]">Add a wali</p>
+                <p className="text-[12px] text-[#9B9B9B] mt-0.5">Optional — they receive read-only visibility</p>
+              </div>
+              <Link href="/dashboard/profile/edit/wali"
+                className="text-[13px] text-[#AF4D98] font-medium hover:text-[#9B3D85] transition-colors">
+                Add →
+              </Link>
+            </div>
+          )
         )}
 
         {/* ── BASIC INFO ──────────────────────────────────────────────────── */}

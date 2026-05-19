@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
-const KEY = 'nasib_onboarding_brother'
 type Religiosity = 'practicing' | 'moderately_practicing' | 'learning'
 
 const LEVELS: { value: Religiosity; label: string; sub: string }[] = [
@@ -17,42 +18,68 @@ const inputCls  = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-
 
 export default function BrotherReligiosity() {
   const router = useRouter()
-  const [religiosity,      setReligiosity]      = useState<Religiosity | null>(null)
-  const [madhab,           setMadhab]           = useState('')
-  const [prayerFreq,       setPrayerFreq]       = useState('')
+  const [userId,          setUserId]          = useState('')
+  const [loading,         setLoading]         = useState(true)
+  const [saving,          setSaving]          = useState(false)
+  const [religiosity,     setReligiosity]     = useState<Religiosity | null>(null)
+  const [madhab,          setMadhab]          = useState('')
+  const [prayerFreq,      setPrayerFreq]      = useState('')
   const [islamicKnowledge, setIslamicKnowledge] = useState('')
-  const [hasBeard,         setHasBeard]         = useState<boolean | null>(null)
-  const [error,            setError]            = useState<string | null>(null)
+  const [hasBeard,        setHasBeard]        = useState<boolean | null>(null)
+  const [error,           setError]           = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s.religiosity_level)       setReligiosity(s.religiosity_level)
-      if (s.madhab)                  setMadhab(s.madhab)
-      if (s.prayer_frequency)        setPrayerFreq(s.prayer_frequency)
-      if (s.islamic_knowledge_level) setIslamicKnowledge(s.islamic_knowledge_level)
-      if (s.has_beard !== undefined && s.has_beard !== null) setHasBeard(s.has_beard)
-    } catch {}
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('brother_profiles')
+        .select('religiosity_level, madhab, prayer_frequency, islamic_knowledge_level, has_beard')
+        .eq('id', user.id)
+        .single()
+      if (data) {
+        if (data.religiosity_level)       setReligiosity(data.religiosity_level)
+        if (data.madhab)                  setMadhab(data.madhab)
+        if (data.prayer_frequency)        setPrayerFreq(data.prayer_frequency)
+        if (data.islamic_knowledge_level) setIslamicKnowledge(data.islamic_knowledge_level)
+        if (data.has_beard !== null && data.has_beard !== undefined) setHasBeard(data.has_beard)
+      }
+      setLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handleNext(e: React.FormEvent) {
+  async function handleNext(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     if (!religiosity)      { setError('Please select your religiosity level.'); return }
     if (!prayerFreq)       { setError('Please select your prayer frequency.'); return }
     if (!islamicKnowledge) { setError('Please select your Islamic knowledge level.'); return }
-
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-    localStorage.setItem(KEY, JSON.stringify({
-      ...s,
-      religiosity_level:       religiosity,
-      madhab:                  madhab.trim() || null,
-      prayer_frequency:        prayerFreq,
-      islamic_knowledge_level: islamicKnowledge,
-      has_beard:               hasBeard,
-    }))
+    setSaving(true)
+    const supabase = createClient()
+    const { error: saveErr } = await supabase
+      .from('brother_profiles')
+      .upsert({
+        id:                      userId,
+        religiosity_level:       religiosity,
+        madhab:                  madhab.trim() || null,
+        prayer_frequency:        prayerFreq,
+        islamic_knowledge_level: islamicKnowledge,
+        has_beard:               hasBeard,
+      }, { onConflict: 'id' })
+    if (saveErr) { setError(saveErr.message); setSaving(false); return }
+    await recalculateCompletion(userId, 'brother')
     router.push('/onboarding/brother/lifestyle')
   }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]">
@@ -62,7 +89,6 @@ export default function BrotherReligiosity() {
 
         <form onSubmit={handleNext} className="space-y-6">
 
-          {/* Religiosity */}
           <div>
             <label className="block text-sm font-medium text-[#1A1A1A] mb-3">Religiosity Level</label>
             <div className="space-y-3">
@@ -82,7 +108,6 @@ export default function BrotherReligiosity() {
             </div>
           </div>
 
-          {/* Madhab */}
           <div>
             <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
               Madhab <span className="text-[#9B9B9B] font-normal">(optional)</span>
@@ -91,7 +116,6 @@ export default function BrotherReligiosity() {
               placeholder="e.g. Hanafi, Shafi'i, Maliki, Hanbali" className={inputCls} />
           </div>
 
-          {/* Prayer frequency */}
           <div>
             <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Prayer Frequency</label>
             <select value={prayerFreq} onChange={e => setPrayerFreq(e.target.value)} className={selectCls}>
@@ -103,7 +127,6 @@ export default function BrotherReligiosity() {
             </select>
           </div>
 
-          {/* Islamic knowledge */}
           <div>
             <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Islamic Knowledge Level</label>
             <select value={islamicKnowledge} onChange={e => setIslamicKnowledge(e.target.value)} className={selectCls}>
@@ -114,7 +137,6 @@ export default function BrotherReligiosity() {
             </select>
           </div>
 
-          {/* Has beard */}
           <div>
             <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Do you keep a beard?</label>
             <div className="flex gap-3">
@@ -135,9 +157,9 @@ export default function BrotherReligiosity() {
             <div className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">{error}</div>
           )}
 
-          <button type="submit"
-            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors">
-            Next →
+          <button type="submit" disabled={saving}
+            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors disabled:opacity-50">
+            {saving ? 'Saving...' : 'Next →'}
           </button>
         </form>
       </div>

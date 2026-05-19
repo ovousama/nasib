@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
-const KEY = 'nasib_onboarding_sister'
 type Religiosity = 'practicing' | 'moderately_practicing' | 'learning'
 
 const LEVELS: { value: Religiosity; label: string; sub: string }[] = [
@@ -17,42 +18,68 @@ const inputCls  = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:out
 
 export default function SisterReligiosity() {
   const router = useRouter()
-  const [religiosity,      setReligiosity]      = useState<Religiosity | null>(null)
-  const [madhab,           setMadhab]           = useState('')
-  const [prayerFreq,       setPrayerFreq]       = useState('')
+  const [userId,          setUserId]          = useState('')
+  const [loading,         setLoading]         = useState(true)
+  const [saving,          setSaving]          = useState(false)
+  const [religiosity,     setReligiosity]     = useState<Religiosity | null>(null)
+  const [madhab,          setMadhab]          = useState('')
+  const [prayerFreq,      setPrayerFreq]      = useState('')
   const [islamicKnowledge, setIslamicKnowledge] = useState('')
-  const [wearsHijab,       setWearsHijab]       = useState('')
-  const [error,            setError]            = useState<string | null>(null)
+  const [wearsHijab,      setWearsHijab]      = useState('')
+  const [error,           setError]           = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s.religiosity_level)       setReligiosity(s.religiosity_level)
-      if (s.madhab)                  setMadhab(s.madhab)
-      if (s.prayer_frequency)        setPrayerFreq(s.prayer_frequency)
-      if (s.islamic_knowledge_level) setIslamicKnowledge(s.islamic_knowledge_level)
-      if (s.wears_hijab)             setWearsHijab(s.wears_hijab)
-    } catch {}
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('sister_profiles')
+        .select('religiosity_level, madhab, prayer_frequency, islamic_knowledge_level, wears_hijab')
+        .eq('id', user.id)
+        .single()
+      if (data) {
+        if (data.religiosity_level)       setReligiosity(data.religiosity_level)
+        if (data.madhab)                  setMadhab(data.madhab)
+        if (data.prayer_frequency)        setPrayerFreq(data.prayer_frequency)
+        if (data.islamic_knowledge_level) setIslamicKnowledge(data.islamic_knowledge_level)
+        if (data.wears_hijab)             setWearsHijab(data.wears_hijab)
+      }
+      setLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handleNext(e: React.FormEvent) {
+  async function handleNext(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     if (!religiosity)      { setError('Please select your religiosity level.'); return }
     if (!prayerFreq)       { setError('Please select your prayer frequency.'); return }
     if (!islamicKnowledge) { setError('Please select your Islamic knowledge level.'); return }
-
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-    localStorage.setItem(KEY, JSON.stringify({
-      ...s,
-      religiosity_level:       religiosity,
-      madhab:                  madhab.trim() || null,
-      prayer_frequency:        prayerFreq,
-      islamic_knowledge_level: islamicKnowledge,
-      wears_hijab:             wearsHijab || null,
-    }))
+    setSaving(true)
+    const supabase = createClient()
+    const { error: saveErr } = await supabase
+      .from('sister_profiles')
+      .upsert({
+        id:                      userId,
+        religiosity_level:       religiosity,
+        madhab:                  madhab.trim() || null,
+        prayer_frequency:        prayerFreq,
+        islamic_knowledge_level: islamicKnowledge,
+        wears_hijab:             wearsHijab || null,
+      }, { onConflict: 'id' })
+    if (saveErr) { setError(saveErr.message); setSaving(false); return }
+    await recalculateCompletion(userId, 'sister')
     router.push('/onboarding/sister/lifestyle')
   }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
@@ -124,9 +151,9 @@ export default function SisterReligiosity() {
           <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
         )}
 
-        <button type="submit"
-          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm">
-          Next →
+        <button type="submit" disabled={saving}
+          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-50">
+          {saving ? 'Saving...' : 'Next →'}
         </button>
       </form>
     </div>

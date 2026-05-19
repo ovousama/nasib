@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
-const KEY = 'nasib_onboarding_brother'
 const inputCls = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors'
 
 export default function BrotherReference() {
   const router = useRouter()
+  const [userId,          setUserId]          = useState('')
   const [refName,         setRefName]         = useState('')
   const [refRelationship, setRefRelationship] = useState('')
   const [refEmail,        setRefEmail]        = useState('')
@@ -17,13 +18,25 @@ export default function BrotherReference() {
   const [error,           setError]           = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (s._ref_name)         setRefName(s._ref_name)
-      if (s._ref_relationship) setRefRelationship(s._ref_relationship)
-      if (s._ref_email)        setRefEmail(s._ref_email)
-      if (s._ref_phone)        setRefPhone(s._ref_phone)
-    } catch {}
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('references')
+        .select('referee_name,referee_relationship,referee_email,referee_phone')
+        .eq('profile_id', user.id)
+        .single()
+      if (data) {
+        if (data.referee_name)         setRefName(data.referee_name)
+        if (data.referee_relationship) setRefRelationship(data.referee_relationship)
+        if (data.referee_email)        setRefEmail(data.referee_email)
+        if (data.referee_phone)        setRefPhone(data.referee_phone)
+      }
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -31,90 +44,21 @@ export default function BrotherReference() {
     setError(null)
     setLoading(true)
 
-    try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+    const supabase = createClient()
+    const { error: refErr } = await supabase
+      .from('references')
+      .upsert({
+        profile_id:           userId,
+        referee_name:         refName.trim(),
+        referee_relationship: refRelationship.trim(),
+        referee_email:        refEmail.trim(),
+        referee_phone:        refPhone.trim() || null,
+        status:               'pending',
+      }, { onConflict: 'profile_id' })
 
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      const a = JSON.parse(localStorage.getItem('nasib_brother_additional') || '{}')
-      const d = JSON.parse(localStorage.getItem('naseeb_brother_deepdive') || '{}')
-
-      // 1. Upsert brother_profiles
-      const { error: profileErr } = await supabase
-        .from('brother_profiles')
-        .upsert({
-          id:                           user.id,
-          full_name:                    s.full_name,
-          age:                          s.age,
-          location:                     s.location     ?? null,
-          ethnicity:                    s.ethnicity    ?? null,
-          languages:                    s.languages    ?? [],
-          religiosity_level:            s.religiosity_level ?? null,
-          madhab:                       s.madhab       ?? null,
-          prayer_frequency:             s.prayer_frequency ?? null,
-          islamic_knowledge_level:      s.islamic_knowledge_level ?? null,
-          has_beard:                    s.has_beard    ?? null,
-          occupation:                   s.occupation   ?? null,
-          education_level:              s.education_level ?? null,
-          living_situation:             s.living_situation ?? null,
-          willing_to_relocate:          s.willing_to_relocate ?? null,
-          financial_readiness:          s.financial_readiness ?? null,
-          polygamy_openness:            s.polygamy_openness ?? null,
-          previously_married:           s.previously_married ?? null,
-          has_children:                 s.has_children ?? null,
-          wants_children:               s.wants_children ?? null,
-          timeline_to_marry:            s.timeline_to_marry ?? null,
-          spouse_religiosity_preference: s.spouse_religiosity_preference ?? null,
-          spouse_age_min:               s.spouse_age_min ?? null,
-          spouse_age_max:               s.spouse_age_max ?? null,
-          dealbreakers:                 s.dealbreakers ?? [],
-          character_description:        s.character_description ?? null,
-          goals:                        s.goals ?? null,
-          photo_url:                    s.photo_url ?? null,
-          ...a,
-          ...d,
-        }, { onConflict: 'id' })
-
-      if (profileErr) throw profileErr
-
-      // 1b. Calculate and persist profile completion
-      const { data: fullProfile } = await supabase.from('brother_profiles').select('*').eq('id', user.id).single()
-      if (fullProfile) {
-        const { calculateCompletion } = await import('@/lib/profile-completion')
-        const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'brother')
-        await supabase.from('profiles').update({
-          profile_complete: isComplete,
-          profile_completion_percentage: percentage,
-          status: isComplete ? 'active' : 'pending_verification',
-        }).eq('id', user.id)
-      }
-
-      // 2. Upsert reference (safe on retry)
-      const { error: refErr } = await supabase
-        .from('references')
-        .upsert({
-          profile_id:           user.id,
-          referee_name:         refName.trim(),
-          referee_relationship: refRelationship.trim(),
-          referee_email:        refEmail.trim(),
-          referee_phone:        refPhone.trim() || null,
-          status:               'pending',
-        }, { onConflict: 'profile_id' })
-
-      if (refErr) throw refErr
-
-      // 3. Clear onboarding data
-      localStorage.removeItem(KEY)
-      localStorage.removeItem('nasib_brother_additional')
-      localStorage.removeItem('naseeb_brother_deepdive')
-      localStorage.removeItem('naseeb_onboarding_started')
-
-      router.push('/dashboard')
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
-      setLoading(false)
-    }
+    if (refErr) { setError(refErr.message); setLoading(false); return }
+    await recalculateCompletion(userId, 'brother')
+    router.push('/dashboard')
   }
 
   return (
@@ -167,7 +111,7 @@ export default function BrotherReference() {
             </p>
           </div>
 
-          <button type="submit" disabled={loading}
+          <button type="submit" disabled={loading || !userId}
             className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
             {loading ? 'Submitting...' : 'Submit Profile'}
           </button>

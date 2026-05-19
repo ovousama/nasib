@@ -24,9 +24,6 @@ export default function OnboardingStart() {
   }, [router])
 
   function handleBegin() {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('naseeb_onboarding_started', 'true')
-    }
     if (gender === 'sister') {
       router.push('/onboarding/sister')
     } else {

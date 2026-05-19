@@ -153,6 +153,6 @@ export function calculateCompletion(
   return {
     percentage,
     missingFields,
-    isComplete: missingFields.length === 0,
+    isComplete: percentage >= 80,
   }
 }

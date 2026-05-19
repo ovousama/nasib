@@ -4,8 +4,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-
-const KEY = 'nasib_onboarding_brother'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
 function toStoragePath(urlOrPath: string): string {
   const marker = '/object/public/brother-photos/'
@@ -20,24 +19,32 @@ function toStoragePath(urlOrPath: string): string {
 export default function BrotherPhoto() {
   const router      = useRouter()
   const inputRef    = useRef<HTMLInputElement>(null)
+  const [userId,    setUserId]    = useState('')
   const [preview,   setPreview]   = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploaded,  setUploaded]  = useState(false)
   const [error,     setError]     = useState<string | null>(null)
 
   useEffect(() => {
-    async function loadSaved() {
-      try {
-        const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-        if (!s.photo_url) return
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('brother_profiles')
+        .select('photo_url')
+        .eq('id', user.id)
+        .single()
+      if (data?.photo_url) {
         setUploaded(true)
-        const path = toStoragePath(s.photo_url)
-        const supabase = createClient()
-        const { data } = await supabase.storage.from('brother-photos').createSignedUrl(path, 3600)
-        if (data?.signedUrl) setPreview(data.signedUrl)
-      } catch {}
+        const path = toStoragePath(data.photo_url)
+        const { data: signed } = await supabase.storage.from('brother-photos').createSignedUrl(path, 3600)
+        if (signed?.signedUrl) setPreview(signed.signedUrl)
+      }
     }
-    loadSaved()
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleFile(file: File) {
@@ -56,11 +63,8 @@ export default function BrotherPhoto() {
 
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
       const ext  = file.name.split('.').pop() ?? 'jpg'
-      const path = `${user.id}/photo.${ext}`
+      const path = `${userId}/photo.${ext}`
 
       const { error: uploadError } = await supabase.storage
         .from('brother-photos')
@@ -68,9 +72,13 @@ export default function BrotherPhoto() {
 
       if (uploadError) throw uploadError
 
-      // Store the storage path (not a public URL) — signed URL generated at display time
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      localStorage.setItem(KEY, JSON.stringify({ ...s, photo_url: path }))
+      const { error: dbErr } = await supabase
+        .from('brother_profiles')
+        .upsert({ id: userId, photo_url: path }, { onConflict: 'id' })
+
+      if (dbErr) throw dbErr
+
+      await recalculateCompletion(userId, 'brother')
       setUploaded(true)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')

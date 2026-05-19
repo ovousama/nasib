@@ -4,40 +4,44 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { recalculateCompletion } from '@/app/onboarding/actions'
 
-const KEY = 'nasib_onboarding_sister'
 const MAX = 5
 
 export default function SisterPhotos() {
   const router   = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // paths[i] = storage path (saved to DB)
-  // previews[i] = display URL — signed URL for saved photos, object URL for new uploads
+  const [userId,    setUserId]    = useState('')
   const [paths,     setPaths]     = useState<string[]>([])
   const [previews,  setPreviews]  = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [error,     setError]     = useState<string | null>(null)
 
   useEffect(() => {
-    async function loadSaved() {
-      try {
-        const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-        const storedPaths: string[] = Array.isArray(s.photo_urls) ? s.photo_urls : []
-        if (storedPaths.length === 0) return
-        setPaths(storedPaths)
-        // Generate signed URLs so saved photos display properly
-        const supabase = createClient()
-        const urls = await Promise.all(
-          storedPaths.map(async (p) => {
-            const { data } = await supabase.storage.from('sister-photos').createSignedUrl(p, 3600)
-            return data?.signedUrl ?? ''
-          })
-        )
-        setPreviews(urls)
-      } catch {}
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.replace('/auth/login'); return }
+      setUserId(user.id)
+      const { data } = await supabase
+        .from('sister_profiles')
+        .select('photo_urls')
+        .eq('id', user.id)
+        .single()
+      const storedPaths: string[] = Array.isArray(data?.photo_urls) ? data.photo_urls : []
+      if (storedPaths.length === 0) return
+      setPaths(storedPaths)
+      const urls = await Promise.all(
+        storedPaths.map(async (p) => {
+          const { data: signed } = await supabase.storage.from('sister-photos').createSignedUrl(p, 3600)
+          return signed?.signedUrl ?? ''
+        })
+      )
+      setPreviews(urls)
     }
-    loadSaved()
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleFiles(files: FileList) {
@@ -54,15 +58,13 @@ export default function SisterPhotos() {
     setUploading(true)
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
 
       const newPaths: string[]    = []
       const newPreviews: string[] = []
 
       for (const file of selected) {
         const ext  = file.name.split('.').pop() ?? 'jpg'
-        const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
         const { error: uploadError } = await supabase.storage
           .from('sister-photos')
@@ -80,12 +82,12 @@ export default function SisterPhotos() {
       setPaths(allPaths)
       setPreviews(allPreviews)
 
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      localStorage.setItem(KEY, JSON.stringify({
-        ...s,
-        photo_urls:      allPaths,
-        photos_uploaded: true,
-      }))
+      const { error: dbErr } = await supabase
+        .from('sister_profiles')
+        .upsert({ id: userId, photo_urls: allPaths, photos_uploaded: true }, { onConflict: 'id' })
+
+      if (dbErr) throw dbErr
+      await recalculateCompletion(userId, 'sister')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
     } finally {
@@ -97,19 +99,17 @@ export default function SisterPhotos() {
     try {
       const supabase = createClient()
       await supabase.storage.from('sister-photos').remove([paths[index]])
+
+      const newPaths    = paths.filter((_, i) => i !== index)
+      const newPreviews = previews.filter((_, i) => i !== index)
+      setPaths(newPaths)
+      setPreviews(newPreviews)
+
+      await supabase
+        .from('sister_profiles')
+        .upsert({ id: userId, photo_urls: newPaths, photos_uploaded: newPaths.length > 0 }, { onConflict: 'id' })
+      await recalculateCompletion(userId, 'sister')
     } catch {}
-
-    const newPaths    = paths.filter((_, i) => i !== index)
-    const newPreviews = previews.filter((_, i) => i !== index)
-    setPaths(newPaths)
-    setPreviews(newPreviews)
-
-    const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-    localStorage.setItem(KEY, JSON.stringify({
-      ...s,
-      photo_urls:      newPaths,
-      photos_uploaded: newPaths.length > 0,
-    }))
   }
 
   function handleNext() {

@@ -29,11 +29,11 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })
 }
 
-function CompletionBadge({ complete, percentage }: { complete: boolean; percentage: number }) {
-  if (complete) return (
-    <span className="inline-block text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#E6F9F7] text-[#00857A]">Complete ✓</span>
+function CompletionBadge({ percentage }: { complete: boolean; percentage: number }) {
+  if (percentage >= 80) return (
+    <span className="inline-block text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#E6F9F7] text-[#00857A]">Match ready ✓</span>
   )
-  if (percentage >= 75) return (
+  if (percentage >= 60) return (
     <span className="inline-block text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#FEF9EC] text-[#8A6A00]">{percentage}%</span>
   )
   return (

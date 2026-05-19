@@ -95,13 +95,13 @@ export default function NewMatchForm({ brothers, sisters, defaultBrotherId = '',
     setError(null)
     const selectedBrother = brothers.find(b => b.id === brotherId)
     const selectedSister = sisters.find(s => s.id === sisterId)
-    if (selectedBrother && !selectedBrother.profile_complete) {
-      setError(`${selectedBrother.full_name}'s profile is only ${selectedBrother.profile_completion_percentage}% complete. They must complete their profile before being assigned matches.`)
+    if (selectedBrother && selectedBrother.profile_completion_percentage < 80) {
+      setError(`${selectedBrother.full_name}'s profile is only ${selectedBrother.profile_completion_percentage}% complete. They need at least 80% to be assigned matches.`)
       setSubmitting(false)
       return
     }
-    if (selectedSister && !selectedSister.profile_complete) {
-      setError(`${selectedSister.full_name}'s profile is only ${selectedSister.profile_completion_percentage}% complete. They must complete their profile before being assigned matches.`)
+    if (selectedSister && selectedSister.profile_completion_percentage < 80) {
+      setError(`${selectedSister.full_name}'s profile is only ${selectedSister.profile_completion_percentage}% complete. They need at least 80% to be assigned matches.`)
       setSubmitting(false)
       return
     }
