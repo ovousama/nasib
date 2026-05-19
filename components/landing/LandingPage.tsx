@@ -131,7 +131,7 @@ const DIFFS = [
 const FAQS = [
   {
     q: 'Is Naseeb free?',
-    a: 'Naseeb is free for sisters. Brothers pay a small monthly subscription fee. This reflects the Islamic principle of nafaqah — the financial responsibility of provision that falls on men in marriage.',
+    a: 'Yes — Naseeb is completely free for everyone, always. There are no subscriptions, no credits, and no hidden fees. If the platform helps you find your match, we simply ask that you consider making a voluntary sadaqah to help keep it running for others.',
   },
   {
     q: 'Do I need a wali to sign up as a sister?',
@@ -158,8 +158,8 @@ const FAQS = [
     a: 'Yes. You can request account deletion from your profile settings at any time. All your data including messages, photos, and profile information will be permanently removed.',
   },
   {
-    q: 'Is this available outside the UK?',
-    a: 'Yes. Naseeb is available globally. You can set your location during onboarding and matches will consider location preferences.',
+    q: 'Where does Naseeb operate?',
+    a: 'Naseeb currently serves Muslims across Canada, the United States, the United Kingdom, and the European Union. These are our primary markets for our initial launch. If you are based outside these regions, you are still welcome to sign up — simply set your location during onboarding. We are actively growing and will notify you as we expand to new regions, in sha Allah.',
   },
 ]
 
@@ -265,8 +265,8 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <p className="text-[12px] text-[#9B9B9B] mt-4">
-            Free for sisters · Brothers pay a small monthly fee at launch
+          <p className="text-[13px] text-[#9B9B9B] text-center mt-4">
+            Free, Forever
           </p>
         </div>
       </section>
@@ -553,6 +553,45 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── DONATION ──────────────────────────────────────────────────────── */}
+      <section style={{ background: 'white', padding: '80px 24px', textAlign: 'center' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <p style={{ fontFamily: arabic, fontSize: '24px', color: '#AF4D98', marginBottom: '8px' }}>
+            وَمَا تُنفِقُوا مِن خَيْرٍ فَلِأَنفُسِكُمْ
+          </p>
+          <p style={{ fontSize: '13px', fontStyle: 'italic', color: '#9B9B9B', marginBottom: '32px' }}>
+            &ldquo;Whatever good you spend is for yourselves&rdquo; — Al-Baqarah 2:272
+          </p>
+
+          <h2 style={{ fontFamily: cormorant, fontSize: '36px', fontWeight: 400, color: '#1A1A1A', marginBottom: '16px' }}>
+            Naseeb is free, forever
+          </h2>
+
+          <p style={{ fontSize: '16px', color: '#5C5C5C', lineHeight: 1.8, marginBottom: '32px' }}>
+            Naseeb is free for everyone — always. No subscriptions, no credits, no hidden fees.
+            <br /><br />
+            If this platform helps you find your match, consider making a sadaqah to help keep it
+            running for others who are still seeking theirs. Every contribution goes directly
+            toward maintaining and growing Naseeb.
+          </p>
+
+          <div style={{ background: 'linear-gradient(135deg, #F5E6F2, #F4E4BA)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+            <p style={{ fontSize: '15px', fontWeight: 500, color: '#AF4D98', marginBottom: '8px' }}>
+              Why donate?
+            </p>
+            <p style={{ fontSize: '14px', color: '#5C5C5C', lineHeight: 1.7 }}>
+              Facilitating a marriage is one of the greatest acts of sadaqah. The Prophet ﷺ
+              said: &ldquo;There is no foundation that Allah loves more than marriage.&rdquo; Contributing
+              to Naseeb is contributing to that.
+            </p>
+          </div>
+
+          <p style={{ fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic' }}>
+            Donation details coming soon. Jazakallah khair for your support.
+          </p>
         </div>
       </section>
 

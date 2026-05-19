@@ -204,6 +204,19 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section className="px-4 mb-8">
+        <div className="bg-white rounded-[16px] border border-[#EDE8E3] p-5 text-center">
+          <p style={{ fontFamily: cormorant, fontSize: '22px', fontWeight: 400, color: '#AF4D98', marginBottom: '8px' }}>
+            Naseeb is free, forever.
+          </p>
+          <p className="text-[13px] text-[#5C5C5C] leading-[1.7]">
+            No subscriptions, no credits, no hidden fees. If this platform helps you find your match,
+            consider making a voluntary sadaqah to support others who are still searching.
+          </p>
+        </div>
+      </section>
+
       {/* Closing du'a */}
       <div className="px-4 pb-4">
         <div className="bg-[#F5E6F2] rounded-[16px] p-6 text-center">
