@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { sendMessage, confirmMeeting, declineMeeting } from '@/app/dashboard/actions'
 import type { Message, MeetingRequest, ConnectionDetail } from '@/lib/database'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 
 type PendingProposal = { id: string; profile_id: string }
 
@@ -217,6 +218,7 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
   const [checkinLoading, setCheckinLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const channelRef = useRef<RealtimeChannel | null>(null)
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -228,12 +230,19 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
 
   useEffect(() => {
     const supabase = createClient()
+
+    function handleNewMessage(msg: Message) {
+      setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
+      scrollToBottom()
+    }
+
     const channel = supabase
       .channel(`chat-${connection.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `connection_id=eq.${connection.id}` }, (payload) => {
-        const msg = payload.new as Message
-        setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
-        scrollToBottom()
+        handleNewMessage(payload.new as Message)
+      })
+      .on('broadcast', { event: 'new_message' }, ({ payload }) => {
+        handleNewMessage(payload.message as Message)
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'meeting_requests', filter: `connection_id=eq.${connection.id}` }, (payload) => {
         const meeting = payload.new as MeetingRequest
@@ -248,7 +257,8 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
         setIsConnected(status === 'SUBSCRIBED')
       })
 
-    return () => { supabase.removeChannel(channel) }
+    channelRef.current = channel
+    return () => { supabase.removeChannel(channel); channelRef.current = null }
   }, [connection.id])
 
   // Realtime: detect incoming nikah proposals from the other party
@@ -316,6 +326,11 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
 
     if (result?.message) {
       setMessages(prev => prev.map(m => m.id === tempId ? result.message! : m))
+      channelRef.current?.send({
+        type: 'broadcast',
+        event: 'new_message',
+        payload: { message: result.message },
+      })
     }
   }
 
