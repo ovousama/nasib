@@ -214,23 +214,15 @@ export default function LandingPage() {
       <section
         data-testid="landing-hero"
         style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5E6F2 100%)' }}
-        className="px-6 pt-[100px] pb-[80px] lg:pt-[140px] lg:pb-[120px] relative overflow-hidden"
+        className="px-6 pt-[80px] pb-[60px] lg:pt-[120px] lg:pb-[60px] relative overflow-hidden lg:min-h-[90vh] lg:flex lg:flex-col lg:justify-center"
       >
         <IslamicPatternBg opacity={0.04} color="#AF4D98" />
-        <div className="hidden lg:flex absolute right-8 bottom-0 items-end gap-[-20px] pointer-events-none" style={{ opacity: 0.85 }}>
-          <BrotherIllustration size={180} />
-          <SisterIllustration size={200} />
+        <div className="hidden lg:flex absolute right-8 bottom-0 items-end pointer-events-none" style={{ opacity: 0.85 }}>
+          <BrotherIllustration size={220} />
+          <SisterIllustration size={220} />
         </div>
         <div className="max-w-[700px] mx-auto text-center" style={{ position: 'relative', zIndex: 1 }}>
-          {/* Pill badge */}
-          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white border border-[rgba(175,77,152,0.2)]">
-            <span className="text-[12px] text-[#AF4D98]">Halal matrimonial · Seek with sincerity</span>
-          </div>
-          <p style={{ fontFamily: 'var(--font-arabic, "Noto Naskh Arabic", serif)', fontSize: '14px', color: '#9B9B9B', marginTop: '6px', marginBottom: '24px' }}>
-            اطلب بإخلاص
-          </p>
-
-          {/* Arabic verse */}
+          {/* Ar-Rum verse — first element */}
           <p
             className="mb-2 text-[#AF4D98]"
             style={{ fontFamily: arabic, fontSize: '22px', lineHeight: 1.8 }}
@@ -240,26 +232,26 @@ export default function LandingPage() {
           <p className="text-[14px] italic text-[#9B9B9B] mb-1">
             &ldquo;And of His signs is that He created for you mates that you may find tranquillity in them&rdquo;
           </p>
-          <p className="text-[12px] text-[#BDBDBD]">— Ar-Rum 30:21</p>
+          <p className="text-[12px] text-[#BDBDBD] mb-12">— Ar-Rum 30:21</p>
 
           {/* Main heading */}
           <h1
-            className="text-[#1A1A1A] mt-8 mb-5"
+            className="text-[#1A1A1A] mb-6"
             style={{
               fontFamily: cormorant,
-              fontSize: 'clamp(40px, 8vw, 72px)',
+              fontSize: 'clamp(80px, 10vw, 120px)',
               fontWeight: 300,
-              letterSpacing: '-0.02em',
-              lineHeight: 1.1,
+              letterSpacing: '-0.03em',
+              lineHeight: 1.0,
             }}
           >
-            Find your <span style={{ fontFamily: arabic, fontSize: '0.9em' }}>نصيب</span>
+            Find your <span style={{ fontFamily: arabic, color: '#AF4D98' }}>نصيب</span>
           </h1>
 
           {/* Subheading */}
           <p
-            className="text-[#5C5C5C] mx-auto mb-8 max-w-[540px]"
-            style={{ fontSize: '18px', fontWeight: 300, lineHeight: 1.6 }}
+            className="text-[#5C5C5C] mx-auto mb-10 max-w-[560px]"
+            style={{ fontSize: '18px', fontWeight: 300, lineHeight: 1.7 }}
           >
             A halal matrimonial platform built around Islamic values. Serious intent, wali involvement,
             and deep compatibility — from the very first step.
