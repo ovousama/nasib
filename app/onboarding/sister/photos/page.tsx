@@ -5,25 +5,39 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
-const KEY      = 'nasib_onboarding_sister'
-const MAX      = 5
+const KEY = 'nasib_onboarding_sister'
+const MAX = 5
 
 export default function SisterPhotos() {
   const router   = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const [previews,   setPreviews]   = useState<string[]>([])
-  const [paths,      setPaths]      = useState<string[]>([])
-  const [uploading,  setUploading]  = useState(false)
-  const [error,      setError]      = useState<string | null>(null)
+  // paths[i] = storage path (saved to DB)
+  // previews[i] = display URL — signed URL for saved photos, object URL for new uploads
+  const [paths,     setPaths]     = useState<string[]>([])
+  const [previews,  setPreviews]  = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [error,     setError]     = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || '{}')
-      if (Array.isArray(s.photo_urls) && s.photo_urls.length > 0) {
-        setPaths(s.photo_urls)
-      }
-    } catch {}
+    async function loadSaved() {
+      try {
+        const s = JSON.parse(localStorage.getItem(KEY) || '{}')
+        const storedPaths: string[] = Array.isArray(s.photo_urls) ? s.photo_urls : []
+        if (storedPaths.length === 0) return
+        setPaths(storedPaths)
+        // Generate signed URLs so saved photos display properly
+        const supabase = createClient()
+        const urls = await Promise.all(
+          storedPaths.map(async (p) => {
+            const { data } = await supabase.storage.from('sister-photos').createSignedUrl(p, 3600)
+            return data?.signedUrl ?? ''
+          })
+        )
+        setPreviews(urls)
+      } catch {}
+    }
+    loadSaved()
   }, [])
 
   async function handleFiles(files: FileList) {
@@ -102,8 +116,6 @@ export default function SisterPhotos() {
     router.push('/onboarding/sister/reference')
   }
 
-  const alreadyUploaded = paths.length - previews.length
-
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
       <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Your Photos</h2>
@@ -119,25 +131,22 @@ export default function SisterPhotos() {
       </div>
 
       {/* Photo grid */}
-      {(previews.length > 0 || alreadyUploaded > 0) && (
+      {paths.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mb-5">
-          {/* Previously uploaded (no preview available) */}
-          {alreadyUploaded > 0 && Array.from({ length: alreadyUploaded }).map((_, i) => (
-            <div key={`prev-${i}`}
-              className="relative aspect-square rounded-xl bg-[#F5E6F2] border-2 border-[#AF4D98] flex flex-col items-center justify-center gap-1">
-              <svg className="w-6 h-6 text-[#AF4D98]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-xs text-[#AF4D98] font-medium">Uploaded</span>
-            </div>
-          ))}
-
-          {/* New uploads with preview */}
-          {previews.map((src, i) => (
-            <div key={`new-${i}`} className="relative aspect-square rounded-xl overflow-hidden">
-              <img src={src} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
-              <button type="button" onClick={() => removePhoto(alreadyUploaded + i)}
-                className="absolute top-1 right-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center text-white text-xs hover:bg-black/80 transition-colors">
+          {paths.map((_, i) => (
+            <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-[#F5E6F2]">
+              {previews[i] ? (
+                <img src={previews[i]} alt="Your photo" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => removePhoto(i)}
+                className="absolute top-1 right-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center text-white text-xs hover:bg-black/80 transition-colors"
+              >
                 ×
               </button>
             </div>

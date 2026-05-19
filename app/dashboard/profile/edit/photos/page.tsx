@@ -2,11 +2,26 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
 
 const MAX_PHOTOS = 5
+
+function toStoragePath(urlOrPath: string): string {
+  const marker = '/object/public/sister-photos/'
+  const idx = urlOrPath.indexOf(marker)
+  if (idx !== -1) return decodeURIComponent(urlOrPath.slice(idx + marker.length))
+  const signMarker = '/object/sign/sister-photos/'
+  const signIdx = urlOrPath.indexOf(signMarker)
+  if (signIdx !== -1) return decodeURIComponent(urlOrPath.slice(signIdx + signMarker.length).split('?')[0])
+  return urlOrPath
+}
+
+async function getSignedUrl(path: string): Promise<string> {
+  const supabase = createClient()
+  const { data } = await supabase.storage.from('sister-photos').createSignedUrl(path, 3600)
+  return data?.signedUrl ?? ''
+}
 
 export default function EditPhotosPage() {
   const router = useRouter()
@@ -16,7 +31,8 @@ export default function EditPhotosPage() {
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState(false)
   const [userId, setUserId] = useState<string>('')
-  const [photoUrls, setPhotoUrls] = useState<string[]>([])
+  const [photoPaths, setPhotoPaths] = useState<string[]>([])
+  const [displayUrls, setDisplayUrls] = useState<string[]>([])
   const [confirmRemoveIndex, setConfirmRemoveIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -33,35 +49,34 @@ export default function EditPhotosPage() {
       }
       setUserId(user.id)
       const { data } = await supabase.from('sister_profiles').select('photo_urls, photos_uploaded').eq('id', user.id).single()
-      if (data && Array.isArray(data.photo_urls)) setPhotoUrls(data.photo_urls)
+      if (data && Array.isArray(data.photo_urls) && data.photo_urls.length > 0) {
+        const paths = (data.photo_urls as string[]).map(toStoragePath)
+        setPhotoPaths(paths)
+        const urls = await Promise.all(paths.map(getSignedUrl))
+        setDisplayUrls(urls)
+      }
       setLoading(false)
     }
     load()
   }, [])
 
   async function confirmRemove(index: number) {
-    const url = photoUrls[index]
     setConfirmRemoveIndex(null)
-
     const supabase = createClient()
-    const marker = '/object/public/sister-photos/'
-    const idx = url.indexOf(marker)
-    if (idx !== -1) {
-      const path = decodeURIComponent(url.slice(idx + marker.length))
-      await supabase.storage.from('sister-photos').remove([path])
-    }
-
-    const newUrls = photoUrls.filter((_, i) => i !== index)
-    setPhotoUrls(newUrls)
+    await supabase.storage.from('sister-photos').remove([photoPaths[index]])
+    const newPaths = photoPaths.filter((_, i) => i !== index)
+    const newUrls = displayUrls.filter((_, i) => i !== index)
+    setPhotoPaths(newPaths)
+    setDisplayUrls(newUrls)
     await supabase
       .from('sister_profiles')
-      .update({ photo_urls: newUrls, photos_uploaded: newUrls.length > 0 })
+      .update({ photo_urls: newPaths, photos_uploaded: newPaths.length > 0 })
       .eq('id', userId)
   }
 
   async function handleAddPhoto(file: File) {
     setError(null)
-    if (photoUrls.length >= MAX_PHOTOS) {
+    if (photoPaths.length >= MAX_PHOTOS) {
       setError(`You can upload a maximum of ${MAX_PHOTOS} photos.`)
       return
     }
@@ -76,11 +91,13 @@ export default function EditPhotosPage() {
     setUploading(true)
     try {
       const supabase = createClient()
-      const path = `${userId}/${Date.now()}-${file.name}`
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const { error: uploadError } = await supabase.storage.from('sister-photos').upload(path, file)
       if (uploadError) throw uploadError
-      const { data: { publicUrl } } = supabase.storage.from('sister-photos').getPublicUrl(path)
-      setPhotoUrls(prev => [...prev, publicUrl])
+      const signedUrl = await getSignedUrl(path)
+      setPhotoPaths(prev => [...prev, path])
+      setDisplayUrls(prev => [...prev, signedUrl])
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
     } finally {
@@ -101,7 +118,7 @@ export default function EditPhotosPage() {
       const supabase = createClient()
       const { error: updateError } = await supabase
         .from('sister_profiles')
-        .update({ photo_urls: photoUrls, photos_uploaded: photoUrls.length > 0 })
+        .update({ photo_urls: photoPaths, photos_uploaded: photoPaths.length > 0 })
         .eq('id', userId)
       if (updateError) throw updateError
       recalculateProfileCompletion().catch(() => {})
@@ -146,12 +163,19 @@ export default function EditPhotosPage() {
           </div>
         )}
 
-        <p className="text-sm text-[#9B9B9B] mb-4">{photoUrls.length} of {MAX_PHOTOS} photos</p>
+        <p className="text-sm text-[#9B9B9B] mb-4">{photoPaths.length} of {MAX_PHOTOS} photos</p>
 
         <div className="grid grid-cols-2 gap-3 mb-4">
-          {photoUrls.map((url, index) => (
-            <div key={url + index} className="relative aspect-square rounded-xl overflow-hidden border border-[#EDE8E3]">
-              <Image src={url} alt={`Photo ${index + 1}`} width={200} height={200} className="w-full h-full object-cover" />
+          {displayUrls.map((url, index) => (
+            <div key={photoPaths[index] + index} className="relative aspect-square rounded-xl overflow-hidden border border-[#EDE8E3] bg-[#F5E6F2]">
+              {url ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={url} alt="Your photo" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => setConfirmRemoveIndex(index)}
@@ -164,7 +188,7 @@ export default function EditPhotosPage() {
             </div>
           ))}
 
-          {photoUrls.length < MAX_PHOTOS && (
+          {photoPaths.length < MAX_PHOTOS && (
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
