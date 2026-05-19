@@ -508,7 +508,6 @@ export default function ProfilePageClient({
             <F label="In-Laws Living Together"><PillValue v={p?.inlaws_living_together} /></F>
             <F label="Islamic Schooling"><PillValue v={p?.islamic_schooling_importance} /></F>
             <F label="Child Caregiving"><PillValue v={p?.child_caregiving} /></F>
-            <F label="Non-Islamic Holidays"><PillValue v={p?.celebrate_non_islamic_holidays} /></F>
             <F label="Jumu&apos;ah Attendance"><PillValue v={p?.jumuah_attendance} /></F>
             <F label="Wife Hijab Importance"><PillValue v={p?.wife_hijab_importance} /></F>
           </Section>
@@ -591,10 +590,10 @@ export default function ProfilePageClient({
           {reference ? (
             <>
               <F label="Name"><TextValue v={reference.referee_name} /></F>
-              <F label="Relationship"><TextValue v={reference.relationship} /></F>
+              <F label="Relationship"><TextValue v={reference.referee_relationship} /></F>
               <F label="Email"><TextValue v={reference.referee_email} /></F>
               <F label="Status">
-                {reference.verified
+                {reference.status === 'completed'
                   ? <span className="inline-flex px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#E6F9F7] text-[#00A699]">Verified</span>
                   : <span className="inline-flex px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-amber-50 text-amber-700">Pending</span>}
               </F>

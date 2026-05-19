@@ -21,7 +21,9 @@ const POLITICAL_VIEWS = ['Conservative', 'Moderate', 'Progressive', 'Prefer not 
 const WEEKEND_LIFESTYLE = ['Very social — always out', 'Mix of social and home', 'Mostly home', 'Prefer quiet weekends']
 const MIXED_GENDER = ['Yes — mixed freely', 'Some — professional/unavoidable', 'Prefer gender-separated', 'Strictly separated']
 const MUSIC = ['Yes — regularly', 'Occasionally', 'Nasheeds/instrumentals only', 'No music']
-const TRAVEL = ['Love to travel', 'Travel occasionally', 'Prefer to stay local', 'Open to it']
+const TRAVEL_FREQ_OPTS = ['Rarely', 'A few times a year', 'Monthly', 'Frequently — yes she would join', 'Frequently — independently']
+const TRAVEL_IMPORTANCE_OPTS = ['Very important — frequent travel', 'A few times a year', 'Occasionally', 'Not important']
+const NON_ISLAMIC_HOLIDAYS_OPTS = ['Yes', 'No', 'Birthdays only', 'Rarely']
 
 function Pill({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
   return (
@@ -104,6 +106,8 @@ export default function EditLifestylePage() {
   const [mixedGenderSocialCircle, setMixedGenderSocialCircle] = useState('')
   const [doYouListenToMusic, setDoYouListenToMusic] = useState('')
   const [travelImportance, setTravelImportance] = useState('')
+  const [travelFrequency, setTravelFrequency] = useState('')
+  const [celebrateNonIslamicHolidays, setCelebrateNonIslamicHolidays] = useState('')
   const [ramadanRoutine, setRamadanRoutine] = useState('')
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,10 +140,13 @@ export default function EditLifestylePage() {
         setWeekendLifestyle(data.weekend_lifestyle ?? '')
         setMixedGenderSocialCircle(data.mixed_gender_social_circle ?? '')
         setDoYouListenToMusic(data.do_you_listen_to_music ?? '')
-        setTravelImportance(data.travel_importance ?? '')
+        setCelebrateNonIslamicHolidays(data.celebrate_non_islamic_holidays ?? '')
         setRamadanRoutine(data.ramadan_routine ?? '')
         if (profile.gender === 'brother') {
           setFinancialReadiness(data.financial_readiness ?? '')
+          setTravelFrequency(data.travel_frequency ?? '')
+        } else {
+          setTravelImportance(data.travel_importance ?? '')
         }
       }
       setLoading(false)
@@ -170,17 +177,21 @@ export default function EditLifestylePage() {
         weekend_lifestyle: weekendLifestyle || null,
         mixed_gender_social_circle: mixedGenderSocialCircle || null,
         do_you_listen_to_music: doYouListenToMusic || null,
-        travel_importance: travelImportance || null,
+        celebrate_non_islamic_holidays: celebrateNonIslamicHolidays || null,
         ramadan_routine: ramadanRoutine || null,
       }
       if (gender === 'brother') {
         const { error: e2 } = await supabase.from('brother_profiles').update({
           ...shared,
           financial_readiness: financialReadiness || null,
+          travel_frequency: travelFrequency || null,
         }).eq('id', userId)
         if (e2) throw e2
       } else {
-        const { error: e2 } = await supabase.from('sister_profiles').update(shared).eq('id', userId)
+        const { error: e2 } = await supabase.from('sister_profiles').update({
+          ...shared,
+          travel_importance: travelImportance || null,
+        }).eq('id', userId)
         if (e2) throw e2
       }
       recalculateProfileCompletion().catch(() => {})
@@ -266,7 +277,10 @@ export default function EditLifestylePage() {
           <PillGroup label="Weekend lifestyle" options={WEEKEND_LIFESTYLE} value={weekendLifestyle} onChange={setWeekendLifestyle} optional />
           <PillGroup label="Mixed gender social circle" options={MIXED_GENDER} value={mixedGenderSocialCircle} onChange={setMixedGenderSocialCircle} optional />
           <PillGroup label="Music" options={MUSIC} value={doYouListenToMusic} onChange={setDoYouListenToMusic} optional />
-          <PillGroup label="Travel" options={TRAVEL} value={travelImportance} onChange={setTravelImportance} optional />
+          <PillGroup label="Non-Islamic holidays" options={NON_ISLAMIC_HOLIDAYS_OPTS} value={celebrateNonIslamicHolidays} onChange={setCelebrateNonIslamicHolidays} optional />
+          {gender === 'brother'
+            ? <PillGroup label="Travel frequency" options={TRAVEL_FREQ_OPTS} value={travelFrequency} onChange={setTravelFrequency} optional />
+            : <PillGroup label="Travel importance" options={TRAVEL_IMPORTANCE_OPTS} value={travelImportance} onChange={setTravelImportance} optional />}
 
           <TA label="Ramadan routine" value={ramadanRoutine} onChange={setRamadanRoutine} placeholder="How do you spend Ramadan? Daily habits, routines, community..." optional />
 
