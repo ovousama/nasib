@@ -5,9 +5,9 @@ type NasibLogoProps = {
 }
 
 const sizeMap = {
-  sm: { arabic: '22px', latin: '9px', gap: '2px' },
-  md: { arabic: '30px', latin: '11px', gap: '3px' },
-  lg: { arabic: '42px', latin: '13px', gap: '4px' },
+  sm: { arabic: '22px' },
+  md: { arabic: '30px' },
+  lg: { arabic: '42px' },
 }
 
 export default function NasibLogo({
@@ -17,7 +17,6 @@ export default function NasibLogo({
 }: NasibLogoProps) {
   const s = sizeMap[size]
   const primaryColor = theme === 'dark' ? '#E5A9A9' : '#AF4D98'
-  const latinColor = theme === 'dark' ? '#6B6B6B' : '#9B9B9B'
 
   return (
     <div
@@ -27,7 +26,6 @@ export default function NasibLogo({
         flexDirection: 'column',
         alignItems: 'center',
         lineHeight: 1,
-        gap: s.gap,
         userSelect: 'none',
       }}
     >
@@ -42,19 +40,6 @@ export default function NasibLogo({
         }}
       >
         نصيب
-      </span>
-      <span
-        style={{
-          fontFamily: 'var(--font-inter, "Inter", system-ui, sans-serif)',
-          fontSize: s.latin,
-          color: latinColor,
-          fontWeight: 200,
-          letterSpacing: '0.3em',
-          textTransform: 'uppercase',
-          lineHeight: 1,
-        }}
-      >
-        Naseeb
       </span>
     </div>
   )

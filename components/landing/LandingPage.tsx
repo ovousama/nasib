@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import NasibLogo from '@/components/ui/NasibLogo'
+import AnimatedHero from './AnimatedHero'
 
 const cormorant = "var(--font-cormorant, 'Cormorant Garamond', serif)"
 const arabic = "var(--font-arabic, 'Noto Naskh Arabic', serif)"
@@ -226,19 +227,8 @@ export default function LandingPage() {
           </p>
           <p className="text-[12px] text-[#BDBDBD] mb-12">— Ar-Rum 30:21</p>
 
-          {/* Main heading */}
-          <h1
-            className="text-[#1A1A1A] mb-6"
-            style={{
-              fontFamily: cormorant,
-              fontSize: 'clamp(80px, 10vw, 120px)',
-              fontWeight: 300,
-              letterSpacing: '-0.03em',
-              lineHeight: 1.0,
-            }}
-          >
-            Find your <span style={{ fontFamily: arabic, color: '#AF4D98' }}>نصيب</span>
-          </h1>
+          {/* Main heading — animated */}
+          <AnimatedHero />
 
           {/* Subheading */}
           <p
