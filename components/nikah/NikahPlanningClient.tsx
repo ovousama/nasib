@@ -719,21 +719,9 @@ export default function NikahPlanningClient({
         </Link>
       </div>
 
-      <div className="max-w-[640px] mx-auto px-5 pt-4 lg:max-w-[1100px] lg:px-8 lg:flex lg:gap-8 lg:items-start">
-        {/* Left column: checklist (sticky on desktop) */}
-        <div className="lg:w-80 lg:flex-shrink-0 lg:sticky lg:top-24">
-          <ChecklistSection
-            checklistMap={checklistMap}
-            toggling={toggling}
-            onToggle={handleToggle}
-            brotherId={brotherId}
-            brotherName={brotherName}
-            sisterName={sisterName}
-          />
-        </div>
-
-        {/* Right column: celebration + content */}
-        <div className="lg:flex-1 lg:min-w-0">
+      <div className="max-w-[640px] mx-auto px-5 pt-4 lg:max-w-[1100px] lg:px-8 flex flex-col lg:flex-row lg:gap-8 lg:items-start">
+        {/* Right column: celebration + content — first in DOM so it appears first on mobile */}
+        <div className="lg:order-2 lg:flex-1 lg:min-w-0">
           <CelebrationHeader brotherName={brotherName} sisterName={sisterName} />
           <QuestionsSection />
           <ContractSection />
@@ -748,6 +736,18 @@ export default function NikahPlanningClient({
             onSubmitted={date => { setImamSubmitted(true); setImamDate(date) }}
           />
           <DownloadSection connectionId={connectionId} />
+        </div>
+
+        {/* Left column: checklist — second in DOM, appears left on desktop via lg:order-1 */}
+        <div className="lg:order-1 lg:w-80 lg:flex-shrink-0 lg:sticky lg:top-24">
+          <ChecklistSection
+            checklistMap={checklistMap}
+            toggling={toggling}
+            onToggle={handleToggle}
+            brotherId={brotherId}
+            brotherName={brotherName}
+            sisterName={sisterName}
+          />
         </div>
       </div>
 

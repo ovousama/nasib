@@ -285,7 +285,7 @@ export default function LandingPage() {
         <div className="max-w-[900px] mx-auto">
           <h2
             className="text-center text-[#1A1A1A] mb-2"
-            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(36px, 4vw, 44px)', fontWeight: 400 }}
           >
             How Naseeb works
           </h2>
@@ -320,7 +320,7 @@ export default function LandingPage() {
         <div className="max-w-[900px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-12"
-            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(36px, 4vw, 44px)', fontWeight: 400 }}
           >
             Built differently
           </h2>
@@ -345,7 +345,7 @@ export default function LandingPage() {
         <div className="max-w-[700px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-12"
-            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(36px, 4vw, 44px)', fontWeight: 400 }}
           >
             Who Naseeb is for
           </h2>
@@ -409,7 +409,7 @@ export default function LandingPage() {
         <div className="max-w-[700px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-2"
-            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(36px, 4vw, 44px)', fontWeight: 400 }}
           >
             The wali system
           </h2>
@@ -466,7 +466,7 @@ export default function LandingPage() {
         <div className="max-w-[700px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-12"
-            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(36px, 4vw, 44px)', fontWeight: 400 }}
           >
             Your privacy, protected
           </h2>
@@ -528,7 +528,7 @@ export default function LandingPage() {
         <div className="max-w-[700px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-10"
-            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(36px, 4vw, 44px)', fontWeight: 400 }}
           >
             Common questions
           </h2>
