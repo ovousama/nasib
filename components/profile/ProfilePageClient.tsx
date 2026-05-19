@@ -365,11 +365,14 @@ export default function ProfilePageClient({
           {isBrother && <F label="Missed Prayer"><PillValue v={p?.missed_prayer_approach} /></F>}
           {isBrother && <F label="Wife Niqab Pref"><PillValue v={p?.wife_niqab_preference} /></F>}
           {!isBrother && <F label="Islamic Home Importance"><PillValue v={p?.islamic_home_importance} /></F>}
+          {!isBrother && <F label="Hijab Outside Home"><PillValue v={p?.hijab_outside_home} /></F>}
+          {!isBrother && <F label="Islamic Classes"><PillValue v={p?.islamic_classes_attendance} /></F>}
           <FW label="Traditional ↔ Reformist">
             <SliderValue v={p?.traditional_vs_reformist} />
           </FW>
           {p?.deen_growth && <FW label="Deen Growth"><TextValue v={p.deen_growth} /></FW>}
           {!isBrother && p?.deen_when_busy && <FW label="Deen When Busy"><TextValue v={p.deen_when_busy} /></FW>}
+          {p?.differing_islamic_opinions && <FW label="Differing Islamic Opinions"><TextValue v={p.differing_islamic_opinions} /></FW>}
         </Section>
 
         {/* ── FAMILY DYNAMICS ─────────────────────────────────────────────── */}
@@ -472,6 +475,7 @@ export default function ProfilePageClient({
           {p?.stress_management && <FW label="Stress Management"><TextValue v={p.stress_management} /></FW>}
           {p?.emotional_support_style && <FW label="Emotional Support Style"><TextValue v={p.emotional_support_style} /></FW>}
           {p?.significant_hardship && <FW label="Significant Hardship"><TextValue v={p.significant_hardship} /></FW>}
+          {p?.health_background_disclosure && <FW label="Health Background Disclosure"><TextValue v={p.health_background_disclosure} /></FW>}
         </Section>
 
         {/* ── CONFLICT & COMMUNICATION ─────────────────────────────────────── */}
@@ -519,6 +523,16 @@ export default function ProfilePageClient({
             </FW>
             {p?.career_five_years && <FW label="Career in 5 Years"><TextValue v={p.career_five_years} /></FW>}
             {p?.career_ambitions && <FW label="Career Ambitions"><TextValue v={p.career_ambitions} /></FW>}
+          </Section>
+        )}
+
+        {/* ── HOUSEHOLD (sisters only) ─────────────────────────────────────── */}
+        {!isBrother && (
+          <Section title="Household" editHref="/dashboard/profile/edit/additional" defaultOpen={false} testId="section-household-sister">
+            <F label="Primary Caregiver Comfort"><PillValue v={p?.primary_caregiver_comfort} /></F>
+            <F label="In-Laws Living Together"><PillValue v={p?.inlaws_living_together} /></F>
+            <F label="Islamic Schooling"><PillValue v={p?.islamic_schooling_importance} /></F>
+            {p?.household_responsibilities_vision && <FW label="Household Responsibilities Vision"><TextValue v={p.household_responsibilities_vision} /></FW>}
           </Section>
         )}
 

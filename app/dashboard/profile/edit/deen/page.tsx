@@ -26,6 +26,8 @@ const MISSED_PRAYER = ['Rarely miss', 'Make up immediately', 'Make up same day',
 const WIFE_NIQAB = ['Prefer', 'Not a condition', 'No preference']
 const DEEN_WHEN_BUSY = ['Prayer never slips', 'Mostly consistent', 'Struggle sometimes', 'Working on balance']
 const ISLAMIC_HOME = ['Extremely important', 'Very important', 'Important', 'Somewhat important']
+const HIJAB_OUTSIDE_OPTS = ['Always', 'Usually', 'Sometimes', 'No', 'Prefer not to say']
+const ISLAMIC_CLASSES_OPTS = ['Regularly', 'Occasionally', 'Rarely', 'Not currently but interested', 'Online only']
 
 function Pill({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
   return (
@@ -110,6 +112,8 @@ export default function EditDeenPage() {
   // Sister only
   const [deenWhenBusy, setDeenWhenBusy] = useState('')
   const [islamicHomeImportance, setIslamicHomeImportance] = useState('')
+  const [hijabOutsideHome, setHijabOutsideHome] = useState('')
+  const [islamicClassesAttendance, setIslamicClassesAttendance] = useState('')
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -145,6 +149,8 @@ export default function EditDeenPage() {
           setWearsHijab(data.wears_hijab ?? '')
           setDeenWhenBusy(data.deen_when_busy ?? '')
           setIslamicHomeImportance(data.islamic_home_importance ?? '')
+          setHijabOutsideHome(data.hijab_outside_home ?? '')
+          setIslamicClassesAttendance(data.islamic_classes_attendance ?? '')
         }
       }
       setLoading(false)
@@ -189,6 +195,8 @@ export default function EditDeenPage() {
           wears_hijab: wearsHijab || null,
           deen_when_busy: deenWhenBusy || null,
           islamic_home_importance: islamicHomeImportance || null,
+          hijab_outside_home: hijabOutsideHome || null,
+          islamic_classes_attendance: islamicClassesAttendance || null,
         }).eq('id', userId)
         if (e2) throw e2
       }
@@ -297,6 +305,8 @@ export default function EditDeenPage() {
             <>
               <PillGroup label="Deen consistency when busy" options={DEEN_WHEN_BUSY} value={deenWhenBusy} onChange={setDeenWhenBusy} optional />
               <PillGroup label="Islamic home environment importance" options={ISLAMIC_HOME} value={islamicHomeImportance} onChange={setIslamicHomeImportance} optional />
+              <PillGroup label="Hijab outside home" options={HIJAB_OUTSIDE_OPTS} value={hijabOutsideHome} onChange={setHijabOutsideHome} optional />
+              <PillGroup label="Islamic classes attendance" options={ISLAMIC_CLASSES_OPTS} value={islamicClassesAttendance} onChange={setIslamicClassesAttendance} optional />
             </>
           )}
 
