@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import NasibLogo from '@/components/ui/NasibLogo'
 
@@ -167,7 +167,14 @@ const FAQS = [
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [scrolled, setScrolled] = useState(false)
   const howItWorksRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   function scrollToHowItWorks() {
     howItWorksRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -177,7 +184,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white">
 
       {/* ── NAVBAR ────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 bg-white border-b border-[#EDE8E3]" data-testid="landing-nav">
+      <header className={`sticky top-0 z-50 bg-white border-b border-[#EDE8E3] transition-shadow ${scrolled ? 'shadow-sm' : ''}`} data-testid="landing-nav">
         <div className="max-w-[1100px] mx-auto px-6 h-[60px] flex items-center justify-between">
           <Link href="/">
             <NasibLogo size="sm" />
@@ -204,7 +211,7 @@ export default function LandingPage() {
       <section
         data-testid="landing-hero"
         style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5E6F2 100%)' }}
-        className="px-6 pt-[100px] pb-[80px]"
+        className="px-6 pt-[100px] pb-[80px] lg:pt-[140px] lg:pb-[120px]"
       >
         <div className="max-w-[700px] mx-auto text-center">
           {/* Pill badge */}
@@ -229,7 +236,7 @@ export default function LandingPage() {
             className="text-[#1A1A1A] mt-8 mb-5"
             style={{
               fontFamily: cormorant,
-              fontSize: 'clamp(40px, 8vw, 56px)',
+              fontSize: 'clamp(40px, 8vw, 72px)',
               fontWeight: 300,
               letterSpacing: '-0.02em',
               lineHeight: 1.1,
@@ -273,12 +280,12 @@ export default function LandingPage() {
       <section
         ref={howItWorksRef}
         data-testid="landing-how-it-works"
-        className="bg-white px-6 py-[80px]"
+        className="bg-white px-6 py-[80px] lg:py-[120px]"
       >
         <div className="max-w-[900px] mx-auto">
           <h2
             className="text-center text-[#1A1A1A] mb-2"
-            style={{ fontFamily: cormorant, fontSize: '36px', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
           >
             How Naseeb works
           </h2>
@@ -308,12 +315,12 @@ export default function LandingPage() {
       <section
         data-testid="landing-differentiators"
         style={{ background: 'linear-gradient(135deg, #F5E6F2, #F4E4BA)' }}
-        className="px-6 py-[80px]"
+        className="px-6 py-[80px] lg:py-[120px]"
       >
         <div className="max-w-[900px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-12"
-            style={{ fontFamily: cormorant, fontSize: '36px', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
           >
             Built differently
           </h2>
@@ -333,12 +340,12 @@ export default function LandingPage() {
       {/* ── WHO IT IS FOR ─────────────────────────────────────────────────── */}
       <section
         data-testid="landing-who-its-for"
-        className="bg-white px-6 py-[80px]"
+        className="bg-white px-6 py-[80px] lg:py-[120px]"
       >
         <div className="max-w-[700px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-12"
-            style={{ fontFamily: cormorant, fontSize: '36px', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
           >
             Who Naseeb is for
           </h2>
@@ -397,12 +404,12 @@ export default function LandingPage() {
       {/* ── THE WALI SYSTEM ───────────────────────────────────────────────── */}
       <section
         data-testid="landing-wali-system"
-        className="bg-[#FDF8F3] px-6 py-[80px]"
+        className="bg-[#FDF8F3] px-6 py-[80px] lg:py-[120px]"
       >
         <div className="max-w-[700px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-2"
-            style={{ fontFamily: cormorant, fontSize: '36px', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
           >
             The wali system
           </h2>
@@ -454,12 +461,12 @@ export default function LandingPage() {
       {/* ── PRIVACY & PHOTOS ──────────────────────────────────────────────── */}
       <section
         data-testid="landing-privacy"
-        className="bg-white px-6 py-[80px]"
+        className="bg-white px-6 py-[80px] lg:py-[120px]"
       >
         <div className="max-w-[700px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-12"
-            style={{ fontFamily: cormorant, fontSize: '36px', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
           >
             Your privacy, protected
           </h2>
@@ -516,12 +523,12 @@ export default function LandingPage() {
       {/* ── FAQS ──────────────────────────────────────────────────────────── */}
       <section
         data-testid="landing-faqs"
-        className="bg-[#FDF8F3] px-6 py-[80px]"
+        className="bg-[#FDF8F3] px-6 py-[80px] lg:py-[120px]"
       >
         <div className="max-w-[700px] mx-auto">
           <h2
             className="text-[#1A1A1A] text-center mb-10"
-            style={{ fontFamily: cormorant, fontSize: '36px', fontWeight: 400 }}
+            style={{ fontFamily: cormorant, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400 }}
           >
             Common questions
           </h2>

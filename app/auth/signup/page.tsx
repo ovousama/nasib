@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { signUpWali } from '@/app/auth/actions'
 import NasibLogo from '@/components/ui/NasibLogo'
+import AuthSidePanel from '@/components/auth/AuthSidePanel'
 
 type Mode = 'brother' | 'sister' | 'wali'
 
@@ -108,7 +109,9 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3] flex flex-col items-center justify-center px-6 py-16">
+    <div className="min-h-screen bg-[#FDF8F3] lg:grid lg:grid-cols-2">
+      <AuthSidePanel headline="Your journey begins here. Find your spouse the halal way." />
+      <div className="flex flex-col items-center justify-center px-6 py-16 lg:py-0 lg:overflow-y-auto">
       <div className="w-full max-w-[380px]">
 
         {/* Logo */}
@@ -243,8 +246,8 @@ export default function SignupPage() {
           By signing up you agree to use Naseeb with sincere intention
         </p>
 
-        {/* Quranic verse */}
-        <div className="text-center mt-14">
+        {/* Quranic verse — only on mobile */}
+        <div className="text-center mt-14 lg:hidden">
           <p className="text-[14px] text-[#9B9B9B] leading-loose">
             وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا
           </p>
@@ -253,6 +256,7 @@ export default function SignupPage() {
           </p>
         </div>
 
+      </div>
       </div>
     </div>
   )

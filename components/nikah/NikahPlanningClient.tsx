@@ -706,8 +706,8 @@ export default function NikahPlanningClient({
   const done = ALL_KEYS.filter(k => checklistMap[k]?.completed).length
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3] pb-24">
-      <div className="max-w-[640px] mx-auto px-5 pt-4 pb-2">
+    <div className="min-h-screen bg-[#FDF8F3] pb-24 lg:pb-8">
+      <div className="max-w-[640px] mx-auto px-5 pt-4 pb-2 lg:max-w-[1100px] lg:px-8">
         <Link
           href="/dashboard"
           className="inline-flex items-center gap-1 text-sm text-[#9B9B9B] hover:text-[#5C5C5C] transition-colors"
@@ -718,30 +718,39 @@ export default function NikahPlanningClient({
           Dashboard
         </Link>
       </div>
-      <div className="max-w-[640px] mx-auto px-5 pt-4">
-        <CelebrationHeader brotherName={brotherName} sisterName={sisterName} />
-        <ChecklistSection
-          checklistMap={checklistMap}
-          toggling={toggling}
-          onToggle={handleToggle}
-          brotherId={brotherId}
-          brotherName={brotherName}
-          sisterName={sisterName}
-        />
-        <QuestionsSection />
-        <ContractSection />
-        <MahrSection />
-        <WalimaSection />
-        <DuasSection />
-        <ImamSection
-          connectionId={connectionId}
-          currentUserId={currentUserId}
-          imamSubmitted={imamSubmitted}
-          imamDate={imamDate}
-          onSubmitted={date => { setImamSubmitted(true); setImamDate(date) }}
-        />
-        <DownloadSection connectionId={connectionId} />
+
+      <div className="max-w-[640px] mx-auto px-5 pt-4 lg:max-w-[1100px] lg:px-8 lg:flex lg:gap-8 lg:items-start">
+        {/* Left column: checklist (sticky on desktop) */}
+        <div className="lg:w-80 lg:flex-shrink-0 lg:sticky lg:top-24">
+          <ChecklistSection
+            checklistMap={checklistMap}
+            toggling={toggling}
+            onToggle={handleToggle}
+            brotherId={brotherId}
+            brotherName={brotherName}
+            sisterName={sisterName}
+          />
+        </div>
+
+        {/* Right column: celebration + content */}
+        <div className="lg:flex-1 lg:min-w-0">
+          <CelebrationHeader brotherName={brotherName} sisterName={sisterName} />
+          <QuestionsSection />
+          <ContractSection />
+          <MahrSection />
+          <WalimaSection />
+          <DuasSection />
+          <ImamSection
+            connectionId={connectionId}
+            currentUserId={currentUserId}
+            imamSubmitted={imamSubmitted}
+            imamDate={imamDate}
+            onSubmitted={date => { setImamSubmitted(true); setImamDate(date) }}
+          />
+          <DownloadSection connectionId={connectionId} />
+        </div>
       </div>
+
       <BottomBar
         connectionId={connectionId}
         done={done}

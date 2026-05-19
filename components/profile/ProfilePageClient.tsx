@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -90,16 +90,20 @@ function Section({
   defaultOpen = true,
   children,
   testId,
+  id,
 }: {
   title: string
   editHref: string
   defaultOpen?: boolean
   children: React.ReactNode
   testId?: string
+  id?: string
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  const sectionId = id ?? testId
   return (
     <div
+      id={sectionId}
       data-testid={testId}
       className="bg-white border border-[#EDE8E3] rounded-[16px] mb-3 overflow-hidden"
     >
@@ -169,6 +173,23 @@ type Props = {
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
+const SECTION_LINKS = [
+  { id: 'section-basic', label: 'Basic Info' },
+  { id: 'section-deen', label: 'Deen' },
+  { id: 'section-family', label: 'Family' },
+  { id: 'section-lifestyle', label: 'Lifestyle' },
+  { id: 'section-marriage', label: 'Marriage' },
+  { id: 'section-preferences', label: 'Preferences' },
+  { id: 'section-financial', label: 'Financial' },
+  { id: 'section-emotional', label: 'Emotional' },
+  { id: 'section-communication', label: 'Communication' },
+  { id: 'section-household', label: 'Household / Career' },
+  { id: 'section-character', label: 'Character' },
+  { id: 'section-vision', label: 'Vision' },
+  { id: 'section-photo', label: 'Photos' },
+  { id: 'section-reference', label: 'Reference' },
+]
+
 export default function ProfilePageClient({
   gender,
   genderProfile: p,
@@ -180,6 +201,25 @@ export default function ProfilePageClient({
 }: Props) {
   const router = useRouter()
   const isBrother = gender === 'brother'
+  const [activeSection, setActiveSection] = useState<string>('')
+  const mainRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id)
+            break
+          }
+        }
+      },
+      { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
+    )
+    const sections = document.querySelectorAll('[id^="section-"]')
+    sections.forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -199,10 +239,55 @@ export default function ProfilePageClient({
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]" data-testid="profile-page">
-      <div className="max-w-[640px] mx-auto px-5 pb-28">
+      <div className="lg:max-w-[1100px] lg:mx-auto lg:flex lg:gap-8 lg:px-8 lg:pt-8">
 
-        {/* Header */}
-        <div data-testid="profile-header" className="flex flex-col items-center pt-8 pb-6">
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:block w-60 flex-shrink-0">
+        <div className="sticky top-24 space-y-4">
+          {/* Profile card */}
+          <div className="bg-white border border-[#EDE8E3] rounded-[16px] p-4 text-center">
+            <div className="w-16 h-16 rounded-full border-2 border-white shadow overflow-hidden bg-[#F5E6F2] flex items-center justify-center mx-auto mb-3">
+              {photoUrl
+                ? <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                : <span className="text-[20px] font-medium text-[#AF4D98]">{initials}</span>}
+            </div>
+            <p className="text-[14px] font-medium text-[#1A1A1A] truncate">{p?.full_name ?? '—'}</p>
+            <p className="text-[12px] text-[#9B9B9B] mt-0.5">{p?.age ? `${p.age} years` : ''}</p>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium mt-2 ${pillPct}`}>
+              {isComplete ? 'Complete' : `${completionPercentage}%`}
+            </span>
+          </div>
+          {/* Section links */}
+          <nav className="bg-white border border-[#EDE8E3] rounded-[16px] p-2">
+            {SECTION_LINKS.map(link => (
+              <a
+                key={link.id}
+                href={`#${link.id}`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-[10px] text-[13px] transition-colors ${
+                  activeSection === link.id
+                    ? 'bg-[#F9F0F6] text-[#AF4D98] font-medium'
+                    : 'text-[#5C5C5C] hover:bg-[#FAF4EE]'
+                }`}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-[10px] text-[13px] text-red-500 hover:bg-red-50 transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <div ref={mainRef} className="flex-1 min-w-0">
+      <div className="max-w-[640px] mx-auto px-5 pb-28 lg:max-w-none lg:px-0">
+
+        {/* Header - hidden on desktop (sidebar shows this) */}
+        <div data-testid="profile-header" className="flex flex-col items-center pt-8 pb-6 lg:hidden">
           <div className="w-24 h-24 rounded-full border-2 border-white shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden bg-[#F5E6F2] flex items-center justify-center mb-3">
             {photoUrl
               ? <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
@@ -509,7 +594,9 @@ export default function ProfilePageClient({
           </button>
         </div>
 
-      </div>
+      </div>{/* end inner max-width */}
+      </div>{/* end main content */}
+      </div>{/* end lg:flex */}
     </div>
   )
 }

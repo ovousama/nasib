@@ -232,8 +232,9 @@ export default function BrotherDashboard({
 
   return (
     <div className="bg-[#FDF8F3] min-h-screen">
+      <div className="lg:max-w-6xl lg:mx-auto">
       {!profileComplete && (
-        <div className="px-6 pt-6">
+        <div className="px-6 pt-6 lg:px-8">
           <div style={{
             background: 'linear-gradient(135deg, #F5E6F2, #F4E4BA)',
             border: '1px solid rgba(175,77,152,0.2)',
@@ -268,15 +269,16 @@ export default function BrotherDashboard({
         </div>
       )}
       {/* ── Header ──────────────────────────────────────────── */}
-      <div className="px-6 pt-10 pb-8">
+      <div className="px-6 pt-10 pb-8 lg:px-8">
         <p className="text-sm text-[#9B9B9B]">Assalamu Alaikum,</p>
-        <h1 className="text-[26px] font-medium text-[#1A1A1A] tracking-[-0.02em] leading-snug mb-1">{firstName}</h1>
+        <h1 className="text-[26px] lg:text-[32px] font-medium text-[#1A1A1A] tracking-[-0.02em] leading-snug mb-1">{firstName}</h1>
         <div className="mt-2">
           {profile?.verification_badge ? <VerifiedBadge /> : <PendingBadge />}
         </div>
       </div>
 
-      <div className="px-6 pb-6 space-y-8">
+      <div className="px-6 pb-6 lg:px-8 lg:pb-10 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
+        <div className="space-y-8 lg:col-span-2">
         {/* ── Pending Interests (sister expressed interest in brother) ─── */}
         {visibleIncoming.length > 0 && (
           <section id="interests" data-testid="pending-interests-section">
@@ -361,7 +363,7 @@ export default function BrotherDashboard({
           {!profileComplete ? null : visibleMatches.length === 0 ? (
             <EmptyState message="Your matches are being prepared. We will notify you when they are ready, in sha Allah." />
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
               {visibleMatches.map(match => {
                 const sisterFirstName = match.sister?.full_name?.split(' ')[0] ?? 'Sister'
                 // Interests the brother sent (initiated_by = brother)
@@ -469,7 +471,8 @@ export default function BrotherDashboard({
             </p>
           )}
         </section>
-
+        </div>{/* end left column */}
+        <div className="space-y-6 lg:col-span-1 mt-8 lg:mt-0">
         {/* ── Nikah Planning Connections ───────────────────────── */}
         {nikahConns.length > 0 && (
           <section id="nikah" data-testid="nikah-connections-section">
@@ -574,7 +577,9 @@ export default function BrotherDashboard({
             </div>
           )}
         </section>
-      </div>
+        </div>{/* end right column */}
+      </div>{/* end grid */}
+      </div>{/* end max-width */}
 
       {/* ── Quick View Modal ─────────────────────────────────────── */}
       <ProfileQuickView

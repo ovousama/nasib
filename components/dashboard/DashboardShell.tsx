@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import BottomNav from './BottomNav'
+import DesktopTopNav from './DesktopTopNav'
 
 type ToastItem = {
   id: string
@@ -24,6 +25,7 @@ type Props = {
   userId: string
   initialUnreadCount: number
   nikahConnectionId: string | null
+  initials: string
   children: React.ReactNode
 }
 
@@ -54,7 +56,7 @@ export function getNotificationRoute(type: string, metadata: Record<string, stri
   }
 }
 
-export default function DashboardShell({ userId, initialUnreadCount, nikahConnectionId, children }: Props) {
+export default function DashboardShell({ userId, initialUnreadCount, nikahConnectionId, initials, children }: Props) {
   const router = useRouter()
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount)
   const [toasts, setToasts] = useState<ToastItem[]>([])
@@ -116,10 +118,13 @@ export default function DashboardShell({ userId, initialUnreadCount, nikahConnec
 
   return (
     <>
-      <main className="flex-1 pb-20">
+      <DesktopTopNav unreadCount={unreadCount} nikahConnectionId={nikahConnectionId} initials={initials} />
+      <main className="flex-1 pb-20 lg:pb-0">
         {children}
       </main>
-      <BottomNav unreadCount={unreadCount} nikahConnectionId={nikahConnectionId} />
+      <div className="lg:hidden">
+        <BottomNav unreadCount={unreadCount} nikahConnectionId={nikahConnectionId} />
+      </div>
 
       {/* Toast notifications */}
       <div className="fixed bottom-24 right-4 z-50 flex flex-col gap-2 items-end pointer-events-none">

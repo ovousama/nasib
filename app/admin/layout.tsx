@@ -15,8 +15,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="flex min-h-screen bg-[#FDF8F3]">
       <AdminSidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b border-[#EDE8E3] px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <header className="bg-white border-b border-[#EDE8E3] pl-14 pr-6 py-4 lg:px-6 flex items-center justify-between sticky top-0 z-10">
+          <div className="hidden lg:flex items-center gap-[10px]">
             <NasibLogo size="sm" theme="light" />
             <span style={{ fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9B9B9B', fontWeight: 400, marginTop: '2px' }}>
               Admin

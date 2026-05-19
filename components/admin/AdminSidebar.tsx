@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -47,13 +48,13 @@ const navItems = [
     href: '/admin/connections',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-        <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+        <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
       </svg>
     ),
   },
 ]
 
-export default function AdminSidebar() {
+function NavContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -64,7 +65,7 @@ export default function AdminSidebar() {
   }
 
   return (
-    <aside className="w-56 bg-white border-r border-[#EDE8E3] min-h-screen flex flex-col flex-shrink-0">
+    <>
       <div className="px-5 py-6 border-b border-[#EDE8E3]">
         <NasibLogo size="sm" theme="light" />
         <p className="text-[#9B9B9B] text-xs mt-1.5">Admin Panel</p>
@@ -79,6 +80,7 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-colors ${
                 active
                   ? 'bg-[#F9F0F6] text-[#AF4D98]'
@@ -104,6 +106,48 @@ export default function AdminSidebar() {
           Sign out
         </button>
       </div>
-    </aside>
+    </>
+  )
+}
+
+export default function AdminSidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-56 bg-white border-r border-[#EDE8E3] min-h-screen flex-col flex-shrink-0">
+        <NavContent />
+      </aside>
+
+      {/* Mobile: hamburger button in top-left of header — rendered via layout */}
+      <button
+        className="lg:hidden fixed top-3 left-4 z-50 p-2 rounded-lg bg-white border border-[#EDE8E3] shadow-sm"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open menu"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-[#5C5C5C]">
+          <path fillRule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z" clipRule="evenodd" />
+        </svg>
+      </button>
+
+      {/* Mobile overlay sidebar */}
+      {mobileOpen && (
+        <>
+          <div className="lg:hidden fixed inset-0 bg-black/40 z-40" onClick={() => setMobileOpen(false)} />
+          <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-56 bg-white z-50 flex flex-col shadow-xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#EDE8E3]">
+              <span className="text-sm font-medium text-[#1A1A1A]">Menu</span>
+              <button onClick={() => setMobileOpen(false)} className="text-[#9B9B9B] p-1 hover:text-[#1A1A1A]">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                  <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                </svg>
+              </button>
+            </div>
+            <NavContent onClose={() => setMobileOpen(false)} />
+          </aside>
+        </>
+      )}
+    </>
   )
 }

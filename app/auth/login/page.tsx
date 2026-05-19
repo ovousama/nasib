@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import NasibLogo from '@/components/ui/NasibLogo'
+import AuthSidePanel from '@/components/auth/AuthSidePanel'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,7 +37,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3] flex flex-col items-center justify-center px-6 py-16">
+    <div className="min-h-screen bg-[#FDF8F3] lg:grid lg:grid-cols-2">
+      <AuthSidePanel headline="Join thousands of Muslims finding their nasib the halal way." />
+      <div className="flex flex-col items-center justify-center px-6 py-16 lg:py-0">
       <div className="w-full max-w-[380px]">
 
         {/* Logo */}
@@ -108,8 +111,8 @@ export default function LoginPage() {
           </Link>
         </p>
 
-        {/* Quranic verse */}
-        <div className="text-center mt-16">
+        {/* Quranic verse — only on mobile (desktop has the side panel) */}
+        <div className="text-center mt-16 lg:hidden">
           <p className="text-[14px] text-[#9B9B9B] leading-loose">
             وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا
           </p>
@@ -118,6 +121,7 @@ export default function LoginPage() {
           </p>
         </div>
 
+      </div>
       </div>
     </div>
   )
