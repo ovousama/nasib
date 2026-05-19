@@ -1,5 +1,10 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+
+export const metadata: Metadata = {
+  title: 'Naseeb · Seek with sincerity',
+}
 import { getUnreadNotificationCount } from '@/lib/database'
 import TopBar from '@/components/dashboard/TopBar'
 import DashboardShell from '@/components/dashboard/DashboardShell'

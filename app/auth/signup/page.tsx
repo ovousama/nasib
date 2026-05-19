@@ -76,7 +76,7 @@ export default function SignupPage() {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '48px' }}>
             <NasibLogo size="lg" theme="light" />
             <p style={{ marginTop: '16px', fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic', textAlign: 'center' }}>
-              Your portion, your destiny
+              Seek with sincerity
             </p>
           </div>
 
@@ -118,7 +118,7 @@ export default function SignupPage() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '40px' }}>
           <NasibLogo size="lg" theme="light" />
           <p style={{ marginTop: '16px', fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic', textAlign: 'center' }}>
-            Your portion, your destiny
+            Seek with sincerity
           </p>
         </div>
 

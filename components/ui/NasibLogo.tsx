@@ -5,9 +5,9 @@ type NasibLogoProps = {
 }
 
 const sizeMap = {
-  sm: { arabic: '22px', latin: '9px', gap: '2px' },
-  md: { arabic: '30px', latin: '11px', gap: '3px' },
-  lg: { arabic: '42px', latin: '13px', gap: '4px' },
+  sm: { arabic: '22px', latin: '9px', tagline: '8px', gap: '2px' },
+  md: { arabic: '30px', latin: '11px', tagline: '9px', gap: '3px' },
+  lg: { arabic: '42px', latin: '13px', tagline: '10px', gap: '4px' },
 }
 
 export default function NasibLogo({
@@ -55,6 +55,20 @@ export default function NasibLogo({
         }}
       >
         Naseeb
+      </span>
+      <span
+        style={{
+          fontFamily: 'Inter, sans-serif',
+          fontSize: s.tagline,
+          fontWeight: 300,
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          color: theme === 'dark' ? 'rgba(255,255,255,0.5)' : '#9B9B9B',
+          display: 'block',
+          marginTop: '2px',
+        }}
+      >
+        Seek with sincerity
       </span>
     </div>
   )

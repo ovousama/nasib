@@ -1,6 +1,6 @@
-# Naseeb
+# Naseeb — Seek with sincerity
 
-**Naseeb** (نصیب) — an Islamic matrimonial platform built to help Muslims find their life partner in a halal, purposeful, and dignified way.
+**Naseeb** (نصیب) — an Islamic matrimonial platform built to help Muslims find their life partner in a halal, purposeful, and dignified way. *Seek with sincerity.*
 
 ## About
 

@@ -215,9 +215,12 @@ export default function LandingPage() {
       >
         <div className="max-w-[700px] mx-auto text-center">
           {/* Pill badge */}
-          <div className="inline-flex items-center px-4 py-1.5 mb-8 rounded-full bg-white border border-[rgba(175,77,152,0.2)]">
-            <span className="text-[12px] text-[#AF4D98]">Halal matrimonial — نصيب</span>
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white border border-[rgba(175,77,152,0.2)]">
+            <span className="text-[12px] text-[#AF4D98]">Halal matrimonial · Seek with sincerity</span>
           </div>
+          <p style={{ fontFamily: 'var(--font-arabic, "Noto Naskh Arabic", serif)', fontSize: '14px', color: '#9B9B9B', marginTop: '6px', marginBottom: '24px' }}>
+            اطلب بإخلاص
+          </p>
 
           {/* Arabic verse */}
           <p
@@ -619,7 +622,7 @@ export default function LandingPage() {
             <div>
               <NasibLogo size="sm" theme="dark" />
               <p className="text-[13px] text-[#6B6B6B] mt-3 leading-[1.7]">
-                Build a family of comfort and a community of taqwa.
+                Seek with sincerity.
               </p>
             </div>
 

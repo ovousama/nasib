@@ -22,8 +22,8 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: 'Naseeb — نصيب',
-  description: 'Find your naseeb. Halal matrimonial platform.',
+  title: 'Naseeb — Seek with sincerity',
+  description: 'Naseeb — Seek with sincerity. A halal matrimonial platform built around Islamic values. Serious intent, wali involvement, and deep compatibility.',
   icons: {
     icon: '/favicon.svg',
   },
