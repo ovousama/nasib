@@ -29,16 +29,17 @@ export default async function DashboardPage() {
   }
 
   if (profile.gender === 'brother') {
-    const [brotherProfile, matches, connections, sentInterestOtherIds, incomingInterests, notifications] = await Promise.all([
+    const [brotherProfile, matches, connections, sentInterestOtherIds, incomingInterests, notifications, { data: refRow }] = await Promise.all([
       getBrotherProfile(user.id),
       getBrotherMatches(user.id),
       getActiveConnections(user.id, 'brother'),
       getSentPendingInterestOtherIds(user.id, 'brother'),
       getIncomingPendingInterests(user.id, 'brother'),
       getNotifications(user.id),
+      supabase.from('references').select('profile_id').eq('profile_id', user.id).maybeSingle(),
     ])
 
-    if (!brotherProfile) redirect('/onboarding/brother')
+    if (!brotherProfile) redirect('/dashboard/profile/edit/basic')
 
     return (
       <BrotherDashboard
@@ -51,20 +52,22 @@ export default async function DashboardPage() {
         notifications={notifications}
         profileComplete={profile.profile_complete ?? false}
         completionPercentage={profile.profile_completion_percentage ?? 0}
+        hasReference={!!refRow}
       />
     )
   }
 
   if (profile.gender === 'sister') {
-    const [sisterProfile, matches, connections, incomingInterests, notifications] = await Promise.all([
+    const [sisterProfile, matches, connections, incomingInterests, notifications, { data: refRow }] = await Promise.all([
       getSisterProfile(user.id),
       getSisterMatches(user.id),
       getActiveConnections(user.id, 'sister'),
       getIncomingPendingInterests(user.id, 'sister'),
       getNotifications(user.id),
+      supabase.from('references').select('profile_id').eq('profile_id', user.id).maybeSingle(),
     ])
 
-    if (!sisterProfile) redirect('/onboarding/sister')
+    if (!sisterProfile) redirect('/dashboard/profile/edit/basic')
 
     const waliProfile = await getWaliProfile(user.id)
 
@@ -79,6 +82,7 @@ export default async function DashboardPage() {
         notifications={notifications}
         profileComplete={profile.profile_complete ?? false}
         completionPercentage={profile.profile_completion_percentage ?? 0}
+        hasReference={!!refRow}
       />
     )
   }

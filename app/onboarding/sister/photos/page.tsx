@@ -95,12 +95,17 @@ export default function SisterPhotos() {
     if (fullProfile) {
       const { calculateCompletion } = await import('@/lib/profile-completion')
       const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'sister')
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('status, profile_complete')
+        .eq('id', userId)
+        .single()
       await supabase
         .from('profiles')
         .update({
           profile_completion_percentage: percentage,
-          profile_complete: isComplete,
-          status: isComplete ? 'active' : 'pending_verification',
+          profile_complete: currentProfile?.profile_complete || isComplete,
+          status: currentProfile?.status === 'active' ? 'active' : (isComplete ? 'active' : 'pending_verification'),
         })
         .eq('id', userId)
     }
@@ -133,12 +138,17 @@ export default function SisterPhotos() {
     if (fullProfile) {
       const { calculateCompletion } = await import('@/lib/profile-completion')
       const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'sister')
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('status, profile_complete')
+        .eq('id', userId)
+        .single()
       await supabase
         .from('profiles')
         .update({
           profile_completion_percentage: percentage,
-          profile_complete: isComplete,
-          status: isComplete ? 'active' : 'pending_verification',
+          profile_complete: currentProfile?.profile_complete || isComplete,
+          status: currentProfile?.status === 'active' ? 'active' : (isComplete ? 'active' : 'pending_verification'),
         })
         .eq('id', userId)
     }

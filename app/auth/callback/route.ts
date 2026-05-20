@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { calculateCompletion } from '@/lib/profile-completion'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -10,7 +11,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/auth/login`)
   }
 
-  // Collect session cookies so we can forward them onto the redirect response
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pendingCookies: Array<{ name: string; value: string; options: any }> = []
 
@@ -19,9 +19,7 @@ export async function GET(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
+        getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
           pendingCookies.splice(0, pendingCookies.length, ...cookiesToSet)
         },
@@ -45,28 +43,70 @@ export async function GET(request: NextRequest) {
   const user = data.session.user
   const gender = user.user_metadata?.gender as 'brother' | 'sister' | undefined
 
-  // Check if a profile row with gender already exists (re-verification / new device)
+  // Check if profile row already exists (re-verification / returning user)
   const { data: existingProfile } = await supabase
     .from('profiles')
     .select('id, gender')
     .eq('id', user.id)
     .single()
 
-  let redirectTo = '/onboarding'
-
   if (existingProfile?.gender) {
-    // Profile exists — go straight to dashboard
-    redirectTo = '/dashboard'
-  } else if (gender) {
-    // First verification and gender is in metadata — create the profile row
-    await supabase.from('profiles').upsert(
-      { id: user.id, gender, status: 'pending_verification' },
-      { onConflict: 'id', ignoreDuplicates: true }
-    )
+    // Already set up — go to dashboard
+    const response = NextResponse.redirect(`${origin}/dashboard`)
+    pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+    return response
   }
-  // If no gender anywhere, fall through to /onboarding which renders GenderSelectionPage
 
-  const response = NextResponse.redirect(`${origin}${redirectTo}`)
+  if (!gender) {
+    // No gender in metadata — show gender selection
+    const response = NextResponse.redirect(`${origin}/onboarding`)
+    pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+    return response
+  }
+
+  // First-time verification: create profiles row and gender profile row
+  await supabase.from('profiles').upsert(
+    {
+      id: user.id,
+      gender,
+      status: 'active',
+      profile_complete: false,
+      profile_completion_percentage: 0,
+    },
+    { onConflict: 'id', ignoreDuplicates: true }
+  )
+
+  const fullName = user.user_metadata?.full_name as string | undefined
+  const age = user.user_metadata?.age as number | string | undefined
+  const location = user.user_metadata?.location as string | undefined
+
+  const basicInfo = {
+    id: user.id,
+    full_name: fullName ?? null,
+    age: age ? parseInt(String(age)) : null,
+    location: location ?? null,
+  }
+
+  if (gender === 'brother') {
+    await supabase.from('brother_profiles').upsert(basicInfo, { onConflict: 'id', ignoreDuplicates: true })
+  } else {
+    await supabase.from('sister_profiles').upsert(basicInfo, { onConflict: 'id', ignoreDuplicates: true })
+  }
+
+  // Calculate initial completion percentage from the basic info we just saved
+  const profileData: Record<string, unknown> = {
+    full_name: basicInfo.full_name,
+    age: basicInfo.age,
+    location: basicInfo.location,
+  }
+  const { percentage } = calculateCompletion(profileData, gender)
+
+  await supabase
+    .from('profiles')
+    .update({ profile_completion_percentage: percentage })
+    .eq('id', user.id)
+
+  const response = NextResponse.redirect(`${origin}/dashboard`)
   pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
   return response
 }

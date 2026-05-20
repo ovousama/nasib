@@ -7,7 +7,11 @@ export async function recalculateProfileCompletion(): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  const { data: profile } = await supabase.from('profiles').select('gender').eq('id', user.id).single()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('gender, status, profile_complete')
+    .eq('id', user.id)
+    .single()
   if (!profile) return
 
   const gender = profile.gender as 'brother' | 'sister'
@@ -16,9 +20,14 @@ export async function recalculateProfileCompletion(): Promise<void> {
   if (!extProfile) return
 
   const { percentage, isComplete } = calculateCompletion(extProfile as Record<string, unknown>, gender)
+
+  // Never downgrade: status stays 'active' if already active; profile_complete stays true once set
+  const newStatus = profile.status === 'active' ? 'active' : (isComplete ? 'active' : 'pending_verification')
+  const newComplete = profile.profile_complete || isComplete
+
   await supabase.from('profiles').update({
-    profile_complete: isComplete,
+    profile_complete: newComplete,
     profile_completion_percentage: percentage,
-    status: isComplete ? 'active' : 'pending_verification',
+    status: newStatus,
   }).eq('id', user.id)
 }
