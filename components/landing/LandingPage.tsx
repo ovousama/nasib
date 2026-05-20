@@ -132,7 +132,7 @@ const DIFFS = [
 const FAQS = [
   {
     q: 'Is Naseeb free?',
-    a: 'Yes — Naseeb is completely free for everyone, always. There are no subscriptions, no credits, and no hidden fees. If the platform helps you find your match, we simply ask that you consider making a voluntary sadaqah to help keep it running for others.',
+    a: 'Yes — Naseeb is completely free for everyone, always. There are no subscriptions, no credits, and no hidden fees. If the platform helps you find your match, we simply ask that you consider making a voluntary donation to help keep it running for others.',
   },
   {
     q: 'Do I need a wali to sign up as a sister?',
@@ -235,7 +235,7 @@ export default function LandingPage() {
             className="text-[#5C5C5C] mx-auto mb-10 max-w-[560px]"
             style={{ fontSize: '18px', fontWeight: 300, lineHeight: 1.7 }}
           >
-            A halal matrimonial platform built around Islamic values. Serious intent, wali involvement,
+            A halal matchmaking platform built around Islamic values. Serious intent, wali involvement,
             and deep compatibility — from the very first step.
           </p>
 
@@ -345,7 +345,7 @@ export default function LandingPage() {
               <ul className="space-y-3">
                 {[
                   'Muslim men serious about marriage',
-                  'Ready to fulfil the responsibility of nafaqah',
+                  'Ready to lead with love and responsibility',
                   'Looking for a partner in deen, not just a partner',
                   'Willing to engage respectfully with a wali',
                 ].map((item) => (
@@ -563,7 +563,7 @@ export default function LandingPage() {
           <p style={{ fontSize: '16px', color: '#5C5C5C', lineHeight: 1.8, marginBottom: '32px' }}>
             Naseeb is free for everyone — always. No subscriptions, no credits, no hidden fees.
             <br /><br />
-            If this platform helps you find your match, consider making a sadaqah to help keep it
+            If this platform helps you find your match, consider making a donation to help keep it
             running for others who are still seeking theirs. Every contribution goes directly
             toward maintaining and growing Naseeb.
           </p>

@@ -220,13 +220,24 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const channelRef = useRef<RealtimeChannel | null>(null)
 
-  const scrollToBottom = () => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  const scrollToBottom = (behavior: 'smooth' | 'instant' = 'smooth') => {
+    bottomRef.current?.scrollIntoView({ behavior })
   }
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages, meetings])
+    scrollToBottom('instant')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (messages.length > 0) scrollToBottom('smooth')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length])
+
+  useEffect(() => {
+    if (meetings.length > 0) scrollToBottom('smooth')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meetings.length])
 
   useEffect(() => {
     const supabase = createClient()

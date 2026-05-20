@@ -23,7 +23,7 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: 'Naseeb — Seek with sincerity',
-  description: 'Naseeb — Seek with sincerity. A free halal matrimonial platform serving Muslims in Canada, the USA, the UK, and the EU. Serious intent, wali involvement, and deep compatibility.',
+  description: 'Naseeb — Seek with sincerity. A free halal matchmaking platform serving Muslims in Canada, the USA, the UK, and the EU. Serious intent, wali involvement, and deep compatibility.',
   icons: {
     icon: '/favicon.svg',
   },

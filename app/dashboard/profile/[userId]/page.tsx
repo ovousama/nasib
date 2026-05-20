@@ -98,8 +98,18 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
   const firstName = profileData.full_name?.split(' ')[0] ?? ''
   const isBrother = targetProfile.gender === 'brother'
 
-  // A brother viewing a sister sees no photo. A sister viewing a brother sees photo.
-  const photoUrl = isBrother ? profileData.photo_url : null
+  // A brother viewing a sister sees no photo. A sister viewing a brother sees photo (public bucket).
+  let photoUrl: string | null = null
+  if (isBrother && profileData.photo_url) {
+    const path = profileData.photo_url
+    if (path.startsWith('http')) {
+      photoUrl = path
+    } else {
+      const supabase = await createServerSupabaseClient()
+      const { data } = supabase.storage.from('brother-photos').getPublicUrl(path)
+      photoUrl = data.publicUrl
+    }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = profileData as any

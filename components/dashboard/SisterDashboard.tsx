@@ -5,6 +5,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+function toBrotherPhotoUrl(path: string | null | undefined): string | null {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return `${SUPABASE_URL}/storage/v1/object/public/brother-photos/${path}`
+}
 import ProfileQuickView from '@/components/dashboard/ProfileQuickView'
 import ProfileChecklist from '@/components/dashboard/ProfileChecklist'
 import {
@@ -355,7 +362,7 @@ export default function SisterDashboard({
                       <div className="p-5">
                         <div className="flex items-start gap-3 mb-3">
                           {op?.photo_url ? (
-                            <Image src={op.photo_url} alt={op.full_name} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
+                            <Image src={toBrotherPhotoUrl(op.photo_url) ?? op.photo_url} alt={op.full_name} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
                           ) : (
                             <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
                               {(op?.full_name ?? 'B')[0]?.toUpperCase()}
@@ -457,7 +464,7 @@ export default function SisterDashboard({
                       <div className="p-5">
                         <div className="flex items-start gap-3 mb-3">
                           {b?.photo_url ? (
-                            <Image src={b.photo_url} alt={brotherFirstName} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
+                            <Image src={toBrotherPhotoUrl(b.photo_url) ?? b.photo_url} alt={brotherFirstName} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
                           ) : (
                             <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
                               {brotherFirstName[0]?.toUpperCase()}

@@ -5,6 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { getFieldLabel } from '@/lib/field-labels'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+function toBrotherPhotoUrl(path: string | null | undefined): string | null {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return `${SUPABASE_URL}/storage/v1/object/public/brother-photos/${path}`
+}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyData = any
 
@@ -219,6 +226,7 @@ export default function ProfilePageClient({
   const router = useRouter()
   const isBrother = gender === 'brother'
   const [activeSection, setActiveSection] = useState<string>('')
+  const [sisterSignedUrls, setSisterSignedUrls] = useState<string[]>([])
   const mainRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -238,6 +246,24 @@ export default function ProfilePageClient({
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    if (isBrother) return
+    const paths: string[] = Array.isArray(p?.photo_urls) ? p.photo_urls : []
+    if (paths.length === 0) return
+    const supabase = createClient()
+    Promise.all(
+      paths.map(async (path: string) => {
+        const storagePath = path.includes('/object/sign/')
+          ? path.split('sister-photos/')[1]?.split('?')[0]
+          : path
+        if (!storagePath) return null
+        const { data } = await supabase.storage.from('sister-photos').createSignedUrl(storagePath, 3600)
+        return data?.signedUrl ?? null
+      })
+    ).then(urls => setSisterSignedUrls(urls.filter(Boolean) as string[]))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   async function handleSignOut() {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -251,7 +277,9 @@ export default function ProfilePageClient({
       ? 'bg-amber-50 text-amber-700'
       : 'bg-red-50 text-red-600'
 
-  const photoUrl = isBrother ? p?.photo_url : p?.photo_urls?.[0]
+  const photoUrl = isBrother
+    ? toBrotherPhotoUrl(p?.photo_url)
+    : (sisterSignedUrls[0] ?? null)
   const firstName = p?.full_name?.split(' ')[0] ?? 'N'
 
   return (
@@ -622,17 +650,19 @@ export default function ProfilePageClient({
         {isBrother ? (
           <Section title="Photo" editHref="/dashboard/profile/edit/photo" testId="section-photo">
             <FW label="">
-              {p?.photo_url
-                ? <img src={p.photo_url} alt="Profile" className="w-20 h-20 rounded-[12px] object-cover border border-[#EDE8E3]" />
+              {toBrotherPhotoUrl(p?.photo_url)
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={toBrotherPhotoUrl(p?.photo_url)!} alt="Profile" className="w-20 h-20 rounded-[12px] object-cover border border-[#EDE8E3]" />
                 : <span className="text-[14px] text-[#9B9B9B]">No photo uploaded yet</span>}
             </FW>
           </Section>
         ) : (
           <Section title="Photos" editHref="/dashboard/profile/edit/photos" testId="section-photos">
             <FW label="">
-              {p?.photo_urls?.length
+              {sisterSignedUrls.length > 0
                 ? <div className="flex flex-wrap gap-2">
-                    {p.photo_urls.map((url: string, i: number) => (
+                    {sisterSignedUrls.map((url: string, i: number) => (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img key={i} src={url} alt={`Photo ${i + 1}`} className="w-16 h-16 rounded-[12px] object-cover border border-[#EDE8E3]" />
                     ))}
                   </div>

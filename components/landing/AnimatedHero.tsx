@@ -85,13 +85,14 @@ export default function AnimatedHero() {
         letterSpacing: '-0.03em',
         color: '#1A1A1A',
         textAlign: 'center',
-        lineHeight: 1.1,
+        lineHeight: 1,
         marginBottom: '28px',
         display: 'flex',
         alignItems: 'baseline',
         justifyContent: 'center',
-        gap: '0.25em',
-        flexWrap: 'wrap',
+        gap: '0.2em',
+        flexWrap: 'nowrap',
+        whiteSpace: 'nowrap',
       }}
     >
       <span>Find your</span>
@@ -103,8 +104,11 @@ export default function AnimatedHero() {
           color: '#AF4D98',
           direction: isArabic ? 'rtl' : 'ltr',
           display: 'inline-block',
-          minWidth: isArabic ? '120px' : '180px',
+          minWidth: '220px',
           textAlign: 'center',
+          fontSize: 'clamp(52px, 8vw, 110px)',
+          lineHeight: 1,
+          verticalAlign: 'baseline',
         }}
       >
         {displayText}

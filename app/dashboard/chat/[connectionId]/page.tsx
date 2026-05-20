@@ -49,7 +49,7 @@ export default async function ChatPage({ params }: Props) {
       </div>
 
       {/* Chat panel */}
-      <div className="flex flex-col h-[calc(100vh-8rem)] lg:h-full lg:flex-1 lg:min-w-0">
+      <div className="flex flex-col h-[calc(100dvh-56px)] lg:h-full lg:flex-1 lg:min-w-0">
         {/* Nikah planning banner */}
         {connection.status === 'nikah_planning' && (
           <div className="flex items-center justify-between px-4 py-2.5 bg-[#F5E6F2] border-b border-[#E5C8E0]">

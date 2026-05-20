@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+function toBrotherPhotoUrl(path: string | null | undefined): string | null {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return `${SUPABASE_URL}/storage/v1/object/public/brother-photos/${path}`
+}
+
 type QuickViewData = {
   first_name: string
   age: number
@@ -177,7 +184,7 @@ export default function ProfileQuickView({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     data-testid="sister-photo"
-                    src={data.photo_url}
+                    src={toBrotherPhotoUrl(data.photo_url) ?? data.photo_url}
                     alt={data.first_name}
                     className="w-20 h-20 rounded-full object-cover ring-2 ring-[#EDE8E3] mb-3"
                   />
