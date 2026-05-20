@@ -1085,7 +1085,7 @@ export async function getProfileForViewing(userId: string): Promise<ProfileForVi
     // Deliberately excludes health_background_disclosure — it is private
     const { data: sisterProfile, error } = await supabase
       .from('sister_profiles')
-      .select('id, full_name, age, location, ethnicity, languages, religiosity_level, madhab, prayer_frequency, islamic_knowledge_level, wears_hijab, occupation, education_level, living_situation, willing_to_relocate, previously_married, has_children, wants_children, timeline_to_marry, spouse_religiosity_preference, spouse_age_min, spouse_age_max, dealbreakers, character_description, goals, photos_uploaded, do_you_listen_to_music, celebrate_non_islamic_holidays, hijab_outside_home, islamic_classes_attendance, differing_islamic_opinions, plan_to_work_after_marriage, financial_independence_importance, has_significant_debt, supporting_family_financially, career_ambitions, number_of_children_wanted, primary_caregiver_comfort, household_responsibilities_vision, inlaws_living_together, islamic_schooling_importance, weekend_lifestyle, mixed_gender_social_circle, travel_importance, strict_halal_diet, smoking, conflict_style, introvert_extrovert, love_language, alone_time_importance')
+      .select('*')
       .eq('id', userId)
       .single()
 

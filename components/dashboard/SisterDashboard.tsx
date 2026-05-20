@@ -291,7 +291,7 @@ export default function SisterDashboard({
 
   const visibleInterests = incomingInterests.filter(i => !localDeclinedIds.has(i.id))
   const visibleNotifications = notifications.filter(n => !readNotifIds.has(n.id))
-  const visibleMatches = matches.filter(m => !connections.some(c => c.brother_id === m.brother_id))
+  const visibleMatches = matches
   const activeConns = connections.filter(c => c.status === 'active')
   const nikahConns = connections.filter(c => c.status === 'nikah_planning')
 
@@ -372,6 +372,146 @@ export default function SisterDashboard({
               </div>
             </section>
           )}
+
+          {/* ── Matches ─────────────────────────────────────────── */}
+          <section id="matches" data-testid="matches-section">
+            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
+
+            {!profileComplete ? null : visibleMatches.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '48px 20px' }}>
+                <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '32px', color: '#AF4D98', marginBottom: '12px', opacity: 0.4 }}>نصيب</p>
+                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 400, color: '#AF4D98', marginBottom: '8px' }}>
+                  Matches coming soon
+                </p>
+                <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '260px', margin: '0 auto' }}>
+                  We will notify you when they are ready, in sha Allah.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
+                {visibleMatches.map(match => {
+                  const b = match.brother
+                  const brotherFirstName = b?.full_name?.split(' ')[0] ?? 'Brother'
+                  const matchConnection = connections.find(c => c.brother_id === match.brother_id)
+                  const incomingFromThis = matchConnection ? null : incomingInterests.find(i => i.brother_id === match.brother_id && !localDeclinedIds.has(i.id))
+                  const hasSent = !matchConnection && (match.interest?.status === 'pending' || localSentIds.includes(match.brother_id))
+                  const isAccepted = !matchConnection && match.interest?.status === 'accepted'
+                  const hasAnyInterest = !matchConnection && (match.interest !== null || localSentIds.includes(match.brother_id))
+
+                  return (
+                    <div data-testid="match-card" key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
+                      <div className="p-5">
+                        <div className="flex items-start gap-3 mb-3">
+                          {b?.photo_url ? (
+                            <Image src={toBrotherPhotoUrl(b.photo_url) ?? b.photo_url} alt={brotherFirstName} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
+                          ) : (
+                            <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
+                              {brotherFirstName[0]?.toUpperCase()}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{brotherFirstName}</span>
+                              {b?.verification_badge && <VerifiedBadge />}
+                            </div>
+                            <p className="text-sm text-[#9B9B9B] mt-0.5">
+                              {[b?.age ? `${b.age} yrs` : null, b?.location].filter(Boolean).join(' · ')}
+                            </p>
+                          </div>
+                        </div>
+
+                        {match.compatibility_note && (
+                          <p className="border-l-2 border-[#E5A9A9] pl-3 text-sm italic text-[#5C5C5C] mb-3">
+                            {match.compatibility_note}
+                          </p>
+                        )}
+
+                        <div className="pt-3 border-t border-[#EDE8E3]">
+                          {matchConnection ? (
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-medium text-[#00A699] bg-[#E6F9F7] px-2.5 py-1 rounded-full">Active Connection</span>
+                              <div className="flex gap-2">
+                                <Link
+                                  href={`/dashboard/profile/${match.brother_id}?context=connection&connectionId=${matchConnection.id}`}
+                                  onClick={e => e.stopPropagation()}
+                                  className="text-sm font-medium text-[#5C5C5C] py-1 px-2"
+                                >
+                                  Profile
+                                </Link>
+                                <Link
+                                  href={`/dashboard/chat/${matchConnection.id}`}
+                                  onClick={e => e.stopPropagation()}
+                                  className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
+                                >
+                                  Open Chat
+                                </Link>
+                              </div>
+                            </div>
+                          ) : incomingFromThis ? (
+                            <div>
+                              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#AF4D98] mb-2">{brotherFirstName} has expressed interest</p>
+                              {incomingFromThis.intro_message && (
+                                <div className="bg-[#FAF4EE] rounded-[12px] px-3 py-2.5 mb-3 border border-[#EDE8E3]">
+                                  <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Their message</p>
+                                  <p className="text-sm text-[#1A1A1A] italic">&ldquo;{incomingFromThis.intro_message}&rdquo;</p>
+                                </div>
+                              )}
+                              <div className="grid grid-cols-2 gap-2">
+                                <button
+                                  onClick={e => { e.stopPropagation(); handleDecline(incomingFromThis.id) }}
+                                  disabled={declining === incomingFromThis.id}
+                                  className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
+                                >
+                                  {declining === incomingFromThis.id ? '…' : 'Decline'}
+                                </button>
+                                <button
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    if (connectionsFull) setActionError('Close an active connection before accepting.')
+                                    else openAcceptOrPromptPhotos(incomingFromThis)
+                                  }}
+                                  className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
+                                >
+                                  Accept
+                                </button>
+                              </div>
+                            </div>
+                          ) : isAccepted ? (
+                            <div className="flex items-center justify-center py-1">
+                              <span className="text-sm text-[#AF4D98] font-medium">Connected — open chat to continue</span>
+                            </div>
+                          ) : hasSent ? (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-[#9B9B9B] italic">Awaiting response…</span>
+                              <span className="text-sm font-medium text-[#AF4D98]">Interest Sent</span>
+                            </div>
+                          ) : !hasAnyInterest ? (
+                            <div className="flex items-center justify-end">
+                              <button
+                                data-testid="express-interest-btn"
+                                onClick={e => { e.stopPropagation(); openInterestModal(match.brother_id, match.sister_id, brotherFirstName) }}
+                                disabled={connectionsFull}
+                                title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
+                                className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              >
+                                Express Interest
+                              </button>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {interestError && (
+              <div className="mt-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">
+                {interestError}
+              </div>
+            )}
+          </section>
 
           {/* ── Active Connections ───────────────────────────────── */}
           <section id="connections" data-testid="connections-section">
@@ -482,127 +622,6 @@ export default function SisterDashboard({
             </section>
           )}
 
-          {/* ── Matches ─────────────────────────────────────────── */}
-          <section id="matches" data-testid="matches-section">
-            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
-
-            {!profileComplete ? null : visibleMatches.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 20px' }}>
-                <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '32px', color: '#AF4D98', marginBottom: '12px', opacity: 0.4 }}>نصيب</p>
-                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 400, color: '#AF4D98', marginBottom: '8px' }}>
-                  Matches coming soon
-                </p>
-                <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '260px', margin: '0 auto' }}>
-                  We will notify you when they are ready, in sha Allah.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
-                {visibleMatches.map(match => {
-                  const b = match.brother
-                  const brotherFirstName = b?.full_name?.split(' ')[0] ?? 'Brother'
-                  const incomingFromThis = incomingInterests.find(i => i.brother_id === match.brother_id && !localDeclinedIds.has(i.id))
-                  const hasSent = match.interest?.status === 'pending' || localSentIds.includes(match.brother_id)
-                  const isAccepted = match.interest?.status === 'accepted'
-                  const hasConnection = connections.some(c => c.brother_id === match.brother_id)
-                  const hasAnyInterest = match.interest !== null || localSentIds.includes(match.brother_id)
-
-                  return (
-                    <div data-testid="match-card" key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
-                      <div className="p-5">
-                        <div className="flex items-start gap-3 mb-3">
-                          {b?.photo_url ? (
-                            <Image src={toBrotherPhotoUrl(b.photo_url) ?? b.photo_url} alt={brotherFirstName} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
-                          ) : (
-                            <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
-                              {brotherFirstName[0]?.toUpperCase()}
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{brotherFirstName}</span>
-                              {b?.verification_badge && <VerifiedBadge />}
-                            </div>
-                            <p className="text-sm text-[#9B9B9B] mt-0.5">
-                              {[b?.age ? `${b.age} yrs` : null, b?.location].filter(Boolean).join(' · ')}
-                            </p>
-                          </div>
-                        </div>
-
-                        {match.compatibility_note && (
-                          <p className="border-l-2 border-[#E5A9A9] pl-3 text-sm italic text-[#5C5C5C] mb-3">
-                            {match.compatibility_note}
-                          </p>
-                        )}
-
-                        <div className="pt-3 border-t border-[#EDE8E3]">
-                          {incomingFromThis ? (
-                            <div>
-                              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#AF4D98] mb-2">{brotherFirstName} has expressed interest</p>
-                              {incomingFromThis.intro_message && (
-                                <div className="bg-[#FAF4EE] rounded-[12px] px-3 py-2.5 mb-3 border border-[#EDE8E3]">
-                                  <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Their message</p>
-                                  <p className="text-sm text-[#1A1A1A] italic">&ldquo;{incomingFromThis.intro_message}&rdquo;</p>
-                                </div>
-                              )}
-                              <div className="grid grid-cols-2 gap-2">
-                                <button
-                                  onClick={e => { e.stopPropagation(); handleDecline(incomingFromThis.id) }}
-                                  disabled={declining === incomingFromThis.id}
-                                  className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
-                                >
-                                  {declining === incomingFromThis.id ? '…' : 'Decline'}
-                                </button>
-                                <button
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    if (connectionsFull) setActionError('Close an active connection before accepting.')
-                                    else openAcceptOrPromptPhotos(incomingFromThis)
-                                  }}
-                                  className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
-                                >
-                                  Accept
-                                </button>
-                              </div>
-                            </div>
-                          ) : isAccepted || hasConnection ? (
-                            <div className="flex items-center justify-center py-1">
-                              <span className="text-sm text-[#AF4D98] font-medium">Connected — open chat to continue</span>
-                            </div>
-                          ) : hasSent ? (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-[#9B9B9B] italic">Awaiting response…</span>
-                              <span className="text-sm font-medium text-[#AF4D98]">
-                                Interest Sent
-                              </span>
-                            </div>
-                          ) : !hasAnyInterest && !hasConnection ? (
-                            <div className="flex items-center justify-end">
-                              <button
-                                data-testid="express-interest-btn"
-                                onClick={e => { e.stopPropagation(); openInterestModal(match.brother_id, match.sister_id, brotherFirstName) }}
-                                disabled={connectionsFull}
-                                title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
-                                className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              >
-                                Express Interest
-                              </button>
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {interestError && (
-              <div className="mt-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">
-                {interestError}
-              </div>
-            )}
-          </section>
           </div>{/* end left column */}
           <div className="space-y-6 lg:col-span-1 mt-8 lg:mt-0">
           {/* ── Notifications ────────────────────────────────────── */}

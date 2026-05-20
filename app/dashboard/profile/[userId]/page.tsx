@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getProfile, getProfileForViewing } from '@/lib/database'
 import { getConnectionBetween } from '@/lib/connections'
 import ProfileInterestActions from '@/components/dashboard/ProfileInterestActions'
+import { getFieldLabel } from '@/lib/field-labels'
 
 type Props = {
   params: Promise<{ userId: string }>
@@ -106,6 +107,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
   const firstName = profileData.full_name?.split(' ')[0] ?? ''
   const isBrother = targetProfile.gender === 'brother'
+  const gender: 'brother' | 'sister' = isBrother ? 'brother' : 'sister'
 
   // Resolve back URL: prefer the explicit connectionId param, fall back to activeConnectionId
   const backConnectionId = connectionIdParam ?? activeConnectionId
@@ -114,30 +116,27 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
   // Photo resolution:
   // - Brother → public bucket, use getPublicUrl
-  // - Sister + connected → fetch signed URL from private bucket
-  // - Sister + interest only → no photo shown
-  let photoUrl: string | null = null
+  // - Sister + connected → fetch all signed URLs from private bucket
+  // - Sister + interest only → no photos shown
+  const photoUrls: string[] = []
   if (isBrother && profileData.photo_url) {
     const path = profileData.photo_url
-    if (path.startsWith('http')) {
-      photoUrl = path
-    } else {
-      const { data } = supabase.storage.from('brother-photos').getPublicUrl(path)
-      photoUrl = data.publicUrl
-    }
+    const url = path.startsWith('http')
+      ? path
+      : supabase.storage.from('brother-photos').getPublicUrl(path).data.publicUrl
+    photoUrls.push(url)
   } else if (!isBrother && activeConnectionId) {
-    // Sister with active connection — fetch photo_urls from sister_profiles
     const { data: sp } = await supabase
       .from('sister_profiles')
       .select('photo_urls')
       .eq('id', userId)
       .maybeSingle()
-    const firstPath = sp?.photo_urls?.[0]
-    if (firstPath) {
+    const paths: string[] = sp?.photo_urls ?? []
+    for (const path of paths) {
       const { data: signed } = await supabase.storage
         .from('sister-photos')
-        .createSignedUrl(firstPath, 3600)
-      photoUrl = signed?.signedUrl ?? null
+        .createSignedUrl(path, 3600)
+      if (signed?.signedUrl) photoUrls.push(signed.signedUrl)
     }
   }
 
@@ -163,16 +162,29 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
       {/* Hero */}
       <div className="bg-white border-b border-[#EDE8E3] px-5 pt-8 pb-7 flex flex-col items-center text-center">
-        {photoUrl ? (
+        {photoUrls.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={photoUrl}
+            src={photoUrls[0]}
             alt={firstName}
             className="w-[96px] h-[96px] rounded-full object-cover border-2 border-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
           />
         ) : (
           <div className="w-[96px] h-[96px] rounded-full bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-3xl font-medium">
             {firstName[0]?.toUpperCase()}
+          </div>
+        )}
+        {photoUrls.length > 1 && (
+          <div className="flex gap-2 justify-center mt-3 flex-wrap">
+            {photoUrls.slice(1).map((url, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={url}
+                alt={`Photo ${i + 2}`}
+                className="w-[60px] h-[60px] rounded-[8px] object-cover border border-[#EDE8E3]"
+              />
+            ))}
           </div>
         )}
         <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[#AF4D98]/50 mt-4 mb-0.5">نصيب</p>
@@ -200,23 +212,23 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
         {/* Deen & Practice */}
         <Section title="Deen & Practice">
-          <Row label="Religiosity" value={profileData.religiosity_level} />
-          <Row label="Prayer Frequency" value={profileData.prayer_frequency} />
-          <Row label="Madhab" value={profileData.madhab} />
-          <Row label="Islamic Knowledge" value={profileData.islamic_knowledge_level} />
+          <Row label={getFieldLabel('religiosity_level', gender)} value={profileData.religiosity_level} />
+          <Row label={getFieldLabel('prayer_frequency', gender)} value={profileData.prayer_frequency} />
+          <Row label={getFieldLabel('madhab', gender)} value={profileData.madhab} />
+          <Row label={getFieldLabel('islamic_knowledge_level', gender)} value={profileData.islamic_knowledge_level} />
           {isBrother ? (
             <>
-              <Row label="Has Beard" value={profileData.has_beard} />
-              <Row label="Attends Jumu'ah" value={p.jumuah_attendance} />
+              <Row label={getFieldLabel('has_beard', gender)} value={profileData.has_beard} />
+              <Row label={getFieldLabel('jumuah_attendance', gender)} value={p.jumuah_attendance} />
             </>
           ) : (
             <>
-              <Row label="Wears Hijab" value={profileData.wears_hijab} />
-              <Row label="Attends Halaqas" value={p.islamic_classes_attendance} />
+              <Row label={getFieldLabel('wears_hijab', gender)} value={profileData.wears_hijab} />
+              <Row label={getFieldLabel('islamic_classes_attendance', gender)} value={p.islamic_classes_attendance} />
             </>
           )}
-          <Row label="Listens to Music" value={p.do_you_listen_to_music} />
-          <Row label="Non-Islamic Holidays" value={p.celebrate_non_islamic_holidays} />
+          <Row label={getFieldLabel('do_you_listen_to_music', gender)} value={p.do_you_listen_to_music} />
+          <Row label={getFieldLabel('celebrate_non_islamic_holidays', gender)} value={p.celebrate_non_islamic_holidays} />
           {p.differing_islamic_opinions && (
             <div className="pt-2.5">
               <p className="text-xs text-[#9B9B9B] mb-1">On Differing Opinions</p>
@@ -227,14 +239,14 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
         {/* Lifestyle */}
         <Section title="Lifestyle">
-          <Row label="Occupation" value={profileData.occupation} />
-          <Row label="Education" value={profileData.education_level} />
-          <Row label="Living Situation" value={profileData.living_situation} />
-          <Row label="Willing to Relocate" value={profileData.willing_to_relocate} />
-          <Row label="Strict Halal Diet" value={p.strict_halal_diet} />
-          <Row label="Smoking" value={p.smoking} />
-          <Row label="Mixed Social Circle" value={p.mixed_gender_social_circle} />
-          <Row label="Travel" value={isBrother ? p.travel_frequency : p.travel_importance} />
+          <Row label={getFieldLabel('occupation', gender)} value={profileData.occupation} />
+          <Row label={getFieldLabel('education_level', gender)} value={profileData.education_level} />
+          <Row label={getFieldLabel('living_situation', gender)} value={profileData.living_situation} />
+          <Row label={getFieldLabel('willing_to_relocate', gender)} value={profileData.willing_to_relocate} />
+          <Row label={getFieldLabel('strict_halal_diet', gender)} value={p.strict_halal_diet} />
+          <Row label={getFieldLabel('smoking', gender)} value={p.smoking} />
+          <Row label={getFieldLabel('mixed_gender_social_circle', gender)} value={p.mixed_gender_social_circle} />
+          <Row label={getFieldLabel(isBrother ? 'travel_frequency' : 'travel_importance', gender)} value={isBrother ? p.travel_frequency : p.travel_importance} />
           {p.weekend_lifestyle && (
             <div className="pt-2.5">
               <p className="text-xs text-[#9B9B9B] mb-1">Weekend Lifestyle</p>
@@ -245,26 +257,26 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
         {/* Marriage & Family */}
         <Section title="Marriage & Family">
-          <Row label="Timeline" value={profileData.timeline_to_marry} />
-          <Row label="Wants Children" value={profileData.wants_children} />
-          <Row label="Number of Children" value={p.number_of_children_wanted} />
-          <Row label="Previously Married" value={profileData.previously_married} />
-          <Row label="Has Children" value={profileData.has_children} />
-          <Row label="Islamic Schooling" value={p.islamic_schooling_importance} />
-          <Row label="In-Laws Together" value={p.inlaws_living_together} />
-          {isBrother && <Row label="Open to Polygamy" value={profileData.polygamy_openness} />}
+          <Row label={getFieldLabel('timeline_to_marry', gender)} value={profileData.timeline_to_marry} />
+          <Row label={getFieldLabel('wants_children', gender)} value={profileData.wants_children} />
+          <Row label={getFieldLabel('number_of_children_wanted', gender)} value={p.number_of_children_wanted} />
+          <Row label={getFieldLabel('previously_married', gender)} value={profileData.previously_married} />
+          <Row label={getFieldLabel('has_children', gender)} value={profileData.has_children} />
+          <Row label={getFieldLabel('islamic_schooling_importance', gender)} value={p.islamic_schooling_importance} />
+          <Row label={getFieldLabel('inlaws_living_together', gender)} value={p.inlaws_living_together} />
+          {isBrother && <Row label={getFieldLabel('polygamy_openness', gender)} value={profileData.polygamy_openness} />}
         </Section>
 
         {/* Financial (brothers) or Career (sisters) */}
         {isBrother ? (
           <Section title="Financial & Practical">
-            <Row label="Financial Readiness" value={profileData.financial_readiness} />
-            <Row label="Annual Income" value={p.annual_income_range} />
-            <Row label="Own or Rent" value={p.own_or_rent} />
-            <Row label="Significant Debt" value={p.has_significant_debt} />
-            <Row label="Supporting Family" value={p.supporting_family_financially} />
-            <Row label="Wife Working" value={p.wife_working_openness} />
-            <Row label="Household Management" value={p.household_management} />
+            <Row label={getFieldLabel('financial_readiness', gender)} value={profileData.financial_readiness} />
+            <Row label={getFieldLabel('annual_income_range', gender)} value={p.annual_income_range} />
+            <Row label={getFieldLabel('own_or_rent', gender)} value={p.own_or_rent} />
+            <Row label={getFieldLabel('has_significant_debt', gender)} value={p.has_significant_debt} />
+            <Row label={getFieldLabel('supporting_family_financially', gender)} value={p.supporting_family_financially} />
+            <Row label={getFieldLabel('wife_working_openness', gender)} value={p.wife_working_openness} />
+            <Row label={getFieldLabel('household_management', gender)} value={p.household_management} />
             {p.mahr_approach && (
               <div className="pt-2.5">
                 <p className="text-xs text-[#9B9B9B] mb-1">Mahr Approach</p>
@@ -274,11 +286,11 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
           </Section>
         ) : (
           <Section title="Career & Independence">
-            <Row label="Work After Marriage" value={p.plan_to_work_after_marriage} />
-            <Row label="Financial Independence" value={p.financial_independence_importance} />
-            <Row label="Significant Debt" value={p.has_significant_debt} />
-            <Row label="Supporting Family" value={p.supporting_family_financially} />
-            <Row label="Primary Caregiver" value={p.primary_caregiver_comfort} />
+            <Row label={getFieldLabel('plan_to_work_after_marriage', gender)} value={p.plan_to_work_after_marriage} />
+            <Row label={getFieldLabel('financial_independence_importance', gender)} value={p.financial_independence_importance} />
+            <Row label={getFieldLabel('has_significant_debt', gender)} value={p.has_significant_debt} />
+            <Row label={getFieldLabel('supporting_family_financially', gender)} value={p.supporting_family_financially} />
+            <Row label={getFieldLabel('primary_caregiver_comfort', gender)} value={p.primary_caregiver_comfort} />
             {p.career_ambitions && (
               <div className="pt-2.5">
                 <p className="text-xs text-[#9B9B9B] mb-1">Career Ambitions</p>
@@ -296,9 +308,9 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
         {/* Personality */}
         <Section title="Personality">
-          <Row label="Conflict Style" value={p.conflict_style} />
-          <Row label="Personality" value={p.introvert_extrovert} />
-          <Row label="Alone Time" value={p.alone_time_importance} />
+          <Row label={getFieldLabel('conflict_style', gender)} value={p.conflict_style} />
+          <Row label={getFieldLabel('introvert_extrovert', gender)} value={p.introvert_extrovert} />
+          <Row label={getFieldLabel('alone_time_importance', gender)} value={p.alone_time_importance} />
           {p.love_language?.length ? (
             <div className="pt-2.5">
               <p className="text-xs text-[#9B9B9B] mb-2">Love Language</p>
@@ -327,7 +339,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
         {/* Spouse Preferences */}
         <Section title="Spouse Preferences">
-          <Row label="Religiosity Preference" value={profileData.spouse_religiosity_preference} />
+          <Row label={getFieldLabel('spouse_religiosity_preference', gender)} value={profileData.spouse_religiosity_preference} />
           <Row
             label="Preferred Age Range"
             value={
@@ -342,6 +354,113 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
               <DealbreakPills items={profileData.dealbreakers} />
             </div>
           ) : null}
+        </Section>
+
+        {/* Family Dynamics */}
+        <Section title="Family Dynamics">
+          <Row label={getFieldLabel('parent_relationship', gender)} value={p.parent_relationship} />
+          <Row label={getFieldLabel('family_conflict_style', gender)} value={p.family_conflict_style} />
+          <Row label={getFieldLabel('family_spouse_disagreement', gender)} value={p.family_spouse_disagreement} />
+          {isBrother ? (
+            <>
+              <Row label={getFieldLabel('wife_family_interaction', gender)} value={p.wife_family_interaction} />
+              <Row label={getFieldLabel('living_near_parents', gender)} value={p.living_near_parents} />
+              <Row label={getFieldLabel('wife_family_relationship', gender)} value={p.wife_family_relationship} />
+              <Row label={getFieldLabel('eldest_responsibilities', gender)} value={p.eldest_responsibilities} />
+              <Row label={getFieldLabel('child_caregiving', gender)} value={p.child_caregiving} />
+            </>
+          ) : (
+            <>
+              <Row label={getFieldLabel('family_balance_after_marriage', gender)} value={p.family_balance_after_marriage} />
+              <Row label={getFieldLabel('inlaws_comfort', gender)} value={p.inlaws_comfort} />
+              <Row label={getFieldLabel('husband_family_relationship', gender)} value={p.husband_family_relationship} />
+              <Row label={getFieldLabel('family_traditional_vs_modern', gender)} value={p.family_traditional_vs_modern} />
+            </>
+          )}
+        </Section>
+
+        {/* Emotional & Mental Health */}
+        <Section title="Emotional & Mental Health">
+          <Row label={getFieldLabel('stress_management', gender)} value={p.stress_management} />
+          <Row label={getFieldLabel('therapy_experience', gender)} value={p.therapy_experience} />
+          <Row label={getFieldLabel('couples_therapy_view', gender)} value={p.couples_therapy_view} />
+          <Row label={getFieldLabel('mental_health_challenges', gender)} value={p.mental_health_challenges} />
+          <Row label={getFieldLabel('emotional_support_style', gender)} value={p.emotional_support_style} />
+          <Row label={getFieldLabel('emotional_availability', gender)} value={p.emotional_availability} />
+          <Row label={getFieldLabel('significant_hardship', gender)} value={p.significant_hardship} />
+          <Row label={getFieldLabel('emotional_expression_view', gender)} value={p.emotional_expression_view} />
+        </Section>
+
+        {/* Conflict & Communication */}
+        <Section title="Conflict & Communication">
+          <Row label={getFieldLabel('healthy_argument_view', gender)} value={p.healthy_argument_view} />
+          <Row label={getFieldLabel('apology_speed', gender)} value={p.apology_speed} />
+          <Row label={getFieldLabel('communication_when_upset', gender)} value={p.communication_when_upset} />
+          <Row label={getFieldLabel('love_language', gender)} value={p.love_language} />
+          {isBrother ? (
+            <>
+              <Row label={getFieldLabel('husband_final_say', gender)} value={p.husband_final_say} />
+              <Row label={getFieldLabel('wife_opinion_importance', gender)} value={p.wife_opinion_importance} />
+            </>
+          ) : (
+            <>
+              <Row label={getFieldLabel('qawwam_view', gender)} value={p.qawwam_view} />
+              <Row label={getFieldLabel('receiving_love_language', gender)} value={p.receiving_love_language} />
+            </>
+          )}
+        </Section>
+
+        {/* Financial / Career Deep Dive */}
+        {isBrother ? (
+          <Section title="Financial (Deep Dive)">
+            <Row label={getFieldLabel('savings_plan', gender)} value={p.savings_plan} />
+            <Row label={getFieldLabel('financial_planning_approach', gender)} value={p.financial_planning_approach} />
+            <Row label={getFieldLabel('hajj_status', gender)} value={p.hajj_status} />
+            <Row label={getFieldLabel('financial_stress_approach', gender)} value={p.financial_stress_approach} />
+          </Section>
+        ) : (
+          <Section title="Career & Financial (Deep Dive)">
+            <Row label={getFieldLabel('career_five_years', gender)} value={p.career_five_years} />
+            <Row label={getFieldLabel('career_identity_importance', gender)} value={p.career_identity_importance} />
+            <Row label={getFieldLabel('career_pause_for_children', gender)} value={p.career_pause_for_children} />
+            <Row label={getFieldLabel('savings_plan', gender)} value={p.savings_plan} />
+            <Row label={getFieldLabel('financial_stress_approach', gender)} value={p.financial_stress_approach} />
+          </Section>
+        )}
+
+        {/* Marriage Vision */}
+        <Section title="Marriage Vision">
+          <Row label={getFieldLabel('marriage_vision_10_years', gender)} value={p.marriage_vision_10_years} />
+          <Row label={getFieldLabel('first_year_vision', gender)} value={p.first_year_vision} />
+          <Row label={getFieldLabel('romance_view', gender)} value={p.romance_view} />
+          <Row label={getFieldLabel('marriage_fear', gender)} value={p.marriage_fear} />
+          <Row label={getFieldLabel('unique_contribution', gender)} value={p.unique_contribution} />
+          <Row label={getFieldLabel('physical_intimacy_importance', gender)} value={p.physical_intimacy_importance} />
+          <Row label={getFieldLabel('spouse_friendships_view', gender)} value={p.spouse_friendships_view} />
+          {!isBrother && <Row label={getFieldLabel('ideal_husband_description', gender)} value={p.ideal_husband_description} />}
+        </Section>
+
+        {/* Faith Deep Dive */}
+        <Section title="Faith & Deen (Deep Dive)">
+          <Row label={getFieldLabel('deen_growth', gender)} value={p.deen_growth} />
+          <Row label={getFieldLabel('quran_listening', gender)} value={p.quran_listening} />
+          <Row label={getFieldLabel('quran_memorisation', gender)} value={p.quran_memorisation} />
+          <Row label={getFieldLabel('traditional_vs_reformist', gender)} value={p.traditional_vs_reformist} />
+          <Row label={getFieldLabel('zakah_sadaqah', gender)} value={p.zakah_sadaqah} />
+          <Row label={getFieldLabel('mawlid_view', gender)} value={p.mawlid_view} />
+          <Row label={getFieldLabel('madhab_consistency', gender)} value={p.madhab_consistency} />
+          <Row label={getFieldLabel('spouse_islamic_knowledge', gender)} value={p.spouse_islamic_knowledge} />
+          {isBrother ? (
+            <>
+              <Row label={getFieldLabel('wife_niqab_preference', gender)} value={p.wife_niqab_preference} />
+              <Row label={getFieldLabel('missed_prayer_approach', gender)} value={p.missed_prayer_approach} />
+            </>
+          ) : (
+            <>
+              <Row label={getFieldLabel('deen_when_busy', gender)} value={p.deen_when_busy} />
+              <Row label={getFieldLabel('islamic_home_importance', gender)} value={p.islamic_home_importance} />
+            </>
+          )}
         </Section>
 
         {/* Reference */}
@@ -365,7 +484,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
                 </span>
               </div>
               <Row label="Referee" value={profileData.reference.referee_name} />
-              <Row label="Relationship" value={profileData.reference.referee_relationship} />
+              <Row label="Relationship to Referee" value={profileData.reference.referee_relationship} />
               <Row label="How Long Known" value={profileData.reference.how_long_known} />
               <Row label="Ready for Marriage" value={profileData.reference.ready_for_marriage} />
               <Row label="Would Recommend" value={profileData.reference.would_recommend} />
