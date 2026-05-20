@@ -264,10 +264,14 @@ export default function BrotherDeepdive() {
 
     setLoading(true)
     const supabase = createClient()
+    const { data: existingRow } = await supabase.from('brother_profiles').select('id').eq('id', userId).maybeSingle()
+    if (!existingRow) {
+      const { error: insertErr } = await supabase.from('brother_profiles').insert({ id: userId })
+      if (insertErr) { setError(insertErr.message); setLoading(false); return }
+    }
     const { error: saveErr } = await supabase
       .from('brother_profiles')
-      .upsert({
-        id:                              userId,
+      .update({
         deen_growth:                     deenGrowth.trim(),
         wife_niqab_preference:           wifeNiqabPreference,
         quran_listening:                 quranListening,
@@ -322,7 +326,8 @@ export default function BrotherDeepdive() {
         polygamy_own_marriage:           polygamyOwnMarriage,
         marriage_fear:                   marriageFear.trim(),
         unique_contribution:             uniqueContribution.trim(),
-      }, { onConflict: 'id' })
+      })
+      .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setLoading(false); return }
     const { data: fullProfile } = await supabase
       .from('brother_profiles')

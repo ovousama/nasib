@@ -52,15 +52,20 @@ export default function BrotherPreferences() {
     }
     setSaving(true)
     const supabase = createClient()
+    const { data: existingRow } = await supabase.from('brother_profiles').select('id').eq('id', userId).maybeSingle()
+    if (!existingRow) {
+      const { error: insertErr } = await supabase.from('brother_profiles').insert({ id: userId })
+      if (insertErr) { setError(insertErr.message); setSaving(false); return }
+    }
     const { error: saveErr } = await supabase
       .from('brother_profiles')
-      .upsert({
-        id:                            userId,
+      .update({
         spouse_religiosity_preference: spouseReligiosity.trim() || null,
         spouse_age_min:                minNum,
         spouse_age_max:                maxNum,
         dealbreakers:                  dealbreakers.split(',').map(d => d.trim()).filter(Boolean),
-      }, { onConflict: 'id' })
+      })
+      .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
     const { data: fullProfile } = await supabase
       .from('brother_profiles')

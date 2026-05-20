@@ -59,16 +59,21 @@ export default function SisterReligiosity() {
     if (!islamicKnowledge) { setError('Please select your Islamic knowledge level.'); return }
     setSaving(true)
     const supabase = createClient()
+    const { data: existingRow } = await supabase.from('sister_profiles').select('id').eq('id', userId).maybeSingle()
+    if (!existingRow) {
+      const { error: insertErr } = await supabase.from('sister_profiles').insert({ id: userId })
+      if (insertErr) { setError(insertErr.message); setSaving(false); return }
+    }
     const { error: saveErr } = await supabase
       .from('sister_profiles')
-      .upsert({
-        id:                      userId,
+      .update({
         religiosity_level:       religiosity,
         madhab:                  madhab.trim() || null,
         prayer_frequency:        prayerFreq,
         islamic_knowledge_level: islamicKnowledge,
         wears_hijab:             wearsHijab || null,
-      }, { onConflict: 'id' })
+      })
+      .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
     const { data: fullProfile } = await supabase
       .from('sister_profiles')

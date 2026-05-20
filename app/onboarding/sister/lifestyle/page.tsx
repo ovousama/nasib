@@ -65,15 +65,20 @@ export default function SisterLifestyle() {
     if (!livingSituation) { setError('Please select your living situation.'); return }
     setSaving(true)
     const supabase = createClient()
+    const { data: existingRow } = await supabase.from('sister_profiles').select('id').eq('id', userId).maybeSingle()
+    if (!existingRow) {
+      const { error: insertErr } = await supabase.from('sister_profiles').insert({ id: userId })
+      if (insertErr) { setError(insertErr.message); setSaving(false); return }
+    }
     const { error: saveErr } = await supabase
       .from('sister_profiles')
-      .upsert({
-        id:                  userId,
+      .update({
         occupation:          occupation.trim() || null,
         education_level:     educationLevel,
         living_situation:    livingSituation,
         willing_to_relocate: willingToRelocate,
-      }, { onConflict: 'id' })
+      })
+      .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
     const { data: fullProfile } = await supabase
       .from('sister_profiles')

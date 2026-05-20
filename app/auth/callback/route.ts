@@ -87,10 +87,14 @@ export async function GET(request: NextRequest) {
     location: location ?? null,
   }
 
-  if (gender === 'brother') {
-    await supabase.from('brother_profiles').upsert(basicInfo, { onConflict: 'id', ignoreDuplicates: true })
-  } else {
-    await supabase.from('sister_profiles').upsert(basicInfo, { onConflict: 'id', ignoreDuplicates: true })
+  const table = gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
+  await supabase.from(table).upsert({ id: user.id }, { onConflict: 'id', ignoreDuplicates: true })
+  const updateData: Record<string, unknown> = {}
+  if (basicInfo.full_name) updateData.full_name = basicInfo.full_name
+  if (basicInfo.age)       updateData.age       = basicInfo.age
+  if (basicInfo.location)  updateData.location  = basicInfo.location
+  if (Object.keys(updateData).length > 0) {
+    await supabase.from(table).update(updateData).eq('id', user.id)
   }
 
   // Calculate initial completion percentage from the basic info we just saved

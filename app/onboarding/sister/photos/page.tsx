@@ -81,9 +81,15 @@ export default function SisterPhotos() {
       setPaths(allPaths)
       setPreviews(allPreviews)
 
+      const { data: existingRow } = await supabase.from('sister_profiles').select('id').eq('id', userId).maybeSingle()
+      if (!existingRow) {
+        const { error: insertErr } = await supabase.from('sister_profiles').insert({ id: userId })
+        if (insertErr) throw insertErr
+      }
       const { error: dbErr } = await supabase
         .from('sister_profiles')
-        .upsert({ id: userId, photo_urls: allPaths, photos_uploaded: true }, { onConflict: 'id' })
+        .update({ photo_urls: allPaths, photos_uploaded: true })
+        .eq('id', userId)
 
       if (dbErr) throw dbErr
       const { data: fullProfile } = await supabase
@@ -128,7 +134,8 @@ export default function SisterPhotos() {
 
       await supabase
         .from('sister_profiles')
-        .upsert({ id: userId, photo_urls: newPaths, photos_uploaded: newPaths.length > 0 }, { onConflict: 'id' })
+        .update({ photo_urls: newPaths, photos_uploaded: newPaths.length > 0 })
+        .eq('id', userId)
       const { data: fullProfile } = await supabase
       .from('sister_profiles')
       .select('*')

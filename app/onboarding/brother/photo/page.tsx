@@ -71,9 +71,15 @@ export default function BrotherPhoto() {
 
       if (uploadError) throw uploadError
 
+      const { data: existingRow } = await supabase.from('brother_profiles').select('id').eq('id', userId).maybeSingle()
+      if (!existingRow) {
+        const { error: insertErr } = await supabase.from('brother_profiles').insert({ id: userId })
+        if (insertErr) throw insertErr
+      }
       const { error: dbErr } = await supabase
         .from('brother_profiles')
-        .upsert({ id: userId, photo_url: path }, { onConflict: 'id' })
+        .update({ photo_url: path })
+        .eq('id', userId)
 
       if (dbErr) throw dbErr
 

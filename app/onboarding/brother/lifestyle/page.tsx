@@ -68,16 +68,21 @@ export default function BrotherLifestyle() {
     if (!financialReadiness) { setError('Please select your financial readiness.'); return }
     setSaving(true)
     const supabase = createClient()
+    const { data: existingRow } = await supabase.from('brother_profiles').select('id').eq('id', userId).maybeSingle()
+    if (!existingRow) {
+      const { error: insertErr } = await supabase.from('brother_profiles').insert({ id: userId })
+      if (insertErr) { setError(insertErr.message); setSaving(false); return }
+    }
     const { error: saveErr } = await supabase
       .from('brother_profiles')
-      .upsert({
-        id:                  userId,
+      .update({
         occupation:          occupation.trim() || null,
         education_level:     educationLevel,
         living_situation:    livingSituation,
         willing_to_relocate: willingToRelocate,
         financial_readiness: financialReadiness,
-      }, { onConflict: 'id' })
+      })
+      .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
     const { data: fullProfile } = await supabase
       .from('brother_profiles')

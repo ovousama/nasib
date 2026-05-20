@@ -65,16 +65,21 @@ export default function BrotherMarriage() {
     if (!timelineToMarry) { setError('Please select your timeline to marry.'); return }
     setSaving(true)
     const supabase = createClient()
+    const { data: existingRow } = await supabase.from('brother_profiles').select('id').eq('id', userId).maybeSingle()
+    if (!existingRow) {
+      const { error: insertErr } = await supabase.from('brother_profiles').insert({ id: userId })
+      if (insertErr) { setError(insertErr.message); setSaving(false); return }
+    }
     const { error: saveErr } = await supabase
       .from('brother_profiles')
-      .upsert({
-        id:                 userId,
+      .update({
         polygamy_openness:  polygamyOpenness,
         previously_married: previouslyMarried,
         has_children:       hasChildren,
         wants_children:     wantsChildren,
         timeline_to_marry:  timelineToMarry,
-      }, { onConflict: 'id' })
+      })
+      .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
     const { data: fullProfile } = await supabase
       .from('brother_profiles')

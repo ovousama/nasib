@@ -45,13 +45,18 @@ export default function BrotherCharacter() {
     }
     setSaving(true)
     const supabase = createClient()
+    const { data: existingRow } = await supabase.from('brother_profiles').select('id').eq('id', userId).maybeSingle()
+    if (!existingRow) {
+      const { error: insertErr } = await supabase.from('brother_profiles').insert({ id: userId })
+      if (insertErr) { setError(insertErr.message); setSaving(false); return }
+    }
     const { error: saveErr } = await supabase
       .from('brother_profiles')
-      .upsert({
-        id:                    userId,
+      .update({
         character_description: character.trim(),
         goals:                 goals.trim() || null,
-      }, { onConflict: 'id' })
+      })
+      .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
     const { data: fullProfile } = await supabase
       .from('brother_profiles')

@@ -210,10 +210,14 @@ export default function BrotherAdditional() {
 
     setLoading(true)
     const supabase = createClient()
+    const { data: existingRow } = await supabase.from('brother_profiles').select('id').eq('id', userId).maybeSingle()
+    if (!existingRow) {
+      const { error: insertErr } = await supabase.from('brother_profiles').insert({ id: userId })
+      if (insertErr) { setError(insertErr.message); setLoading(false); return }
+    }
     const { error: saveErr } = await supabase
       .from('brother_profiles')
-      .upsert({
-        id:                             userId,
+      .update({
         do_you_listen_to_music:         doYouListenToMusic,
         celebrate_non_islamic_holidays: celebrateNonIslamicHolidays,
         wife_hijab_importance:          wifeHijabImportance,
@@ -239,7 +243,8 @@ export default function BrotherAdditional() {
         love_language:                  loveLanguage,
         alone_time_importance:          aloneTimeImportance,
         health_background_disclosure:   healthBackgroundDisclosure.trim() || null,
-      }, { onConflict: 'id' })
+      })
+      .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setLoading(false); return }
     const { data: fullProfile } = await supabase
       .from('brother_profiles')

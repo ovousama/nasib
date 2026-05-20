@@ -261,10 +261,14 @@ export default function SisterDeepdive() {
     setLoading(true)
 
     const supabase = createClient()
+    const { data: existingRow } = await supabase.from('sister_profiles').select('id').eq('id', userId).maybeSingle()
+    if (!existingRow) {
+      const { error: insertErr } = await supabase.from('sister_profiles').insert({ id: userId })
+      if (insertErr) { setError(insertErr.message); setLoading(false); return }
+    }
     const { error: saveErr } = await supabase
       .from('sister_profiles')
-      .upsert({
-        id:                           userId,
+      .update({
         deen_growth:                  deenGrowth.trim(),
         quran_listening:              quranListening,
         traditional_vs_reformist:     traditionalVsReformist,
@@ -319,7 +323,8 @@ export default function SisterDeepdive() {
         marriage_fear:                marriageFear.trim(),
         unique_contribution:          uniqueContribution.trim(),
         ideal_husband_description:    idealHusbandDescription.trim(),
-      }, { onConflict: 'id' })
+      })
+      .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setLoading(false); return }
     const { data: fullProfile } = await supabase
       .from('sister_profiles')
