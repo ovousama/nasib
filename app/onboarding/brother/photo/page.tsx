@@ -4,7 +4,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { recalculateCompletion } from '@/app/onboarding/actions'
 
 function toStoragePath(urlOrPath: string): string {
   const marker = '/object/public/brother-photos/'
@@ -78,7 +77,24 @@ export default function BrotherPhoto() {
 
       if (dbErr) throw dbErr
 
-      await recalculateCompletion(userId, 'brother')
+      const { data: fullProfile } = await supabase
+      .from('brother_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (fullProfile) {
+      const { calculateCompletion } = await import('@/lib/profile-completion')
+      const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'brother')
+      await supabase
+        .from('profiles')
+        .update({
+          profile_completion_percentage: percentage,
+          profile_complete: isComplete,
+          status: isComplete ? 'active' : 'pending_verification',
+        })
+        .eq('id', userId)
+    }
       setUploaded(true)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')

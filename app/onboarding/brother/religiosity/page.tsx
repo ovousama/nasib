@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { recalculateCompletion } from '@/app/onboarding/actions'
 
 type Religiosity = 'practicing' | 'moderately_practicing' | 'learning'
 
@@ -71,7 +70,24 @@ export default function BrotherReligiosity() {
         has_beard:               hasBeard,
       }, { onConflict: 'id' })
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
-    await recalculateCompletion(userId, 'brother')
+    const { data: fullProfile } = await supabase
+      .from('brother_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (fullProfile) {
+      const { calculateCompletion } = await import('@/lib/profile-completion')
+      const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'brother')
+      await supabase
+        .from('profiles')
+        .update({
+          profile_completion_percentage: percentage,
+          profile_complete: isComplete,
+          status: isComplete ? 'active' : 'pending_verification',
+        })
+        .eq('id', userId)
+    }
     router.push('/onboarding/brother/lifestyle')
   }
 

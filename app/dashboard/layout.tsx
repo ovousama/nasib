@@ -24,23 +24,27 @@ export default async function DashboardLayout({ children }: { children: React.Re
       .or(`brother_id.eq.${user.id},sister_id.eq.${user.id}`)
       .limit(1)
       .maybeSingle(),
-    supabase.from('profiles').select('gender').eq('id', user.id).single(),
+    supabase.from('profiles').select('gender, profile_completion_percentage').eq('id', user.id).single(),
   ])
 
   let initials = '?'
+  let firstName = ''
   if (profile?.gender) {
     const table = profile.gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
     const { data: gp } = await supabase.from(table).select('full_name').eq('id', user.id).single()
     if (gp?.full_name) {
       initials = gp.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+      firstName = gp.full_name.split(' ')[0]
     }
   }
+
+  const completionPercentage = profile?.profile_completion_percentage ?? 0
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]">
       {/* Mobile top bar — hidden on desktop */}
       <div className="lg:hidden">
-        <TopBar />
+        <TopBar initials={initials} />
       </div>
       {/* Desktop spacer for fixed nav (64px) */}
       <div className="hidden lg:block h-16" />
@@ -49,6 +53,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         initialUnreadCount={unreadCount}
         nikahConnectionId={nikahConn?.id ?? null}
         initials={initials}
+        firstName={firstName}
+        completionPercentage={completionPercentage}
       >
         {children}
       </DashboardShell>

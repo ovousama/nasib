@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { recalculateCompletion } from '@/app/onboarding/actions'
 
 const inputCls = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
 
@@ -61,7 +60,24 @@ export default function SisterBasicInfo() {
         languages: languages.split(',').map(l => l.trim()).filter(Boolean),
       }, { onConflict: 'id' })
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
-    await recalculateCompletion(userId, 'sister')
+    const { data: fullProfile } = await supabase
+      .from('sister_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (fullProfile) {
+      const { calculateCompletion } = await import('@/lib/profile-completion')
+      const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'sister')
+      await supabase
+        .from('profiles')
+        .update({
+          profile_completion_percentage: percentage,
+          profile_complete: isComplete,
+          status: isComplete ? 'active' : 'pending_verification',
+        })
+        .eq('id', userId)
+    }
     router.push('/onboarding/sister/religiosity')
   }
 

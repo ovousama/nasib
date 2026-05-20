@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Slider from '@/components/ui/Slider'
 import { createClient } from '@/lib/supabase'
-import { recalculateCompletion } from '@/app/onboarding/actions'
 
 const textareaCls =
   'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors resize-none'
@@ -325,7 +324,24 @@ export default function BrotherDeepdive() {
         unique_contribution:             uniqueContribution.trim(),
       }, { onConflict: 'id' })
     if (saveErr) { setError(saveErr.message); setLoading(false); return }
-    await recalculateCompletion(userId, 'brother')
+    const { data: fullProfile } = await supabase
+      .from('brother_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (fullProfile) {
+      const { calculateCompletion } = await import('@/lib/profile-completion')
+      const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'brother')
+      await supabase
+        .from('profiles')
+        .update({
+          profile_completion_percentage: percentage,
+          profile_complete: isComplete,
+          status: isComplete ? 'active' : 'pending_verification',
+        })
+        .eq('id', userId)
+    }
     router.push('/onboarding/brother/photo')
   }
 

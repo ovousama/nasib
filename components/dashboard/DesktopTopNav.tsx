@@ -10,22 +10,24 @@ type Props = {
   unreadCount: number
   nikahConnectionId: string | null
   initials: string
+  firstName: string
+  completionPercentage: number
 }
 
-export default function DesktopTopNav({ unreadCount, nikahConnectionId, initials }: Props) {
+export default function DesktopTopNav({ unreadCount, nikahConnectionId, initials, firstName, completionPercentage }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+    function handleOutsideClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setDropdownOpen(false)
       }
     }
-    if (dropdownOpen) document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    if (dropdownOpen) document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
   }, [dropdownOpen])
 
   const handleSignOut = async () => {
@@ -55,7 +57,7 @@ export default function DesktopTopNav({ unreadCount, nikahConnectionId, initials
       </Link>
 
       {/* Center nav links */}
-      <div className="flex items-center gap-6 flex-1 justify-center">
+      <div className="flex items-center gap-2 flex-1 justify-center">
         {navLinks.map(link => {
           const href = link.href.split('#')[0]
           const active = isActive(href)
@@ -63,8 +65,12 @@ export default function DesktopTopNav({ unreadCount, nikahConnectionId, initials
             <Link
               key={link.href}
               href={link.href}
-              style={{ textDecoration: 'none', transition: 'color 0.15s ease' }}
-              className={`text-[14px] whitespace-nowrap ${active ? 'text-[#AF4D98] font-medium' : 'text-[#5C5C5C] font-normal hover:text-[#AF4D98]'}`}
+              style={{ textDecoration: 'none', transition: 'background 0.15s ease, color 0.15s ease' }}
+              className={`px-3 py-1.5 rounded-full text-[14px] whitespace-nowrap transition-colors ${
+                active
+                  ? 'bg-[#F5E6F2] text-[#AF4D98] font-medium'
+                  : 'text-[#5C5C5C] font-normal hover:bg-[#FAF4EE] hover:text-[#AF4D98]'
+              }`}
             >
               {link.label}
             </Link>
@@ -73,8 +79,12 @@ export default function DesktopTopNav({ unreadCount, nikahConnectionId, initials
         {nikahConnectionId && (
           <Link
             href={`/dashboard/nikah/${nikahConnectionId}`}
-            style={{ textDecoration: 'none', transition: 'color 0.15s ease' }}
-            className={`text-[14px] whitespace-nowrap font-medium ${pathname.startsWith('/dashboard/nikah') ? 'text-[#AF4D98]' : 'text-[#AF4D98] hover:text-[#9B3D85]'}`}
+            style={{ textDecoration: 'none', transition: 'background 0.15s ease, color 0.15s ease' }}
+            className={`px-3 py-1.5 rounded-full text-[14px] whitespace-nowrap font-medium transition-colors ${
+              pathname.startsWith('/dashboard/nikah')
+                ? 'bg-[#F5E6F2] text-[#AF4D98]'
+                : 'text-[#AF4D98] hover:bg-[#FAF4EE]'
+            }`}
           >
             🤍 Nikah Planning
           </Link>
@@ -94,16 +104,29 @@ export default function DesktopTopNav({ unreadCount, nikahConnectionId, initials
         </Link>
 
         {/* Avatar + dropdown */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative" ref={menuRef} data-avatar-menu>
           <button
             onClick={() => setDropdownOpen(v => !v)}
-            className="w-8 h-8 rounded-full bg-[#F5E6F2] flex items-center justify-center text-[#AF4D98] text-xs font-semibold hover:bg-[#EDD5E8] transition-colors"
+            className="w-9 h-9 rounded-full bg-[#F5E6F2] flex items-center justify-center text-[#AF4D98] text-sm font-semibold hover:bg-[#EDD5E8] transition-colors"
             aria-label="Profile menu"
           >
             {initials}
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 top-10 bg-white border border-[#EDE8E3] rounded-xl shadow-lg min-w-[180px] py-1 z-50">
+            <div className="absolute right-0 top-11 bg-white border border-[#EDE8E3] rounded-xl shadow-lg min-w-[220px] py-1 z-50">
+              {/* User info + completion */}
+              <div className="px-4 py-3 border-b border-[#EDE8E3]">
+                <p className="text-sm font-medium text-[#1A1A1A]">{firstName}</p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <div className="flex-1 h-1.5 bg-[#EDE8E3] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#AF4D98] rounded-full transition-all"
+                      style={{ width: `${completionPercentage}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-[#9B9B9B] flex-shrink-0">{completionPercentage}%</span>
+                </div>
+              </div>
               <Link
                 href="/dashboard/profile"
                 onClick={() => setDropdownOpen(false)}

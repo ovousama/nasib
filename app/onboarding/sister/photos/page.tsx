@@ -4,7 +4,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { recalculateCompletion } from '@/app/onboarding/actions'
 
 const MAX = 5
 
@@ -87,7 +86,24 @@ export default function SisterPhotos() {
         .upsert({ id: userId, photo_urls: allPaths, photos_uploaded: true }, { onConflict: 'id' })
 
       if (dbErr) throw dbErr
-      await recalculateCompletion(userId, 'sister')
+      const { data: fullProfile } = await supabase
+      .from('sister_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (fullProfile) {
+      const { calculateCompletion } = await import('@/lib/profile-completion')
+      const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'sister')
+      await supabase
+        .from('profiles')
+        .update({
+          profile_completion_percentage: percentage,
+          profile_complete: isComplete,
+          status: isComplete ? 'active' : 'pending_verification',
+        })
+        .eq('id', userId)
+    }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
     } finally {
@@ -108,7 +124,24 @@ export default function SisterPhotos() {
       await supabase
         .from('sister_profiles')
         .upsert({ id: userId, photo_urls: newPaths, photos_uploaded: newPaths.length > 0 }, { onConflict: 'id' })
-      await recalculateCompletion(userId, 'sister')
+      const { data: fullProfile } = await supabase
+      .from('sister_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (fullProfile) {
+      const { calculateCompletion } = await import('@/lib/profile-completion')
+      const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'sister')
+      await supabase
+        .from('profiles')
+        .update({
+          profile_completion_percentage: percentage,
+          profile_complete: isComplete,
+          status: isComplete ? 'active' : 'pending_verification',
+        })
+        .eq('id', userId)
+    }
     } catch {}
   }
 

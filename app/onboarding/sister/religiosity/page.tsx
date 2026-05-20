@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { recalculateCompletion } from '@/app/onboarding/actions'
 
 type Religiosity = 'practicing' | 'moderately_practicing' | 'learning'
 
@@ -71,7 +70,24 @@ export default function SisterReligiosity() {
         wears_hijab:             wearsHijab || null,
       }, { onConflict: 'id' })
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
-    await recalculateCompletion(userId, 'sister')
+    const { data: fullProfile } = await supabase
+      .from('sister_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (fullProfile) {
+      const { calculateCompletion } = await import('@/lib/profile-completion')
+      const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'sister')
+      await supabase
+        .from('profiles')
+        .update({
+          profile_completion_percentage: percentage,
+          profile_complete: isComplete,
+          status: isComplete ? 'active' : 'pending_verification',
+        })
+        .eq('id', userId)
+    }
     router.push('/onboarding/sister/lifestyle')
   }
 
