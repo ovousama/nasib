@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { getFieldLabel } from '@/lib/field-labels'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyData = any
 
@@ -63,6 +64,16 @@ function SliderValue({ v, left = 'Traditional', right = 'Reformist' }: {
   )
 }
 
+// Check if a section has any non-null/non-empty values
+function hasAny(obj: AnyData, ...fields: string[]): boolean {
+  return fields.some(f => {
+    const v = obj?.[f]
+    if (v === null || v === undefined || v === '') return false
+    if (Array.isArray(v) && v.length === 0) return false
+    return true
+  })
+}
+
 // Two-column field
 function F({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -92,7 +103,7 @@ function Section({
   id,
 }: {
   title: string
-  editHref: string
+  editHref?: string
   defaultOpen?: boolean
   children: React.ReactNode
   testId?: string
@@ -119,13 +130,15 @@ function Section({
           </svg>
           <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B]">{title}</span>
         </div>
-        <Link
-          href={editHref}
-          onClick={e => e.stopPropagation()}
-          className="text-[12px] text-[#AF4D98] font-medium hover:text-[#9B3D85] transition-colors px-1"
-        >
-          Edit
-        </Link>
+        {editHref && (
+          <Link
+            href={editHref}
+            onClick={e => e.stopPropagation()}
+            className="text-[12px] text-[#AF4D98] font-medium hover:text-[#9B3D85] transition-colors px-1"
+          >
+            Edit
+          </Link>
+        )}
       </div>
       {open && (
         <div className="px-5 pb-5">
@@ -168,11 +181,14 @@ type Props = {
   completionPercentage: number
   isComplete: boolean
   verificationBadge: boolean
+  userEmail: string
+  memberSince: string
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
 const SECTION_LINKS = [
+  { id: 'section-account', label: 'Account' },
   { id: 'section-basic', label: 'Basic Info' },
   { id: 'section-deen', label: 'Deen' },
   { id: 'section-family', label: 'Family' },
@@ -197,6 +213,8 @@ export default function ProfilePageClient({
   completionPercentage,
   isComplete,
   verificationBadge,
+  userEmail,
+  memberSince,
 }: Props) {
   const router = useRouter()
   const isBrother = gender === 'brother'
@@ -313,6 +331,21 @@ export default function ProfilePageClient({
 
         <CompletionBanner percentage={completionPercentage} />
 
+        {/* ── ACCOUNT (read-only) ─────────────────────────────────────────── */}
+        <Section title="Account" testId="section-account" defaultOpen={false}>
+          <F label={getFieldLabel('full_name', gender)}><TextValue v={p?.full_name} /></F>
+          <F label={getFieldLabel('age', gender)}><TextValue v={p?.age ? String(p.age) : null} /></F>
+          <F label={getFieldLabel('location', gender)}><TextValue v={p?.location} /></F>
+          <F label="Gender"><TextValue v={gender === 'brother' ? 'Brother' : 'Sister'} /></F>
+          <F label="Email"><TextValue v={userEmail} /></F>
+          <F label="Member Since">
+            <TextValue v={memberSince ? new Date(memberSince).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : null} />
+          </F>
+          <FW label="Password">
+            <Link href="/auth/reset-password" className="text-[14px] text-[#AF4D98] font-medium hover:text-[#9B3D85]">Change password →</Link>
+          </FW>
+        </Section>
+
         {/* ── WALI (sisters only) ─────────────────────────────────────────── */}
         {!isBrother && (
           waliProfile ? (
@@ -339,223 +372,251 @@ export default function ProfilePageClient({
 
         {/* ── BASIC INFO ──────────────────────────────────────────────────── */}
         <Section title="Basic Info" editHref="/dashboard/profile/edit/basic" testId="section-basic">
-          <F label="Full Name"><TextValue v={p?.full_name} /></F>
-          <F label="Age"><TextValue v={p?.age ? String(p.age) : null} /></F>
-          <F label="Location"><TextValue v={p?.location} /></F>
-          <F label="Ethnicity"><TextValue v={p?.ethnicity} /></F>
-          <FW label="Languages"><TextValue v={Array.isArray(p?.languages) ? p.languages.join(', ') : p?.languages} /></FW>
-          <F label="Willing to Relocate"><BoolValue v={p?.willing_to_relocate} /></F>
+          <F label={getFieldLabel('full_name', gender)}><TextValue v={p?.full_name} /></F>
+          <F label={getFieldLabel('age', gender)}><TextValue v={p?.age ? String(p.age) : null} /></F>
+          <F label={getFieldLabel('location', gender)}><TextValue v={p?.location} /></F>
+          <F label={getFieldLabel('ethnicity', gender)}><TextValue v={p?.ethnicity} /></F>
+          <FW label={getFieldLabel('languages', gender)}><TextValue v={Array.isArray(p?.languages) ? p.languages.join(', ') : p?.languages} /></FW>
+          <F label={getFieldLabel('willing_to_relocate', gender)}><BoolValue v={p?.willing_to_relocate} /></F>
         </Section>
 
         {/* ── DEEN & PRACTICE ─────────────────────────────────────────────── */}
-        <Section title="Deen & Practice" editHref="/dashboard/profile/edit/deen" testId="section-deen">
-          <F label="Religiosity"><PillValue v={p?.religiosity_level} /></F>
-          <F label="Prayer Frequency"><PillValue v={p?.prayer_frequency} /></F>
-          <F label="Madhab"><PillValue v={p?.madhab} /></F>
-          <F label="Islamic Knowledge"><PillValue v={p?.islamic_knowledge_level} /></F>
-          {isBrother
-            ? <F label="Has Beard"><BoolValue v={p?.has_beard} /></F>
-            : <F label="Wears Hijab"><PillValue v={p?.wears_hijab} /></F>}
-          <F label="Quran Listening"><PillValue v={p?.quran_listening} /></F>
-          <F label="Quran Memorisation"><PillValue v={p?.quran_memorisation} /></F>
-          <F label="Zakah & Sadaqah"><PillValue v={p?.zakah_sadaqah} /></F>
-          <F label="Madhab Consistency"><PillValue v={p?.madhab_consistency} /></F>
-          <F label="Mawlid View"><PillValue v={p?.mawlid_view} /></F>
-          <F label="Spouse Islamic Knowledge"><PillValue v={p?.spouse_islamic_knowledge} /></F>
-          {isBrother && <F label="Missed Prayer"><PillValue v={p?.missed_prayer_approach} /></F>}
-          {isBrother && <F label="Wife Niqab Pref"><PillValue v={p?.wife_niqab_preference} /></F>}
-          {!isBrother && <F label="Islamic Home Importance"><PillValue v={p?.islamic_home_importance} /></F>}
-          {!isBrother && <F label="Hijab Outside Home"><PillValue v={p?.hijab_outside_home} /></F>}
-          {!isBrother && <F label="Islamic Classes"><PillValue v={p?.islamic_classes_attendance} /></F>}
-          <FW label="Traditional ↔ Reformist">
-            <SliderValue v={p?.traditional_vs_reformist} />
-          </FW>
-          {p?.deen_growth && <FW label="Deen Growth"><TextValue v={p.deen_growth} /></FW>}
-          {!isBrother && p?.deen_when_busy && <FW label="Deen When Busy"><TextValue v={p.deen_when_busy} /></FW>}
-          {p?.differing_islamic_opinions && <FW label="Differing Islamic Opinions"><TextValue v={p.differing_islamic_opinions} /></FW>}
-        </Section>
-
-        {/* ── FAMILY DYNAMICS ─────────────────────────────────────────────── */}
-        <Section title="Family Dynamics" editHref="/dashboard/profile/edit/family" testId="section-family">
-          {isBrother
-            ? <>
-                <F label="Wife–Family Interaction"><PillValue v={p?.wife_family_interaction} /></F>
-                <F label="Eldest Responsibilities"><PillValue v={p?.eldest_responsibilities} /></F>
-                <F label="Child Caregiving"><PillValue v={p?.child_caregiving} /></F>
-                <F label="Wife–Family Relationship"><PillValue v={p?.wife_family_relationship} /></F>
-                <F label="Living Near Parents"><PillValue v={p?.living_near_parents} /></F>
-              </>
-            : <>
-                <F label="Family Balance After Marriage"><PillValue v={p?.family_balance_after_marriage} /></F>
-                <F label="Family Financial Responsibility"><PillValue v={p?.family_financial_responsibility} /></F>
-                <F label="In-Laws Comfort"><PillValue v={p?.inlaws_comfort} /></F>
-                <F label="Husband–Family Relationship"><PillValue v={p?.husband_family_relationship} /></F>
-                <F label="Family: Trad vs Modern"><PillValue v={p?.family_traditional_vs_modern} /></F>
-              </>}
-          <F label="Family Conflict Style"><PillValue v={p?.family_conflict_style} /></F>
-          {p?.parent_relationship && <FW label="Relationship with Parents"><TextValue v={p.parent_relationship} /></FW>}
-          {p?.family_spouse_disagreement && <FW label="Family vs Spouse Disagreements"><TextValue v={p.family_spouse_disagreement} /></FW>}
-        </Section>
-
-        {/* ── LIFESTYLE ───────────────────────────────────────────────────── */}
-        <Section title="Lifestyle" editHref="/dashboard/profile/edit/lifestyle" testId="section-lifestyle">
-          <F label="Occupation"><TextValue v={p?.occupation} /></F>
-          <F label="Education"><PillValue v={p?.education_level} /></F>
-          <F label="Living Situation"><PillValue v={p?.living_situation} /></F>
-          <F label="Exercise Frequency"><PillValue v={p?.exercise_frequency} /></F>
-          <F label="Halal Diet"><PillValue v={p?.strict_halal_diet} /></F>
-          <F label="Smoking"><PillValue v={p?.smoking} /></F>
-          <F label="Pets"><PillValue v={p?.pets_view} /></F>
-          <F label="Healthy Eating"><PillValue v={p?.healthy_eating_importance} /></F>
-          <F label="Social Media"><PillValue v={p?.social_media_view} /></F>
-          <F label="Home Organisation"><PillValue v={p?.home_organisation} /></F>
-          <F label="Mixed Social Circle"><PillValue v={p?.mixed_gender_social_circle} /></F>
-          <F label="Music"><PillValue v={p?.do_you_listen_to_music} /></F>
-          <F label="Non-Islamic Holidays"><PillValue v={p?.celebrate_non_islamic_holidays} /></F>
-          {isBrother
-            ? <F label="Travel"><PillValue v={p?.travel_frequency} /></F>
-            : <F label="Travel"><PillValue v={p?.travel_importance} /></F>}
-          <F label="Political Views"><PillValue v={p?.political_views} /></F>
-          <FW label="Cultural Background Importance">
-            <SliderValue v={p?.cultural_background_importance} left="Not important" right="Very important" />
-          </FW>
-          {p?.weekend_lifestyle && <FW label="Weekend Lifestyle"><TextValue v={p.weekend_lifestyle} /></FW>}
-          {p?.ramadan_routine && <FW label="Ramadan Routine"><TextValue v={p.ramadan_routine} /></FW>}
-        </Section>
-
-        {/* ── MARRIAGE GOALS ───────────────────────────────────────────────── */}
-        <Section title="Marriage Goals" editHref="/dashboard/profile/edit/marriage" testId="section-marriage">
-          <F label="Timeline"><PillValue v={p?.timeline_to_marry} /></F>
-          <F label="Previously Married"><BoolValue v={p?.previously_married} /></F>
-          <F label="Has Children"><BoolValue v={p?.has_children} /></F>
-          <F label="Wants Children"><BoolValue v={p?.wants_children} /></F>
-          <F label="Number of Children"><PillValue v={p?.number_of_children_wanted} /></F>
-          {isBrother && <F label="Polygamy Openness"><BoolValue v={p?.polygamy_openness} /></F>}
-          {isBrother && <F label="Polygamy in Own Marriage"><PillValue v={p?.polygamy_own_marriage} /></F>}
-        </Section>
-
-        {/* ── SPOUSE PREFERENCES ───────────────────────────────────────────── */}
-        <Section title="Spouse Preferences" editHref="/dashboard/profile/edit/preferences" testId="section-preferences">
-          <F label="Religiosity Preference"><PillValue v={p?.spouse_religiosity_preference} /></F>
-          <F label="Age Range">
-            <TextValue v={p?.spouse_age_min && p?.spouse_age_max ? `${p.spouse_age_min}–${p.spouse_age_max}` : null} />
-          </F>
-          {p?.dealbreakers?.length
-            ? <FW label="Dealbreakers"><ArrayValue v={p.dealbreakers} /></FW>
-            : <FW label="Dealbreakers"><span className="text-[14px] text-[#9B9B9B]">—</span></FW>}
-        </Section>
-
-        {/* ── FINANCIAL ────────────────────────────────────────────────────── */}
-        <Section title="Financial" editHref="/dashboard/profile/edit/financial" testId="section-financial">
-          {isBrother && <>
-            <F label="Annual Income"><PillValue v={p?.annual_income_range} /></F>
-            <F label="Own or Rent"><PillValue v={p?.own_or_rent} /></F>
-            <F label="Financial Readiness"><PillValue v={p?.financial_readiness} /></F>
-            <F label="Hajj Status"><PillValue v={p?.hajj_status} /></F>
-            <F label="Wife Financial Independence"><PillValue v={p?.wife_financial_independence} /></F>
-            <F label="Wife Earning More"><PillValue v={p?.wife_earning_more} /></F>
-            <F label="Financial Planning"><PillValue v={p?.financial_planning_approach} /></F>
-          </>}
-          <F label="Savings Plan"><PillValue v={p?.savings_plan} /></F>
-          <F label="Significant Debt"><PillValue v={p?.has_significant_debt} /></F>
-          <F label="Supporting Family"><PillValue v={p?.supporting_family_financially} /></F>
-          {isBrother && p?.mahr_approach && <FW label="Mahr Approach"><TextValue v={p.mahr_approach} /></FW>}
-          {p?.financial_stress_approach && <FW label="Financial Stress Approach"><TextValue v={p.financial_stress_approach} /></FW>}
-        </Section>
-
-        {/* ── EMOTIONAL & MENTAL HEALTH ────────────────────────────────────── */}
-        <Section title="Emotional & Mental Health" editHref="/dashboard/profile/edit/emotional" defaultOpen={false} testId="section-emotional">
-          <F label="Therapy Experience"><PillValue v={p?.therapy_experience} /></F>
-          <F label="Couples Therapy View"><PillValue v={p?.couples_therapy_view} /></F>
-          <F label="Mental Health Challenges"><PillValue v={p?.mental_health_challenges} /></F>
-          <F label="Emotional Expression"><PillValue v={p?.emotional_expression_view} /></F>
-          <FW label="Emotional Availability">
-            <SliderValue v={p?.emotional_availability} left="Needs space" right="Very available" />
-          </FW>
-          {p?.stress_management && <FW label="Stress Management"><TextValue v={p.stress_management} /></FW>}
-          {p?.emotional_support_style && <FW label="Emotional Support Style"><TextValue v={p.emotional_support_style} /></FW>}
-          {p?.significant_hardship && <FW label="Significant Hardship"><TextValue v={p.significant_hardship} /></FW>}
-          {p?.health_background_disclosure && <FW label="Health Background Disclosure"><TextValue v={p.health_background_disclosure} /></FW>}
-        </Section>
-
-        {/* ── CONFLICT & COMMUNICATION ─────────────────────────────────────── */}
-        <Section title="Conflict & Communication" editHref="/dashboard/profile/edit/communication" defaultOpen={false} testId="section-communication">
-          <F label="Conflict Style"><PillValue v={p?.conflict_style} /></F>
-          <F label="Personality"><PillValue v={p?.introvert_extrovert} /></F>
-          <F label="Alone Time"><PillValue v={p?.alone_time_importance} /></F>
-          <F label="Apology Speed"><PillValue v={p?.apology_speed} /></F>
-          <F label="Communication When Upset"><PillValue v={p?.communication_when_upset} /></F>
-          {isBrother
-            ? <>
-                <F label="Husband Final Say"><PillValue v={p?.husband_final_say} /></F>
-                <F label="Wife Opinion Importance"><PillValue v={p?.wife_opinion_importance} /></F>
-                <F label="Friendship Ended"><PillValue v={p?.friendship_ended} /></F>
-              </>
-            : <>
-                <F label="Qawwam View"><PillValue v={p?.qawwam_view} /></F>
-                <F label="Husband Opinion Importance"><PillValue v={p?.husband_opinion_importance} /></F>
-                <F label="Receiving Love Language"><PillValue v={p?.receiving_love_language} /></F>
-              </>}
-          <FW label="Love Language"><ArrayValue v={p?.love_language} /></FW>
-          {p?.healthy_argument_view && <FW label="Healthy Argument View"><TextValue v={p.healthy_argument_view} /></FW>}
-        </Section>
-
-        {/* ── HOUSEHOLD (brothers) / CAREER (sisters) ──────────────────────── */}
-        {isBrother ? (
-          <Section title="Household" editHref="/dashboard/profile/edit/household" defaultOpen={false} testId="section-household">
-            <F label="Wife Working Openness"><PillValue v={p?.wife_working_openness} /></F>
-            <F label="Household Management"><PillValue v={p?.household_management} /></F>
-            <F label="In-Laws Living Together"><PillValue v={p?.inlaws_living_together} /></F>
-            <F label="Islamic Schooling"><PillValue v={p?.islamic_schooling_importance} /></F>
-            <F label="Child Caregiving"><PillValue v={p?.child_caregiving} /></F>
-            <F label="Jumu&apos;ah Attendance"><PillValue v={p?.jumuah_attendance} /></F>
-            <F label="Wife Hijab Importance"><PillValue v={p?.wife_hijab_importance} /></F>
-          </Section>
-        ) : (
-          <Section title="Career" editHref="/dashboard/profile/edit/career" defaultOpen={false} testId="section-career">
-            <F label="Work After Marriage"><PillValue v={p?.plan_to_work_after_marriage} /></F>
-            <F label="Career Pause for Children"><PillValue v={p?.career_pause_for_children} /></F>
-            <F label="Financial Dependence View"><PillValue v={p?.financial_dependence_view} /></F>
-            <F label="Financial Independence"><PillValue v={p?.financial_independence_importance} /></F>
-            <FW label="Career Identity Importance">
-              <SliderValue v={p?.career_identity_importance} left="Not central" right="Core identity" />
+        {hasAny(p, 'religiosity_level', 'prayer_frequency', 'madhab', 'quran_listening', 'islamic_knowledge_level') && (
+          <Section title="Deen & Practice" editHref="/dashboard/profile/edit/deen" testId="section-deen">
+            <F label={getFieldLabel('religiosity_level', gender)}><PillValue v={p?.religiosity_level} /></F>
+            <F label={getFieldLabel('prayer_frequency', gender)}><PillValue v={p?.prayer_frequency} /></F>
+            <F label={getFieldLabel('madhab', gender)}><PillValue v={p?.madhab} /></F>
+            <F label={getFieldLabel('islamic_knowledge_level', gender)}><PillValue v={p?.islamic_knowledge_level} /></F>
+            {isBrother
+              ? <F label={getFieldLabel('has_beard', 'brother')}><BoolValue v={p?.has_beard} /></F>
+              : <F label={getFieldLabel('wears_hijab', 'sister')}><PillValue v={p?.wears_hijab} /></F>}
+            <F label={getFieldLabel('quran_listening', gender)}><PillValue v={p?.quran_listening} /></F>
+            <F label={getFieldLabel('quran_memorisation', gender)}><PillValue v={p?.quran_memorisation} /></F>
+            <F label={getFieldLabel('zakah_sadaqah', gender)}><PillValue v={p?.zakah_sadaqah} /></F>
+            <F label={getFieldLabel('madhab_consistency', gender)}><PillValue v={p?.madhab_consistency} /></F>
+            <F label={getFieldLabel('mawlid_view', gender)}><PillValue v={p?.mawlid_view} /></F>
+            <F label={getFieldLabel('spouse_islamic_knowledge', gender)}><PillValue v={p?.spouse_islamic_knowledge} /></F>
+            {isBrother && <F label={getFieldLabel('missed_prayer_approach', 'brother')}><PillValue v={p?.missed_prayer_approach} /></F>}
+            {isBrother && <F label={getFieldLabel('wife_niqab_preference', 'brother')}><PillValue v={p?.wife_niqab_preference} /></F>}
+            {!isBrother && <F label={getFieldLabel('islamic_home_importance', 'sister')}><PillValue v={p?.islamic_home_importance} /></F>}
+            {!isBrother && <F label={getFieldLabel('hijab_outside_home', 'sister')}><PillValue v={p?.hijab_outside_home} /></F>}
+            {!isBrother && <F label={getFieldLabel('islamic_classes_attendance', 'sister')}><PillValue v={p?.islamic_classes_attendance} /></F>}
+            <FW label={getFieldLabel('traditional_vs_reformist', gender)}>
+              <SliderValue v={p?.traditional_vs_reformist} left="Traditional" right="Reformist" />
             </FW>
-            {p?.career_five_years && <FW label="Career in 5 Years"><TextValue v={p.career_five_years} /></FW>}
-            {p?.career_ambitions && <FW label="Career Ambitions"><TextValue v={p.career_ambitions} /></FW>}
+            {p?.deen_growth && <FW label={getFieldLabel('deen_growth', gender)}><TextValue v={p.deen_growth} /></FW>}
+            {!isBrother && p?.deen_when_busy && <FW label={getFieldLabel('deen_when_busy', 'sister')}><TextValue v={p.deen_when_busy} /></FW>}
+            {p?.differing_islamic_opinions && <FW label={getFieldLabel('differing_islamic_opinions', gender)}><TextValue v={p.differing_islamic_opinions} /></FW>}
           </Section>
         )}
 
+        {/* ── FAMILY DYNAMICS ─────────────────────────────────────────────── */}
+        {hasAny(p, 'family_conflict_style', 'parent_relationship', 'wife_family_interaction', 'family_balance_after_marriage', 'eldest_responsibilities') && (
+          <Section title="Family Dynamics" editHref="/dashboard/profile/edit/family" testId="section-family">
+            {isBrother
+              ? <>
+                  <F label={getFieldLabel('wife_family_interaction', 'brother')}><PillValue v={p?.wife_family_interaction} /></F>
+                  <F label={getFieldLabel('eldest_responsibilities', 'brother')}><PillValue v={p?.eldest_responsibilities} /></F>
+                  <F label={getFieldLabel('child_caregiving', 'brother')}><PillValue v={p?.child_caregiving} /></F>
+                  <F label={getFieldLabel('wife_family_relationship', 'brother')}><PillValue v={p?.wife_family_relationship} /></F>
+                  <F label={getFieldLabel('living_near_parents', 'brother')}><PillValue v={p?.living_near_parents} /></F>
+                </>
+              : <>
+                  <F label={getFieldLabel('family_balance_after_marriage', 'sister')}><PillValue v={p?.family_balance_after_marriage} /></F>
+                  <F label={getFieldLabel('family_financial_responsibility', 'sister')}><PillValue v={p?.family_financial_responsibility} /></F>
+                  <F label={getFieldLabel('inlaws_comfort', 'sister')}><PillValue v={p?.inlaws_comfort} /></F>
+                  <F label={getFieldLabel('husband_family_relationship', 'sister')}><PillValue v={p?.husband_family_relationship} /></F>
+                  <FW label={getFieldLabel('family_traditional_vs_modern', 'sister')}>
+                    <SliderValue v={p?.family_traditional_vs_modern} left="Modern" right="Traditional" />
+                  </FW>
+                </>}
+            <F label={getFieldLabel('family_conflict_style', gender)}><PillValue v={p?.family_conflict_style} /></F>
+            {p?.parent_relationship && <FW label={getFieldLabel('parent_relationship', gender)}><TextValue v={p.parent_relationship} /></FW>}
+            {p?.family_spouse_disagreement && <FW label={getFieldLabel('family_spouse_disagreement', gender)}><TextValue v={p.family_spouse_disagreement} /></FW>}
+          </Section>
+        )}
+
+        {/* ── LIFESTYLE ───────────────────────────────────────────────────── */}
+        {hasAny(p, 'occupation', 'education_level', 'living_situation', 'exercise_frequency', 'strict_halal_diet') && (
+          <Section title="Lifestyle" editHref="/dashboard/profile/edit/lifestyle" testId="section-lifestyle">
+            <F label={getFieldLabel('occupation', gender)}><TextValue v={p?.occupation} /></F>
+            <F label={getFieldLabel('education_level', gender)}><PillValue v={p?.education_level} /></F>
+            <F label={getFieldLabel('living_situation', gender)}><PillValue v={p?.living_situation} /></F>
+            <F label={getFieldLabel('exercise_frequency', gender)}><PillValue v={p?.exercise_frequency} /></F>
+            <F label={getFieldLabel('strict_halal_diet', gender)}><PillValue v={p?.strict_halal_diet} /></F>
+            <F label={getFieldLabel('smoking', gender)}><PillValue v={p?.smoking} /></F>
+            <F label={getFieldLabel('pets_view', gender)}><PillValue v={p?.pets_view} /></F>
+            <F label={getFieldLabel('healthy_eating_importance', gender)}><PillValue v={p?.healthy_eating_importance} /></F>
+            <F label={getFieldLabel('social_media_view', gender)}><PillValue v={p?.social_media_view} /></F>
+            <F label={getFieldLabel('mixed_gender_social_circle', gender)}><PillValue v={p?.mixed_gender_social_circle} /></F>
+            <F label={getFieldLabel('do_you_listen_to_music', gender)}><PillValue v={p?.do_you_listen_to_music} /></F>
+            <F label={getFieldLabel('celebrate_non_islamic_holidays', gender)}><PillValue v={p?.celebrate_non_islamic_holidays} /></F>
+            {isBrother
+              ? <F label={getFieldLabel('travel_frequency', 'brother')}><PillValue v={p?.travel_frequency} /></F>
+              : <F label={getFieldLabel('travel_importance', 'sister')}><PillValue v={p?.travel_importance} /></F>}
+            <F label={getFieldLabel('political_views', gender)}><PillValue v={p?.political_views} /></F>
+            <FW label={getFieldLabel('cultural_background_importance', gender)}>
+              <SliderValue v={p?.cultural_background_importance} left="Not important" right="Very important" />
+            </FW>
+            <FW label={getFieldLabel('home_organisation', gender)}>
+              <SliderValue v={p?.home_organisation} left="Not a priority" right="Very important" />
+            </FW>
+            {p?.weekend_lifestyle && <FW label={getFieldLabel('weekend_lifestyle', gender)}><TextValue v={p.weekend_lifestyle} /></FW>}
+            {p?.ramadan_routine && <FW label={getFieldLabel('ramadan_routine', gender)}><TextValue v={p.ramadan_routine} /></FW>}
+          </Section>
+        )}
+
+        {/* ── MARRIAGE GOALS ───────────────────────────────────────────────── */}
+        {hasAny(p, 'timeline_to_marry', 'wants_children', 'previously_married') && (
+          <Section title="Marriage Goals" editHref="/dashboard/profile/edit/marriage" testId="section-marriage">
+            <F label={getFieldLabel('timeline_to_marry', gender)}><PillValue v={p?.timeline_to_marry} /></F>
+            <F label={getFieldLabel('previously_married', gender)}><BoolValue v={p?.previously_married} /></F>
+            <F label={getFieldLabel('has_children', gender)}><BoolValue v={p?.has_children} /></F>
+            <F label={getFieldLabel('wants_children', gender)}><BoolValue v={p?.wants_children} /></F>
+            <F label={getFieldLabel('number_of_children_wanted', gender)}><PillValue v={p?.number_of_children_wanted} /></F>
+            {isBrother && <F label={getFieldLabel('polygamy_openness', 'brother')}><BoolValue v={p?.polygamy_openness} /></F>}
+            {isBrother && <F label={getFieldLabel('polygamy_own_marriage', 'brother')}><PillValue v={p?.polygamy_own_marriage} /></F>}
+          </Section>
+        )}
+
+        {/* ── SPOUSE PREFERENCES ───────────────────────────────────────────── */}
+        {hasAny(p, 'spouse_religiosity_preference', 'spouse_age_min', 'dealbreakers') && (
+          <Section title="Spouse Preferences" editHref="/dashboard/profile/edit/preferences" testId="section-preferences">
+            <F label={getFieldLabel('spouse_religiosity_preference', gender)}><PillValue v={p?.spouse_religiosity_preference} /></F>
+            <F label="Age range">
+              <TextValue v={p?.spouse_age_min && p?.spouse_age_max ? `${p.spouse_age_min}–${p.spouse_age_max}` : null} />
+            </F>
+            {p?.dealbreakers?.length
+              ? <FW label={getFieldLabel('dealbreakers', gender)}><ArrayValue v={p.dealbreakers} /></FW>
+              : <FW label={getFieldLabel('dealbreakers', gender)}><span className="text-[14px] text-[#9B9B9B]">—</span></FW>}
+          </Section>
+        )}
+
+        {/* ── FINANCIAL ────────────────────────────────────────────────────── */}
+        {hasAny(p, 'annual_income_range', 'savings_plan', 'has_significant_debt', 'plan_to_work_after_marriage', 'financial_readiness') && (
+          <Section title="Financial" editHref="/dashboard/profile/edit/financial" testId="section-financial">
+            {isBrother && <>
+              <F label={getFieldLabel('annual_income_range', 'brother')}><PillValue v={p?.annual_income_range} /></F>
+              <F label={getFieldLabel('own_or_rent', 'brother')}><PillValue v={p?.own_or_rent} /></F>
+              <F label={getFieldLabel('financial_readiness', 'brother')}><PillValue v={p?.financial_readiness} /></F>
+              <F label={getFieldLabel('hajj_status', 'brother')}><PillValue v={p?.hajj_status} /></F>
+              <F label={getFieldLabel('wife_financial_independence', 'brother')}><PillValue v={p?.wife_financial_independence} /></F>
+              <F label={getFieldLabel('wife_earning_more', 'brother')}><PillValue v={p?.wife_earning_more} /></F>
+              <F label={getFieldLabel('financial_planning_approach', 'brother')}><PillValue v={p?.financial_planning_approach} /></F>
+            </>}
+            <F label={getFieldLabel('savings_plan', gender)}><PillValue v={p?.savings_plan} /></F>
+            <F label={getFieldLabel('has_significant_debt', gender)}><PillValue v={p?.has_significant_debt} /></F>
+            <F label={getFieldLabel('supporting_family_financially', gender)}><PillValue v={p?.supporting_family_financially} /></F>
+            {isBrother && p?.mahr_approach && <FW label={getFieldLabel('mahr_approach', 'brother')}><TextValue v={p.mahr_approach} /></FW>}
+            {p?.financial_stress_approach && <FW label={getFieldLabel('financial_stress_approach', gender)}><TextValue v={p.financial_stress_approach} /></FW>}
+          </Section>
+        )}
+
+        {/* ── EMOTIONAL & MENTAL HEALTH ────────────────────────────────────── */}
+        {hasAny(p, 'therapy_experience', 'mental_health_challenges', 'emotional_support_style', 'stress_management') && (
+          <Section title="Emotional & Mental Health" editHref="/dashboard/profile/edit/emotional" defaultOpen={false} testId="section-emotional">
+            <F label={getFieldLabel('therapy_experience', gender)}><PillValue v={p?.therapy_experience} /></F>
+            <F label={getFieldLabel('couples_therapy_view', gender)}><PillValue v={p?.couples_therapy_view} /></F>
+            <F label={getFieldLabel('mental_health_challenges', gender)}><PillValue v={p?.mental_health_challenges} /></F>
+            <F label={getFieldLabel('emotional_expression_view', gender)}><PillValue v={p?.emotional_expression_view} /></F>
+            <FW label={getFieldLabel('emotional_availability', gender)}>
+              <SliderValue v={p?.emotional_availability} left="Needs space" right="Very available" />
+            </FW>
+            {p?.stress_management && <FW label={getFieldLabel('stress_management', gender)}><TextValue v={p.stress_management} /></FW>}
+            {p?.emotional_support_style && <FW label={getFieldLabel('emotional_support_style', gender)}><TextValue v={p.emotional_support_style} /></FW>}
+            {p?.significant_hardship && <FW label={getFieldLabel('significant_hardship', gender)}><TextValue v={p.significant_hardship} /></FW>}
+            {p?.health_background_disclosure && <FW label={getFieldLabel('health_background_disclosure', gender)}><TextValue v={p.health_background_disclosure} /></FW>}
+          </Section>
+        )}
+
+        {/* ── CONFLICT & COMMUNICATION ─────────────────────────────────────── */}
+        {hasAny(p, 'conflict_style', 'introvert_extrovert', 'love_language', 'apology_speed') && (
+          <Section title="Conflict & Communication" editHref="/dashboard/profile/edit/communication" defaultOpen={false} testId="section-communication">
+            <F label={getFieldLabel('conflict_style', gender)}><PillValue v={p?.conflict_style} /></F>
+            <F label={getFieldLabel('introvert_extrovert', gender)}><PillValue v={p?.introvert_extrovert} /></F>
+            <F label={getFieldLabel('alone_time_importance', gender)}><PillValue v={p?.alone_time_importance} /></F>
+            <F label={getFieldLabel('apology_speed', gender)}><PillValue v={p?.apology_speed} /></F>
+            <F label={getFieldLabel('communication_when_upset', gender)}><PillValue v={p?.communication_when_upset} /></F>
+            {isBrother
+              ? <>
+                  <F label={getFieldLabel('husband_final_say', 'brother')}><PillValue v={p?.husband_final_say} /></F>
+                  <F label={getFieldLabel('wife_opinion_importance', 'brother')}><PillValue v={p?.wife_opinion_importance} /></F>
+                  <F label={getFieldLabel('friendship_ended', 'brother')}><PillValue v={p?.friendship_ended} /></F>
+                </>
+              : <>
+                  <F label={getFieldLabel('qawwam_view', 'sister')}><PillValue v={p?.qawwam_view} /></F>
+                  <F label={getFieldLabel('husband_opinion_importance', 'sister')}><PillValue v={p?.husband_opinion_importance} /></F>
+                  <F label={getFieldLabel('receiving_love_language', 'sister')}><PillValue v={p?.receiving_love_language} /></F>
+                </>}
+            <FW label={getFieldLabel('love_language', gender)}><ArrayValue v={p?.love_language} /></FW>
+            {p?.healthy_argument_view && <FW label={getFieldLabel('healthy_argument_view', gender)}><TextValue v={p.healthy_argument_view} /></FW>}
+          </Section>
+        )}
+
+        {/* ── HOUSEHOLD (brothers) / CAREER (sisters) ──────────────────────── */}
+        {isBrother ? (
+          hasAny(p, 'wife_working_openness', 'household_management', 'inlaws_living_together', 'jumuah_attendance') && (
+            <Section title="Household" editHref="/dashboard/profile/edit/household" defaultOpen={false} testId="section-household">
+              <F label={getFieldLabel('wife_working_openness', 'brother')}><PillValue v={p?.wife_working_openness} /></F>
+              <F label={getFieldLabel('household_management', 'brother')}><PillValue v={p?.household_management} /></F>
+              <F label={getFieldLabel('inlaws_living_together', 'brother')}><PillValue v={p?.inlaws_living_together} /></F>
+              <F label={getFieldLabel('islamic_schooling_importance', 'brother')}><PillValue v={p?.islamic_schooling_importance} /></F>
+              <F label={getFieldLabel('child_caregiving', 'brother')}><PillValue v={p?.child_caregiving} /></F>
+              <F label={getFieldLabel('jumuah_attendance', 'brother')}><PillValue v={p?.jumuah_attendance} /></F>
+              <F label={getFieldLabel('wife_hijab_importance', 'brother')}><PillValue v={p?.wife_hijab_importance} /></F>
+            </Section>
+          )
+        ) : (
+          hasAny(p, 'plan_to_work_after_marriage', 'career_pause_for_children', 'career_five_years') && (
+            <Section title="Career" editHref="/dashboard/profile/edit/career" defaultOpen={false} testId="section-career">
+              <F label={getFieldLabel('plan_to_work_after_marriage', 'sister')}><PillValue v={p?.plan_to_work_after_marriage} /></F>
+              <F label={getFieldLabel('career_pause_for_children', 'sister')}><PillValue v={p?.career_pause_for_children} /></F>
+              <F label={getFieldLabel('financial_dependence_view', 'sister')}><PillValue v={p?.financial_dependence_view} /></F>
+              <F label={getFieldLabel('financial_independence_importance', 'sister')}><PillValue v={p?.financial_independence_importance} /></F>
+              <FW label={getFieldLabel('career_identity_importance', 'sister')}>
+                <SliderValue v={p?.career_identity_importance} left="Not central" right="Core identity" />
+              </FW>
+              {p?.career_five_years && <FW label={getFieldLabel('career_five_years', 'sister')}><TextValue v={p.career_five_years} /></FW>}
+              {p?.career_ambitions && <FW label={getFieldLabel('career_ambitions', 'sister')}><TextValue v={p.career_ambitions} /></FW>}
+            </Section>
+          )
+        )}
+
         {/* ── HOUSEHOLD (sisters only) ─────────────────────────────────────── */}
-        {!isBrother && (
+        {!isBrother && hasAny(p, 'primary_caregiver_comfort', 'inlaws_living_together', 'islamic_schooling_importance') && (
           <Section title="Household" editHref="/dashboard/profile/edit/additional" defaultOpen={false} testId="section-household-sister">
-            <F label="Primary Caregiver Comfort"><PillValue v={p?.primary_caregiver_comfort} /></F>
-            <F label="In-Laws Living Together"><PillValue v={p?.inlaws_living_together} /></F>
-            <F label="Islamic Schooling"><PillValue v={p?.islamic_schooling_importance} /></F>
-            {p?.household_responsibilities_vision && <FW label="Household Responsibilities Vision"><TextValue v={p.household_responsibilities_vision} /></FW>}
+            <F label={getFieldLabel('primary_caregiver_comfort', 'sister')}><PillValue v={p?.primary_caregiver_comfort} /></F>
+            <F label={getFieldLabel('inlaws_living_together', 'sister')}><PillValue v={p?.inlaws_living_together} /></F>
+            <F label={getFieldLabel('islamic_schooling_importance', 'sister')}><PillValue v={p?.islamic_schooling_importance} /></F>
+            {p?.household_responsibilities_vision && <FW label={getFieldLabel('household_responsibilities_vision', 'sister')}><TextValue v={p.household_responsibilities_vision} /></FW>}
           </Section>
         )}
 
         {/* ── CHARACTER & GOALS ────────────────────────────────────────────── */}
-        <Section title="Character & Goals" editHref="/dashboard/profile/edit/character" testId="section-character">
-          {p?.character_description
-            ? <FW label="About Me"><TextValue v={p.character_description} /></FW>
-            : <FW label="About Me"><span className="text-[14px] text-[#9B9B9B]">—</span></FW>}
-          {p?.goals
-            ? <FW label="My Goals"><TextValue v={p.goals} /></FW>
-            : <FW label="My Goals"><span className="text-[14px] text-[#9B9B9B]">—</span></FW>}
-        </Section>
+        {hasAny(p, 'character_description', 'goals') && (
+          <Section title="Character & Goals" editHref="/dashboard/profile/edit/character" testId="section-character">
+            {p?.character_description
+              ? <FW label={getFieldLabel('character_description', gender)}><TextValue v={p.character_description} /></FW>
+              : <FW label={getFieldLabel('character_description', gender)}><span className="text-[14px] text-[#9B9B9B]">—</span></FW>}
+            {p?.goals
+              ? <FW label={getFieldLabel('goals', gender)}><TextValue v={p.goals} /></FW>
+              : <FW label={getFieldLabel('goals', gender)}><span className="text-[14px] text-[#9B9B9B]">—</span></FW>}
+          </Section>
+        )}
 
         {/* ── MARRIAGE VISION ──────────────────────────────────────────────── */}
-        <Section title="Marriage Vision" editHref="/dashboard/profile/edit/vision" defaultOpen={false} testId="section-vision">
-          <F label="Physical Intimacy"><PillValue v={p?.physical_intimacy_importance} /></F>
-          <F label="Spouse Friendships"><PillValue v={p?.spouse_friendships_view} /></F>
-          {p?.marriage_vision_10_years && <FW label="10-Year Vision"><TextValue v={p.marriage_vision_10_years} /></FW>}
-          {p?.first_year_vision && <FW label="First Year"><TextValue v={p.first_year_vision} /></FW>}
-          {p?.romance_view && <FW label="Romance"><TextValue v={p.romance_view} /></FW>}
-          {p?.marriage_fear && <FW label="Marriage Fear"><TextValue v={p.marriage_fear} /></FW>}
-          {p?.unique_contribution && <FW label="Unique Contribution"><TextValue v={p.unique_contribution} /></FW>}
-          {!isBrother && p?.ideal_husband_description && <FW label="Ideal Husband"><TextValue v={p.ideal_husband_description} /></FW>}
-        </Section>
+        {hasAny(p, 'marriage_vision_10_years', 'first_year_vision', 'physical_intimacy_importance') && (
+          <Section title="Marriage Vision" editHref="/dashboard/profile/edit/vision" defaultOpen={false} testId="section-vision">
+            <F label={getFieldLabel('physical_intimacy_importance', gender)}><PillValue v={p?.physical_intimacy_importance} /></F>
+            <F label={getFieldLabel('spouse_friendships_view', gender)}><PillValue v={p?.spouse_friendships_view} /></F>
+            {p?.marriage_vision_10_years && <FW label={getFieldLabel('marriage_vision_10_years', gender)}><TextValue v={p.marriage_vision_10_years} /></FW>}
+            {p?.first_year_vision && <FW label={getFieldLabel('first_year_vision', gender)}><TextValue v={p.first_year_vision} /></FW>}
+            {p?.romance_view && <FW label={getFieldLabel('romance_view', gender)}><TextValue v={p.romance_view} /></FW>}
+            {p?.marriage_fear && <FW label={getFieldLabel('marriage_fear', gender)}><TextValue v={p.marriage_fear} /></FW>}
+            {p?.unique_contribution && <FW label={getFieldLabel('unique_contribution', gender)}><TextValue v={p.unique_contribution} /></FW>}
+            {!isBrother && p?.ideal_husband_description && <FW label={getFieldLabel('ideal_husband_description', 'sister')}><TextValue v={p.ideal_husband_description} /></FW>}
+          </Section>
+        )}
 
         {/* ── PHOTO(S) ─────────────────────────────────────────────────────── */}
         {isBrother ? (

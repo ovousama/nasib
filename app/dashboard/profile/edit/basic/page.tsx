@@ -5,6 +5,17 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
 
+function Pill({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick}
+      className={`px-4 py-2 rounded-full text-sm font-medium border transition-all cursor-pointer ${
+        selected ? 'bg-[#AF4D98] text-white border-[#AF4D98]' : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#AF4D98]'
+      }`}>
+      {label}
+    </button>
+  )
+}
+
 export default function EditBasicPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -14,11 +25,16 @@ export default function EditBasicPage() {
 
   const [userId, setUserId] = useState<string>('')
   const [gender, setGender] = useState<string>('')
+
+  // Read-only display fields (set at registration)
   const [fullName, setFullName] = useState('')
   const [age, setAge] = useState<number | ''>('')
   const [location, setLocation] = useState('')
+
+  // Editable fields
   const [ethnicity, setEthnicity] = useState('')
   const [languages, setLanguages] = useState('')
+  const [willingToRelocate, setWillingToRelocate] = useState<boolean | null>(null)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -30,24 +46,15 @@ export default function EditBasicPage() {
       const { data: profile } = await supabase.from('profiles').select('gender').eq('id', user.id).single()
       if (!profile) { router.push('/auth/login'); return }
       setGender(profile.gender)
-      if (profile.gender === 'brother') {
-        const { data } = await supabase.from('brother_profiles').select('full_name, age, location, ethnicity, languages').eq('id', user.id).single()
-        if (data) {
-          setFullName(data.full_name ?? '')
-          setAge(data.age ?? '')
-          setLocation(data.location ?? '')
-          setEthnicity(data.ethnicity ?? '')
-          setLanguages(Array.isArray(data.languages) ? data.languages.join(', ') : '')
-        }
-      } else {
-        const { data } = await supabase.from('sister_profiles').select('full_name, age, location, ethnicity, languages').eq('id', user.id).single()
-        if (data) {
-          setFullName(data.full_name ?? '')
-          setAge(data.age ?? '')
-          setLocation(data.location ?? '')
-          setEthnicity(data.ethnicity ?? '')
-          setLanguages(Array.isArray(data.languages) ? data.languages.join(', ') : '')
-        }
+      const table = profile.gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
+      const { data } = await supabase.from(table).select('full_name, age, location, ethnicity, languages, willing_to_relocate').eq('id', user.id).single()
+      if (data) {
+        setFullName(data.full_name ?? '')
+        setAge(data.age ?? '')
+        setLocation(data.location ?? '')
+        setEthnicity(data.ethnicity ?? '')
+        setLanguages(Array.isArray(data.languages) ? data.languages.join(', ') : '')
+        setWillingToRelocate(data.willing_to_relocate ?? null)
       }
       setLoading(false)
     }
@@ -56,9 +63,6 @@ export default function EditBasicPage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    if (!fullName.trim()) { setError('Full name is required.'); return }
-    if (age === '' || Number(age) < 18) { setError('Age must be 18 or older.'); return }
-    if (!location.trim()) { setError('Location is required.'); return }
     setSaving(true)
     setError(null)
     try {
@@ -67,7 +71,11 @@ export default function EditBasicPage() {
       const table = gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
       const { error: updateError } = await supabase
         .from(table)
-        .update({ full_name: fullName.trim(), age: Number(age), location: location.trim(), ethnicity: ethnicity.trim() || null, languages: languagesArr })
+        .update({
+          ethnicity: ethnicity.trim() || null,
+          languages: languagesArr,
+          willing_to_relocate: willingToRelocate,
+        })
         .eq('id', userId)
       if (updateError) throw updateError
       recalculateProfileCompletion().catch(() => {})
@@ -100,6 +108,25 @@ export default function EditBasicPage() {
           <h1 className="text-base font-medium text-[#1A1A1A]">Edit Basic Info</h1>
         </div>
 
+        {/* Read-only identity block */}
+        <div className="bg-[#F5F5F5] border border-[#EDE8E3] rounded-[12px] px-4 py-3 mb-5">
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-2">Set at registration · Cannot be changed</p>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex justify-between text-[14px]">
+              <span className="text-[#9B9B9B]">Full name</span>
+              <span className="text-[#1A1A1A] font-medium">{fullName || '—'}</span>
+            </div>
+            <div className="flex justify-between text-[14px]">
+              <span className="text-[#9B9B9B]">Age</span>
+              <span className="text-[#1A1A1A] font-medium">{age || '—'}</span>
+            </div>
+            <div className="flex justify-between text-[14px]">
+              <span className="text-[#9B9B9B]">Location</span>
+              <span className="text-[#1A1A1A] font-medium">{location || '—'}</span>
+            </div>
+          </div>
+        </div>
+
         {error && (
           <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">
             {error}
@@ -108,52 +135,18 @@ export default function EditBasicPage() {
 
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Full Name <span className="text-red-500">*</span></label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={e => setFullName(e.target.value)}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-              placeholder="Your full name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Age <span className="text-red-500">*</span></label>
-            <input
-              type="number"
-              value={age}
-              onChange={e => setAge(e.target.value === '' ? '' : Number(e.target.value))}
-              min={18}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-              placeholder="Your age"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Location <span className="text-red-500">*</span></label>
-            <input
-              type="text"
-              value={location}
-              onChange={e => setLocation(e.target.value)}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-              placeholder="City, Country"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Ethnicity</label>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Ethnicity <span className="text-[#9B9B9B] font-normal">(optional)</span></label>
             <input
               type="text"
               value={ethnicity}
               onChange={e => setEthnicity(e.target.value)}
               className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-              placeholder="Optional"
+              placeholder="e.g. Pakistani, Moroccan, Somali"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Languages</label>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Languages spoken <span className="text-[#9B9B9B] font-normal">(optional)</span></label>
             <input
               type="text"
               value={languages}
@@ -162,6 +155,14 @@ export default function EditBasicPage() {
               placeholder="e.g. English, Arabic, Urdu"
             />
             <p className="text-xs text-[#9B9B9B] mt-1">Separate with commas</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-2">Are you willing to relocate after marriage?</label>
+            <div className="flex gap-2">
+              <Pill label="Yes" selected={willingToRelocate === true} onClick={() => setWillingToRelocate(true)} />
+              <Pill label="No" selected={willingToRelocate === false} onClick={() => setWillingToRelocate(false)} />
+            </div>
           </div>
 
           <button

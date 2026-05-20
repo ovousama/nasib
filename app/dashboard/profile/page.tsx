@@ -41,6 +41,8 @@ export default async function ProfilePage() {
         completionPercentage={percentage}
         isComplete={isComplete}
         verificationBadge={profile.verification_badge}
+        userEmail={user.email ?? ''}
+        memberSince={user.created_at ?? ''}
       />
     )
   }
@@ -65,6 +67,8 @@ export default async function ProfilePage() {
       completionPercentage={percentage}
       isComplete={isComplete}
       verificationBadge={profile.verification_badge}
+      userEmail={user.email ?? ''}
+      memberSince={user.created_at ?? ''}
     />
   )
 }

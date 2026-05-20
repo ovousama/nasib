@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getUserDetail } from '@/lib/admin'
 import UserDetailActions from '@/components/admin/UserDetailActions'
+import { getFieldLabel } from '@/lib/field-labels'
 
 type Props = { params: Promise<{ userId: string }> }
 
@@ -127,31 +128,31 @@ export default async function UserDetailPage({ params }: Props) {
           </Section>
 
           <Section title="Deen">
-            <Row label="Religiosity" value={p?.religiosity_level} />
-            <Row label="Madhab" value={p?.madhab} />
-            <Row label="Prayer Frequency" value={p?.prayer_frequency} />
-            <Row label="Islamic Knowledge" value={p?.islamic_knowledge_level} />
-            {isBrother ? <Row label="Has Beard" value={p?.has_beard} /> : <Row label="Wears Hijab" value={p?.wears_hijab} />}
-            {!isBrother && <Row label="Hijab Outside Home" value={s?.hijab_outside_home} />}
-            {!isBrother && <Row label="Islamic Classes" value={s?.islamic_classes_attendance} />}
-            {isBrother && <Row label="Jumuah Attendance" value={b?.jumuah_attendance} />}
-            {isBrother && <Row label="Wife Hijab Importance" value={b?.wife_hijab_importance} />}
-            <LongRow label="Differing Islamic Opinions" value={p?.differing_islamic_opinions} />
+            <Row label={getFieldLabel('religiosity_level', isBrother ? 'brother' : 'sister')} value={p?.religiosity_level} />
+            <Row label={getFieldLabel('madhab', isBrother ? 'brother' : 'sister')} value={p?.madhab} />
+            <Row label={getFieldLabel('prayer_frequency', isBrother ? 'brother' : 'sister')} value={p?.prayer_frequency} />
+            <Row label={getFieldLabel('islamic_knowledge_level', isBrother ? 'brother' : 'sister')} value={p?.islamic_knowledge_level} />
+            {isBrother ? <Row label={getFieldLabel('has_beard', 'brother')} value={p?.has_beard} /> : <Row label={getFieldLabel('wears_hijab', 'sister')} value={p?.wears_hijab} />}
+            {!isBrother && <Row label={getFieldLabel('hijab_outside_home', 'sister')} value={s?.hijab_outside_home} />}
+            {!isBrother && <Row label={getFieldLabel('islamic_classes_attendance', 'sister')} value={s?.islamic_classes_attendance} />}
+            {isBrother && <Row label={getFieldLabel('jumuah_attendance', 'brother')} value={b?.jumuah_attendance} />}
+            {isBrother && <Row label={getFieldLabel('wife_hijab_importance', 'brother')} value={b?.wife_hijab_importance} />}
+            <LongRow label={getFieldLabel('differing_islamic_opinions', isBrother ? 'brother' : 'sister')} value={p?.differing_islamic_opinions} />
           </Section>
 
           <Section title="Deen Deepdive">
-            <Row label="Quran Listening" value={p?.quran_listening} />
-            <Row label="Quran Memorisation" value={p?.quran_memorisation} />
-            <SliderRow label="Traditional ↔ Reformist" value={p?.traditional_vs_reformist} />
-            <Row label="Mawlid View" value={p?.mawlid_view} />
-            <Row label="Zakah & Sadaqah" value={p?.zakah_sadaqah} />
-            <Row label="Madhab Consistency" value={p?.madhab_consistency} />
-            <Row label="Spouse Islamic Knowledge" value={p?.spouse_islamic_knowledge} />
-            {isBrother && <Row label="Missed Prayer Approach" value={b?.missed_prayer_approach} />}
-            {isBrother && <Row label="Wife Niqab Preference" value={b?.wife_niqab_preference} />}
-            {!isBrother && <Row label="Islamic Home Importance" value={s?.islamic_home_importance} />}
-            <LongRow label="Deen Growth" value={p?.deen_growth} />
-            {!isBrother && <LongRow label="Deen When Busy" value={s?.deen_when_busy} />}
+            <Row label={getFieldLabel('quran_listening', isBrother ? 'brother' : 'sister')} value={p?.quran_listening} />
+            <Row label={getFieldLabel('quran_memorisation', isBrother ? 'brother' : 'sister')} value={p?.quran_memorisation} />
+            <SliderRow label={getFieldLabel('traditional_vs_reformist', isBrother ? 'brother' : 'sister')} value={p?.traditional_vs_reformist} />
+            <Row label={getFieldLabel('mawlid_view', isBrother ? 'brother' : 'sister')} value={p?.mawlid_view} />
+            <Row label={getFieldLabel('zakah_sadaqah', isBrother ? 'brother' : 'sister')} value={p?.zakah_sadaqah} />
+            <Row label={getFieldLabel('madhab_consistency', isBrother ? 'brother' : 'sister')} value={p?.madhab_consistency} />
+            <Row label={getFieldLabel('spouse_islamic_knowledge', isBrother ? 'brother' : 'sister')} value={p?.spouse_islamic_knowledge} />
+            {isBrother && <Row label={getFieldLabel('missed_prayer_approach', 'brother')} value={b?.missed_prayer_approach} />}
+            {isBrother && <Row label={getFieldLabel('wife_niqab_preference', 'brother')} value={b?.wife_niqab_preference} />}
+            {!isBrother && <Row label={getFieldLabel('islamic_home_importance', 'sister')} value={s?.islamic_home_importance} />}
+            <LongRow label={getFieldLabel('deen_growth', isBrother ? 'brother' : 'sister')} value={p?.deen_growth} />
+            {!isBrother && <LongRow label={getFieldLabel('deen_when_busy', 'sister')} value={s?.deen_when_busy} />}
           </Section>
 
           <Section title="Life & Career">
@@ -163,128 +164,132 @@ export default async function UserDetailPage({ params }: Props) {
           </Section>
 
           <Section title="Marriage">
-            <Row label="Timeline" value={p?.timeline_to_marry} />
-            <Row label="Previously Married" value={p?.previously_married} />
-            <Row label="Has Children" value={p?.has_children} />
-            <Row label="Wants Children" value={p?.wants_children} />
-            <Row label="Number of Children Wanted" value={p?.number_of_children_wanted} />
-            {isBrother && <Row label="Open to Polygamy" value={b?.polygamy_openness} />}
-            {isBrother && <Row label="Polygamy in Own Marriage" value={b?.polygamy_own_marriage} />}
-            <Row label="Spouse Religiosity Pref" value={p?.spouse_religiosity_preference} />
-            <Row label="Spouse Age Range" value={(p?.spouse_age_min && p?.spouse_age_max) ? `${p.spouse_age_min}–${p.spouse_age_max}` : null} />
-            <Row label="Dealbreakers" value={p?.dealbreakers} />
+            <Row label={getFieldLabel('timeline_to_marry', isBrother ? 'brother' : 'sister')} value={p?.timeline_to_marry} />
+            <Row label={getFieldLabel('previously_married', isBrother ? 'brother' : 'sister')} value={p?.previously_married} />
+            <Row label={getFieldLabel('has_children', isBrother ? 'brother' : 'sister')} value={p?.has_children} />
+            <Row label={getFieldLabel('wants_children', isBrother ? 'brother' : 'sister')} value={p?.wants_children} />
+            <Row label={getFieldLabel('number_of_children_wanted', isBrother ? 'brother' : 'sister')} value={p?.number_of_children_wanted} />
+            {isBrother && <Row label={getFieldLabel('polygamy_openness', 'brother')} value={b?.polygamy_openness} />}
+            {isBrother && <Row label={getFieldLabel('polygamy_own_marriage', 'brother')} value={b?.polygamy_own_marriage} />}
+            <Row label={getFieldLabel('spouse_religiosity_preference', isBrother ? 'brother' : 'sister')} value={p?.spouse_religiosity_preference} />
+            <Row label="Spouse age range" value={(p?.spouse_age_min && p?.spouse_age_max) ? `${p.spouse_age_min}–${p.spouse_age_max}` : null} />
+            <Row label={getFieldLabel('dealbreakers', isBrother ? 'brother' : 'sister')} value={p?.dealbreakers} />
           </Section>
 
           <Section title="Financial">
             {isBrother && <>
-              <Row label="Annual Income" value={b?.annual_income_range} />
-              <Row label="Own or Rent" value={b?.own_or_rent} />
-              <Row label="Financial Planning" value={b?.financial_planning_approach} />
-              <Row label="Wife Financial Independence" value={b?.wife_financial_independence} />
-              <Row label="Wife Earning More" value={b?.wife_earning_more} />
-              <Row label="Hajj Status" value={b?.hajj_status} />
-              <LongRow label="Mahr Approach" value={b?.mahr_approach} />
+              <Row label={getFieldLabel('annual_income_range', 'brother')} value={b?.annual_income_range} />
+              <Row label={getFieldLabel('own_or_rent', 'brother')} value={b?.own_or_rent} />
+              <Row label={getFieldLabel('financial_readiness', 'brother')} value={b?.financial_readiness} />
+              <Row label={getFieldLabel('financial_planning_approach', 'brother')} value={b?.financial_planning_approach} />
+              <Row label={getFieldLabel('wife_financial_independence', 'brother')} value={b?.wife_financial_independence} />
+              <Row label={getFieldLabel('wife_earning_more', 'brother')} value={b?.wife_earning_more} />
+              <Row label={getFieldLabel('hajj_status', 'brother')} value={b?.hajj_status} />
+              <LongRow label={getFieldLabel('mahr_approach', 'brother')} value={b?.mahr_approach} />
             </>}
             {!isBrother && <>
-              <Row label="Plan to Work After Marriage" value={s?.plan_to_work_after_marriage} />
-              <Row label="Financial Independence Importance" value={s?.financial_independence_importance} />
-              <Row label="Financial Dependence View" value={s?.financial_dependence_view} />
+              <Row label={getFieldLabel('plan_to_work_after_marriage', 'sister')} value={s?.plan_to_work_after_marriage} />
+              <Row label={getFieldLabel('financial_independence_importance', 'sister')} value={s?.financial_independence_importance} />
+              <Row label={getFieldLabel('financial_dependence_view', 'sister')} value={s?.financial_dependence_view} />
             </>}
-            <Row label="Has Significant Debt" value={p?.has_significant_debt} />
-            <Row label="Supporting Family Financially" value={p?.supporting_family_financially} />
-            <Row label="Savings Plan" value={p?.savings_plan} />
-            <LongRow label="Financial Stress Approach" value={p?.financial_stress_approach} />
+            <Row label={getFieldLabel('has_significant_debt', isBrother ? 'brother' : 'sister')} value={p?.has_significant_debt} />
+            <Row label={getFieldLabel('supporting_family_financially', isBrother ? 'brother' : 'sister')} value={p?.supporting_family_financially} />
+            <Row label={getFieldLabel('savings_plan', isBrother ? 'brother' : 'sister')} value={p?.savings_plan} />
+            <LongRow label={getFieldLabel('financial_stress_approach', isBrother ? 'brother' : 'sister')} value={p?.financial_stress_approach} />
           </Section>
 
           <Section title="Family Dynamics">
             {isBrother ? <>
-              <Row label="Wife–Family Interaction" value={b?.wife_family_interaction} />
-              <Row label="Eldest Responsibilities" value={b?.eldest_responsibilities} />
-              <Row label="Child Caregiving" value={b?.child_caregiving} />
-              <Row label="Wife–Family Relationship" value={b?.wife_family_relationship} />
-              <Row label="Living Near Parents" value={b?.living_near_parents} />
+              <Row label={getFieldLabel('wife_family_interaction', 'brother')} value={b?.wife_family_interaction} />
+              <Row label={getFieldLabel('eldest_responsibilities', 'brother')} value={b?.eldest_responsibilities} />
+              <Row label={getFieldLabel('child_caregiving', 'brother')} value={b?.child_caregiving} />
+              <Row label={getFieldLabel('wife_family_relationship', 'brother')} value={b?.wife_family_relationship} />
+              <Row label={getFieldLabel('living_near_parents', 'brother')} value={b?.living_near_parents} />
             </> : <>
-              <Row label="Family Balance After Marriage" value={s?.family_balance_after_marriage} />
-              <Row label="Family Financial Responsibility" value={s?.family_financial_responsibility} />
-              <Row label="In-Laws Comfort" value={s?.inlaws_comfort} />
-              <Row label="Husband–Family Relationship" value={s?.husband_family_relationship} />
-              <SliderRow label="Family: Traditional ↔ Modern" value={s?.family_traditional_vs_modern} />
+              <Row label={getFieldLabel('family_balance_after_marriage', 'sister')} value={s?.family_balance_after_marriage} />
+              <Row label={getFieldLabel('family_financial_responsibility', 'sister')} value={s?.family_financial_responsibility} />
+              <Row label={getFieldLabel('inlaws_comfort', 'sister')} value={s?.inlaws_comfort} />
+              <Row label={getFieldLabel('husband_family_relationship', 'sister')} value={s?.husband_family_relationship} />
+              <SliderRow label={getFieldLabel('family_traditional_vs_modern', 'sister')} value={s?.family_traditional_vs_modern} />
             </>}
-            <Row label="Family Conflict Style" value={p?.family_conflict_style} />
-            <LongRow label="Relationship with Parents" value={p?.parent_relationship} />
-            <LongRow label="Family vs Spouse Disagreements" value={p?.family_spouse_disagreement} />
+            <Row label={getFieldLabel('family_conflict_style', isBrother ? 'brother' : 'sister')} value={p?.family_conflict_style} />
+            <LongRow label={getFieldLabel('parent_relationship', isBrother ? 'brother' : 'sister')} value={p?.parent_relationship} />
+            <LongRow label={getFieldLabel('family_spouse_disagreement', isBrother ? 'brother' : 'sister')} value={p?.family_spouse_disagreement} />
           </Section>
 
           <Section title="Household">
             {isBrother ? <>
-              <Row label="Wife Working Openness" value={b?.wife_working_openness} />
-              <Row label="Household Management" value={b?.household_management} />
+              <Row label={getFieldLabel('wife_working_openness', 'brother')} value={b?.wife_working_openness} />
+              <Row label={getFieldLabel('household_management', 'brother')} value={b?.household_management} />
             </> : <>
-              <Row label="Primary Caregiver Comfort" value={s?.primary_caregiver_comfort} />
-              <LongRow label="Household Responsibilities Vision" value={s?.household_responsibilities_vision} />
+              <Row label={getFieldLabel('primary_caregiver_comfort', 'sister')} value={s?.primary_caregiver_comfort} />
+              <LongRow label={getFieldLabel('household_responsibilities_vision', 'sister')} value={s?.household_responsibilities_vision} />
             </>}
-            <Row label="In-Laws Living Together" value={p?.inlaws_living_together} />
-            <Row label="Islamic Schooling" value={p?.islamic_schooling_importance} />
-            <Row label="Number of Children Wanted" value={p?.number_of_children_wanted} />
+            <Row label={getFieldLabel('inlaws_living_together', isBrother ? 'brother' : 'sister')} value={p?.inlaws_living_together} />
+            <Row label={getFieldLabel('islamic_schooling_importance', isBrother ? 'brother' : 'sister')} value={p?.islamic_schooling_importance} />
+            <Row label={getFieldLabel('number_of_children_wanted', isBrother ? 'brother' : 'sister')} value={p?.number_of_children_wanted} />
           </Section>
 
           <Section title="Lifestyle">
-            <Row label="Music" value={p?.do_you_listen_to_music} />
-            <Row label="Non-Islamic Holidays" value={p?.celebrate_non_islamic_holidays} />
-            <Row label="Mixed-Gender Social Circle" value={p?.mixed_gender_social_circle} />
+            <Row label={getFieldLabel('do_you_listen_to_music', isBrother ? 'brother' : 'sister')} value={p?.do_you_listen_to_music} />
+            <Row label={getFieldLabel('celebrate_non_islamic_holidays', isBrother ? 'brother' : 'sister')} value={p?.celebrate_non_islamic_holidays} />
+            <Row label={getFieldLabel('mixed_gender_social_circle', isBrother ? 'brother' : 'sister')} value={p?.mixed_gender_social_circle} />
             {isBrother
-              ? <Row label="Travel Frequency" value={b?.travel_frequency} />
-              : <Row label="Travel Importance" value={s?.travel_importance} />}
-            <Row label="Strict Halal Diet" value={p?.strict_halal_diet} />
-            <Row label="Smoking" value={p?.smoking} />
-            <Row label="Exercise Frequency" value={p?.exercise_frequency} />
-            <Row label="Healthy Eating" value={p?.healthy_eating_importance} />
-            <Row label="Pets" value={p?.pets_view} />
-            <Row label="Social Media" value={p?.social_media_view} />
-            <SliderRow label="Home Organisation" value={p?.home_organisation} />
-            <Row label="Political Views" value={p?.political_views} />
-            <SliderRow label="Cultural Background Importance" value={p?.cultural_background_importance} />
-            <LongRow label="Weekend Lifestyle" value={p?.weekend_lifestyle} />
-            <LongRow label="Ramadan Routine" value={p?.ramadan_routine} />
+              ? <Row label={getFieldLabel('travel_frequency', 'brother')} value={b?.travel_frequency} />
+              : <Row label={getFieldLabel('travel_importance', 'sister')} value={s?.travel_importance} />}
+            <Row label={getFieldLabel('strict_halal_diet', isBrother ? 'brother' : 'sister')} value={p?.strict_halal_diet} />
+            <Row label={getFieldLabel('smoking', isBrother ? 'brother' : 'sister')} value={p?.smoking} />
+            <Row label={getFieldLabel('exercise_frequency', isBrother ? 'brother' : 'sister')} value={p?.exercise_frequency} />
+            <Row label={getFieldLabel('healthy_eating_importance', isBrother ? 'brother' : 'sister')} value={p?.healthy_eating_importance} />
+            <Row label={getFieldLabel('pets_view', isBrother ? 'brother' : 'sister')} value={p?.pets_view} />
+            <Row label={getFieldLabel('social_media_view', isBrother ? 'brother' : 'sister')} value={p?.social_media_view} />
+            <SliderRow label={getFieldLabel('home_organisation', isBrother ? 'brother' : 'sister')} value={p?.home_organisation} />
+            <Row label={getFieldLabel('political_views', isBrother ? 'brother' : 'sister')} value={p?.political_views} />
+            <SliderRow label={getFieldLabel('cultural_background_importance', isBrother ? 'brother' : 'sister')} value={p?.cultural_background_importance} />
+            <LongRow label={getFieldLabel('weekend_lifestyle', isBrother ? 'brother' : 'sister')} value={p?.weekend_lifestyle} />
+            <LongRow label={getFieldLabel('ramadan_routine', isBrother ? 'brother' : 'sister')} value={p?.ramadan_routine} />
           </Section>
 
           <Section title="Mental & Emotional Health">
-            <Row label="Therapy Experience" value={p?.therapy_experience} />
-            <Row label="Couples Therapy View" value={p?.couples_therapy_view} />
-            <Row label="Mental Health Challenges" value={p?.mental_health_challenges} />
-            <Row label="Emotional Expression" value={p?.emotional_expression_view} />
-            <SliderRow label="Emotional Availability" value={p?.emotional_availability} />
-            <LongRow label="Stress Management" value={p?.stress_management} />
-            <LongRow label="Emotional Support Style" value={p?.emotional_support_style} />
-            <LongRow label="Significant Hardship" value={p?.significant_hardship} />
-            <LongRow label="Health Background Disclosure" value={p?.health_background_disclosure} />
+            <Row label={getFieldLabel('therapy_experience', isBrother ? 'brother' : 'sister')} value={p?.therapy_experience} />
+            <Row label={getFieldLabel('couples_therapy_view', isBrother ? 'brother' : 'sister')} value={p?.couples_therapy_view} />
+            <Row label={getFieldLabel('mental_health_challenges', isBrother ? 'brother' : 'sister')} value={p?.mental_health_challenges} />
+            <Row label={getFieldLabel('emotional_expression_view', isBrother ? 'brother' : 'sister')} value={p?.emotional_expression_view} />
+            <SliderRow label={getFieldLabel('emotional_availability', isBrother ? 'brother' : 'sister')} value={p?.emotional_availability} />
+            <LongRow label={getFieldLabel('stress_management', isBrother ? 'brother' : 'sister')} value={p?.stress_management} />
+            <LongRow label={getFieldLabel('emotional_support_style', isBrother ? 'brother' : 'sister')} value={p?.emotional_support_style} />
+            <LongRow label={getFieldLabel('significant_hardship', isBrother ? 'brother' : 'sister')} value={p?.significant_hardship} />
+            <LongRow label={getFieldLabel('health_background_disclosure', isBrother ? 'brother' : 'sister')} value={p?.health_background_disclosure} />
           </Section>
 
           <Section title="Conflict & Communication">
-            <Row label="Conflict Style" value={p?.conflict_style} />
-            <Row label="Personality" value={p?.introvert_extrovert} />
-            <Row label="Alone Time" value={p?.alone_time_importance} />
-            <Row label="Apology Speed" value={p?.apology_speed} />
-            <Row label="Communication When Upset" value={p?.communication_when_upset} />
-            <Row label="Love Language" value={p?.love_language} />
+            <Row label={getFieldLabel('conflict_style', isBrother ? 'brother' : 'sister')} value={p?.conflict_style} />
+            <Row label={getFieldLabel('introvert_extrovert', isBrother ? 'brother' : 'sister')} value={p?.introvert_extrovert} />
+            <Row label={getFieldLabel('alone_time_importance', isBrother ? 'brother' : 'sister')} value={p?.alone_time_importance} />
+            <Row label={getFieldLabel('apology_speed', isBrother ? 'brother' : 'sister')} value={p?.apology_speed} />
+            <Row label={getFieldLabel('communication_when_upset', isBrother ? 'brother' : 'sister')} value={p?.communication_when_upset} />
+            <Row label={getFieldLabel('love_language', isBrother ? 'brother' : 'sister')} value={p?.love_language} />
             {isBrother ? <>
-              <Row label="Husband Final Say" value={b?.husband_final_say} />
-              <Row label="Wife Opinion Importance" value={b?.wife_opinion_importance} />
-              <Row label="Friendship Ended" value={b?.friendship_ended} />
+              <Row label={getFieldLabel('husband_final_say', 'brother')} value={b?.husband_final_say} />
+              <Row label={getFieldLabel('wife_opinion_importance', 'brother')} value={b?.wife_opinion_importance} />
+              <Row label={getFieldLabel('friendship_ended', 'brother')} value={b?.friendship_ended} />
             </> : <>
-              <Row label="Qawwam View" value={s?.qawwam_view} />
-              <Row label="Husband Opinion Importance" value={s?.husband_opinion_importance} />
-              <Row label="Receiving Love Language" value={s?.receiving_love_language} />
+              <Row label={getFieldLabel('qawwam_view', 'sister')} value={s?.qawwam_view} />
+              <Row label={getFieldLabel('husband_opinion_importance', 'sister')} value={s?.husband_opinion_importance} />
+              <Row label={getFieldLabel('receiving_love_language', 'sister')} value={s?.receiving_love_language} />
             </>}
-            <LongRow label="Healthy Argument View" value={p?.healthy_argument_view} />
+            <LongRow label={getFieldLabel('healthy_argument_view', isBrother ? 'brother' : 'sister')} value={p?.healthy_argument_view} />
           </Section>
 
           {!isBrother && (
             <Section title="Career">
-              <Row label="Career Pause for Children" value={s?.career_pause_for_children} />
-              <SliderRow label="Career Identity Importance" value={s?.career_identity_importance} />
-              <LongRow label="Career in 5 Years" value={s?.career_five_years} />
-              <LongRow label="Career Ambitions" value={s?.career_ambitions} />
+              <Row label={getFieldLabel('plan_to_work_after_marriage', 'sister')} value={s?.plan_to_work_after_marriage} />
+              <Row label={getFieldLabel('career_pause_for_children', 'sister')} value={s?.career_pause_for_children} />
+              <Row label={getFieldLabel('financial_dependence_view', 'sister')} value={s?.financial_dependence_view} />
+              <Row label={getFieldLabel('financial_independence_importance', 'sister')} value={s?.financial_independence_importance} />
+              <SliderRow label={getFieldLabel('career_identity_importance', 'sister')} value={s?.career_identity_importance} />
+              <LongRow label={getFieldLabel('career_five_years', 'sister')} value={s?.career_five_years} />
+              <LongRow label={getFieldLabel('career_ambitions', 'sister')} value={s?.career_ambitions} />
             </Section>
           )}
 
@@ -296,14 +301,14 @@ export default async function UserDetailPage({ params }: Props) {
           ) : null}
 
           <Section title="Marriage Vision">
-            <Row label="Physical Intimacy" value={p?.physical_intimacy_importance} />
-            <Row label="Spouse Friendships" value={p?.spouse_friendships_view} />
-            <LongRow label="10-Year Marriage Vision" value={p?.marriage_vision_10_years} />
-            <LongRow label="First Year Vision" value={p?.first_year_vision} />
-            <LongRow label="Romance View" value={p?.romance_view} />
-            <LongRow label="Marriage Fear" value={p?.marriage_fear} />
-            <LongRow label="Unique Contribution" value={p?.unique_contribution} />
-            {!isBrother && <LongRow label="Ideal Husband Description" value={s?.ideal_husband_description} />}
+            <Row label={getFieldLabel('physical_intimacy_importance', isBrother ? 'brother' : 'sister')} value={p?.physical_intimacy_importance} />
+            <Row label={getFieldLabel('spouse_friendships_view', isBrother ? 'brother' : 'sister')} value={p?.spouse_friendships_view} />
+            <LongRow label={getFieldLabel('marriage_vision_10_years', isBrother ? 'brother' : 'sister')} value={p?.marriage_vision_10_years} />
+            <LongRow label={getFieldLabel('first_year_vision', isBrother ? 'brother' : 'sister')} value={p?.first_year_vision} />
+            <LongRow label={getFieldLabel('romance_view', isBrother ? 'brother' : 'sister')} value={p?.romance_view} />
+            <LongRow label={getFieldLabel('marriage_fear', isBrother ? 'brother' : 'sister')} value={p?.marriage_fear} />
+            <LongRow label={getFieldLabel('unique_contribution', isBrother ? 'brother' : 'sister')} value={p?.unique_contribution} />
+            {!isBrother && <LongRow label={getFieldLabel('ideal_husband_description', 'sister')} value={s?.ideal_husband_description} />}
           </Section>
 
           {detail.reference && (
