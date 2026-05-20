@@ -350,6 +350,54 @@ export default function SisterDashboard({
             </div>
           </div>
 
+          {/* ── Nikah Planning Connections ───────────────────────── */}
+          {nikahConns.length > 0 && (
+            <section id="nikah" data-testid="nikah-connections-section">
+              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Nikah Planning</p>
+              <div className="space-y-3">
+                {nikahConns.map(conn => (
+                  <div data-testid="nikah-connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#AF4D98]/30 shadow-[0_1px_3px_rgba(175,77,152,0.12)]">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-base mr-1">🤍</span>
+                      <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
+                      <span className="ml-auto text-xs font-medium text-[#AF4D98] bg-[#F5E6F2] px-2.5 py-1 rounded-full">Nikah Planning</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Link href={`/dashboard/chat/${conn.id}`} className="text-center text-sm font-medium text-[#AF4D98] py-2">Chat</Link>
+                      <Link href={`/dashboard/profile/${conn.brother_id}?context=connection&connectionId=${conn.id}`} className="text-center text-sm font-medium text-[#5C5C5C] py-2">Profile</Link>
+                      <Link data-testid="view-nikah-plan-btn" href={`/dashboard/nikah/${conn.id}`} className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors">View Plan</Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── Active Connections ───────────────────────────────── */}
+          <section id="connections" data-testid="connections-section">
+            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Active Connections</p>
+            {activeConns.length === 0 ? (
+              <EmptyState message="No active connections yet. When a match interest is accepted, a connection will appear here." />
+            ) : (
+              <div className="space-y-3">
+                {activeConns.map(conn => (
+                  <div data-testid="connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
+                      <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      <Link data-testid="open-chat-btn" href={`/dashboard/chat/${conn.id}`} className="text-center text-sm font-medium text-[#AF4D98] py-2">Chat</Link>
+                      <Link href={`/dashboard/profile/${conn.brother_id}?context=connection&connectionId=${conn.id}`} className="text-center text-sm font-medium text-[#5C5C5C] py-2">Profile</Link>
+                      <Link href={`/dashboard/meetings/${conn.id}`} className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-2 py-2 hover:bg-[#9B3D85] transition-colors">Meeting</Link>
+                      <button onClick={() => { setActionError(null); setCloseModalConnection(conn) }} className="text-sm font-medium text-[#9B9B9B]">Close</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
           {/* ── Incoming Interests ───────────────────────────────── */}
           {visibleInterests.length > 0 && (
             <section id="interests">
@@ -557,80 +605,6 @@ export default function SisterDashboard({
           </section>
           </div>{/* end left column */}
           <div className="space-y-6 lg:col-span-1 mt-8 lg:mt-0">
-          {/* ── Nikah Planning Connections ───────────────────────── */}
-          {nikahConns.length > 0 && (
-            <section id="nikah" data-testid="nikah-connections-section">
-              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Nikah Planning</p>
-              <div className="space-y-3">
-                {nikahConns.map(conn => (
-                  <div data-testid="nikah-connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#AF4D98]/30 shadow-[0_1px_3px_rgba(175,77,152,0.12)]">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-base mr-1">🤍</span>
-                      <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
-                      <span className="ml-auto text-xs font-medium text-[#AF4D98] bg-[#F5E6F2] px-2.5 py-1 rounded-full">Nikah Planning</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Link
-                        href={`/dashboard/chat/${conn.id}`}
-                        className="text-center text-sm font-medium text-[#AF4D98] py-2"
-                      >
-                        Open Chat
-                      </Link>
-                      <Link
-                        data-testid="view-nikah-plan-btn"
-                        href={`/dashboard/nikah/${conn.id}`}
-                        className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
-                      >
-                        View Plan
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* ── Active Connections ───────────────────────────────── */}
-          <section id="connections" data-testid="connections-section">
-            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Active Connections</p>
-
-            {activeConns.length === 0 ? (
-              <EmptyState message="No active connections yet. When a match interest is accepted, a connection will appear here." />
-            ) : (
-              <div className="space-y-3">
-                {activeConns.map(conn => (
-                  <div data-testid="connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
-                      <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <Link
-                        data-testid="open-chat-btn"
-                        href={`/dashboard/chat/${conn.id}`}
-                        className="text-center text-sm font-medium text-[#AF4D98] py-2"
-                      >
-                        Open Chat
-                      </Link>
-                      <Link
-                        href={`/dashboard/meetings/${conn.id}`}
-                        className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
-                      >
-                        Meeting
-                      </Link>
-                      <button
-                        onClick={() => { setActionError(null); setCloseModalConnection(conn) }}
-                        className="text-sm font-medium text-[#9B9B9B]"
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
           {/* ── Notifications ────────────────────────────────────── */}
           <section id="notifications" data-testid="notifications-section">
             <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Notifications</p>

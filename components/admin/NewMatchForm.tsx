@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { adminAssignMatch } from '@/app/admin/actions'
+import { useState, useMemo, useEffect } from 'react'
+import { adminAssignMatch, checkPreviousMatch } from '@/app/admin/actions'
 
 type Person = { id: string; full_name: string; profile_complete: boolean; profile_completion_percentage: number }
 
@@ -87,6 +87,20 @@ export default function NewMatchForm({ brothers, sisters, defaultBrotherId = '',
   const [note, setNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [previousMatchWarning, setPreviousMatchWarning] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!brotherId || !sisterId) { setPreviousMatchWarning(null); return }
+    checkPreviousMatch(brotherId, sisterId).then(result => {
+      if (result?.hasPrevious) {
+        const b = brothers.find(p => p.id === brotherId)?.full_name ?? 'This brother'
+        const s = sisters.find(p => p.id === sisterId)?.full_name ?? 'this sister'
+        setPreviousMatchWarning(`${b} and ${s} have been matched before (${result.status}). Assigning again — confirm this is intentional.`)
+      } else {
+        setPreviousMatchWarning(null)
+      }
+    }).catch(() => setPreviousMatchWarning(null))
+  }, [brotherId, sisterId, brothers, sisters])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -114,6 +128,9 @@ export default function NewMatchForm({ brothers, sisters, defaultBrotherId = '',
     <form onSubmit={handleSubmit} className="bg-white rounded-[16px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-[#EDE8E3] max-w-lg space-y-5">
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-[10px] p-3 text-sm text-red-700">{error}</div>
+      )}
+      {previousMatchWarning && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-3 text-sm text-yellow-800">{previousMatchWarning}</div>
       )}
 
       <SearchSelect label="Brother" people={brothers} value={brotherId} onChange={setBrotherId} />

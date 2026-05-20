@@ -80,6 +80,12 @@ export default async function ChatPage({ params }: Props) {
             </p>
           </div>
           <Link
+            href={`/dashboard/profile/${connection.other_id}?context=connection&connectionId=${connectionId}`}
+            className="text-sm font-medium text-[#5C5C5C] hover:text-[#1A1A1A] transition-colors"
+          >
+            Profile
+          </Link>
+          <Link
             data-testid="request-meeting-btn"
             href={`/dashboard/meetings/${connectionId}`}
             className="text-sm font-medium text-[#AF4D98] border border-[#AF4D98] px-4 py-1.5 rounded-full hover:bg-[#F5E6F2] transition-colors"

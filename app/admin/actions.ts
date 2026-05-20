@@ -50,6 +50,21 @@ export async function adminExpireMatch(matchId: string) {
   } catch (e) { return { error: (e as Error).message } }
 }
 
+export async function checkPreviousMatch(brotherId: string, sisterId: string) {
+  await requireAdmin()
+  const { createAdminClient } = await import('@/lib/supabase-admin')
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('matches')
+    .select('status')
+    .eq('brother_id', brotherId)
+    .eq('sister_id', sisterId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  return data ? { hasPrevious: true, status: data.status } : { hasPrevious: false, status: null }
+}
+
 export async function adminAssignMatch(brotherId: string, sisterId: string, note: string) {
   await requireAdmin()
   try {

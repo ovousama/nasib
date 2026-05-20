@@ -2,11 +2,12 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getProfile, getProfileForViewing } from '@/lib/database'
+import { getConnectionBetween } from '@/lib/connections'
 import ProfileInterestActions from '@/components/dashboard/ProfileInterestActions'
 
 type Props = {
   params: Promise<{ userId: string }>
-  searchParams: Promise<{ context?: string; interestId?: string }>
+  searchParams: Promise<{ context?: string; interestId?: string; connectionId?: string }>
 }
 
 // ─── Shared UI Atoms ──────────────────────────────────────────────────────────
@@ -66,7 +67,7 @@ function DealbreakPills({ items }: { items: string[] | null | undefined }) {
 
 export default async function PublicProfilePage({ params, searchParams }: Props) {
   const { userId } = await params
-  const { context, interestId } = await searchParams
+  const { context, interestId, connectionId: connectionIdParam } = await searchParams
 
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -75,8 +76,17 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
   // Don't let users view their own profile via this route
   if (userId === user.id) redirect('/dashboard/profile')
 
-  const [viewerProfile, targetProfile, profileData] = await Promise.all([
-    getProfile(user.id),
+  const isInterestContext = context === 'interest' && !!interestId
+
+  // Check if a live connection exists between viewer and target
+  const activeConnectionId = await getConnectionBetween(user.id, userId)
+
+  // If no interest context and no active connection, redirect to dashboard
+  if (!isInterestContext && !activeConnectionId) {
+    redirect('/dashboard')
+  }
+
+  const [targetProfile, profileData] = await Promise.all([
     getProfile(userId),
     getProfileForViewing(userId),
   ])
@@ -94,44 +104,66 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     )
   }
 
-  const isInterestContext = context === 'interest' && !!interestId
   const firstName = profileData.full_name?.split(' ')[0] ?? ''
   const isBrother = targetProfile.gender === 'brother'
 
-  // A brother viewing a sister sees no photo. A sister viewing a brother sees photo (public bucket).
+  // Resolve back URL: prefer the explicit connectionId param, fall back to activeConnectionId
+  const backConnectionId = connectionIdParam ?? activeConnectionId
+  const backHref = backConnectionId ? `/dashboard/chat/${backConnectionId}` : '/dashboard'
+  const backLabel = backConnectionId ? 'Back to Chat' : 'Dashboard'
+
+  // Photo resolution:
+  // - Brother → public bucket, use getPublicUrl
+  // - Sister + connected → fetch signed URL from private bucket
+  // - Sister + interest only → no photo shown
   let photoUrl: string | null = null
   if (isBrother && profileData.photo_url) {
     const path = profileData.photo_url
     if (path.startsWith('http')) {
       photoUrl = path
     } else {
-      const supabase = await createServerSupabaseClient()
       const { data } = supabase.storage.from('brother-photos').getPublicUrl(path)
       photoUrl = data.publicUrl
+    }
+  } else if (!isBrother && activeConnectionId) {
+    // Sister with active connection — fetch photo_urls from sister_profiles
+    const { data: sp } = await supabase
+      .from('sister_profiles')
+      .select('photo_urls')
+      .eq('id', userId)
+      .maybeSingle()
+    const firstPath = sp?.photo_urls?.[0]
+    if (firstPath) {
+      const { data: signed } = await supabase.storage
+        .from('sister-photos')
+        .createSignedUrl(firstPath, 3600)
+      photoUrl = signed?.signedUrl ?? null
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = profileData as any
 
-  // suppress unused warning — kept for intent clarity
-  void viewerProfile
-
   return (
     <div className={`min-h-screen bg-[#FDF8F3] ${isInterestContext ? 'pb-28' : 'pb-8'}`}>
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-[#EDE8E3] bg-white sticky top-0 z-10">
-        <Link href="/dashboard" className="text-[#9B9B9B] hover:text-[#5C5C5C] transition-colors">
+        <Link href={backHref} className="text-[#9B9B9B] hover:text-[#5C5C5C] transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
             <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
           </svg>
         </Link>
-        <h1 className="text-base font-medium text-[#1A1A1A]">{firstName}&apos;s Profile</h1>
+        <h1 className="text-base font-medium text-[#1A1A1A] flex-1">{firstName}&apos;s Profile</h1>
+        {backConnectionId && (
+          <Link href={backHref} className="text-xs text-[#AF4D98] font-medium">
+            {backLabel}
+          </Link>
+        )}
       </div>
 
       {/* Hero */}
       <div className="bg-white border-b border-[#EDE8E3] px-5 pt-8 pb-7 flex flex-col items-center text-center">
-        {isBrother && photoUrl ? (
+        {photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={photoUrl}

@@ -31,6 +31,7 @@ export default async function MatchesPage({ searchParams }: Props) {
           { label: 'All', value: '' },
           { label: 'Active', value: 'active' },
           { label: 'Expired', value: 'expired' },
+          { label: 'History', value: 'closed' },
         ].map(opt => (
           <Link
             key={opt.value}

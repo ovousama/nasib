@@ -259,82 +259,92 @@ export default function BrotherDashboard({
 
       <div className="px-6 pb-6 lg:px-8 lg:pb-10 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
         <div className="space-y-8 lg:col-span-2">
-        {/* ── Pending Interests (sister expressed interest in brother) ─── */}
-        {visibleIncoming.length > 0 && (
-          <section id="interests" data-testid="pending-interests-section">
-            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Pending Interests</p>
+
+        {/* ── Nikah Planning Connections ───────────────────────── */}
+        {nikahConns.length > 0 && (
+          <section id="nikah" data-testid="nikah-connections-section">
+            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Nikah Planning</p>
             <div className="space-y-3">
-              {visibleIncoming.map(interest => {
-                const op = interest.other_profile
-                const sisterFirstName = op?.full_name?.split(' ')[0] ?? 'Sister'
-                return (
-                  <div data-testid="pending-interest-card" key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
-                    <div className="p-5">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
-                          {sisterFirstName[0]?.toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{sisterFirstName}</span>
-                            {op?.verification_badge && <VerifiedBadge />}
-                          </div>
-                          <p className="text-sm text-[#9B9B9B] mt-0.5">
-                            {[op?.age ? `${op.age} yrs` : null, op?.location].filter(Boolean).join(' · ')}
-                          </p>
-                        </div>
-                      </div>
-
-                      {op?.compatibility_note && (
-                        <p className="border-l-2 border-[#E5A9A9] pl-3 text-sm italic text-[#5C5C5C] mb-3">
-                          {op.compatibility_note}
-                        </p>
-                      )}
-
-                      {interest.intro_message && (
-                        <div className="bg-[#FAF4EE] rounded-[12px] px-3 py-2.5 mb-3 border border-[#EDE8E3]">
-                          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Her message</p>
-                          <p className="text-sm text-[#1A1A1A] italic">&ldquo;{interest.intro_message}&rdquo;</p>
-                        </div>
-                      )}
-
-                      {actionError && (
-                        <div className="mb-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{actionError}</div>
-                      )}
-
-                      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#EDE8E3]">
-                        <button
-                          data-testid="decline-btn"
-                          onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
-                          disabled={declining === interest.id}
-                          className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
-                        >
-                          {declining === interest.id ? '…' : 'Decline'}
-                        </button>
-                        <button
-                          data-testid="accept-btn"
-                          onClick={e => {
-                            e.stopPropagation()
-                            if (connectionsFull) {
-                              setActionError('Close an active connection before accepting a new one.')
-                            } else {
-                              setActionError(null)
-                              handleAccept(interest.id)
-                            }
-                          }}
-                          disabled={accepting === interest.id}
-                          className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors"
-                        >
-                          {accepting === interest.id ? '…' : 'Accept'}
-                        </button>
-                      </div>
-                    </div>
+              {nikahConns.map(conn => (
+                <div data-testid="nikah-connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#AF4D98]/30 shadow-[0_1px_3px_rgba(175,77,152,0.12)]">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-base mr-1">🤍</span>
+                    <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
+                    <span className="ml-auto text-xs font-medium text-[#AF4D98] bg-[#F5E6F2] px-2.5 py-1 rounded-full">Nikah Planning</span>
                   </div>
-                )
-              })}
+                  <div className="grid grid-cols-3 gap-2">
+                    <Link
+                      href={`/dashboard/chat/${conn.id}`}
+                      className="text-center text-sm font-medium text-[#AF4D98] py-2"
+                    >
+                      Chat
+                    </Link>
+                    <Link
+                      href={`/dashboard/profile/${conn.sister_id}?context=connection&connectionId=${conn.id}`}
+                      className="text-center text-sm font-medium text-[#5C5C5C] py-2"
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      data-testid="view-nikah-plan-btn"
+                      href={`/dashboard/nikah/${conn.id}`}
+                      className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
+                    >
+                      View Plan
+                    </Link>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         )}
+
+        {/* ── Active Connections ───────────────────────────────── */}
+        <section id="connections" data-testid="connections-section">
+          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Active Connections</p>
+
+          {activeConns.length === 0 ? (
+            <EmptyState message="No active connections yet. Express interest in a match to begin." />
+          ) : (
+            <div className="space-y-3">
+              {activeConns.map(conn => (
+                <div data-testid="connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
+                    <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    <Link
+                      data-testid="open-chat-btn"
+                      href={`/dashboard/chat/${conn.id}`}
+                      className="text-center text-sm font-medium text-[#AF4D98] py-2"
+                    >
+                      Chat
+                    </Link>
+                    <Link
+                      href={`/dashboard/profile/${conn.sister_id}?context=connection&connectionId=${conn.id}`}
+                      className="text-center text-sm font-medium text-[#5C5C5C] py-2"
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      href={`/dashboard/meetings/${conn.id}`}
+                      className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-2 py-2 hover:bg-[#9B3D85] transition-colors"
+                    >
+                      Meeting
+                    </Link>
+                    <button
+                      onClick={() => { setCloseError(null); setCloseModalConnection(conn) }}
+                      className="text-sm font-medium text-[#9B9B9B]"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* ── Matches ─────────────────────────────────────────── */}
         <section id="matches" data-testid="matches-section">
@@ -354,10 +364,8 @@ export default function BrotherDashboard({
             <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
               {visibleMatches.map(match => {
                 const sisterFirstName = match.sister?.full_name?.split(' ')[0] ?? 'Sister'
-                // Interests the brother sent (initiated_by = brother)
                 const hasSent = localSentIds.includes(match.sister_id)
                 const hasConnection = connections.some(c => c.sister_id === match.sister_id)
-                // Interests the sister sent to the brother (initiated_by = sister)
                 const incomingFromThis = incomingInterests.find(i => i.sister_id === match.sister_id && !localDeclinedIds.has(i.id))
 
                 return (
@@ -459,81 +467,86 @@ export default function BrotherDashboard({
             </p>
           )}
         </section>
-        </div>{/* end left column */}
-        <div className="space-y-6 lg:col-span-1 mt-8 lg:mt-0">
-        {/* ── Nikah Planning Connections ───────────────────────── */}
-        {nikahConns.length > 0 && (
-          <section id="nikah" data-testid="nikah-connections-section">
-            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Nikah Planning</p>
+
+        {/* ── Pending Interests (sister expressed interest in brother) ─── */}
+        {visibleIncoming.length > 0 && (
+          <section id="interests" data-testid="pending-interests-section">
+            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Pending Interests</p>
             <div className="space-y-3">
-              {nikahConns.map(conn => (
-                <div data-testid="nikah-connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#AF4D98]/30 shadow-[0_1px_3px_rgba(175,77,152,0.12)]">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-base mr-1">🤍</span>
-                    <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
-                    <span className="ml-auto text-xs font-medium text-[#AF4D98] bg-[#F5E6F2] px-2.5 py-1 rounded-full">Nikah Planning</span>
+              {visibleIncoming.map(interest => {
+                const op = interest.other_profile
+                const sisterFirstName = op?.full_name?.split(' ')[0] ?? 'Sister'
+                return (
+                  <div data-testid="pending-interest-card" key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
+                    <div className="p-5">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
+                          {sisterFirstName[0]?.toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{sisterFirstName}</span>
+                            {op?.verification_badge && <VerifiedBadge />}
+                          </div>
+                          <p className="text-sm text-[#9B9B9B] mt-0.5">
+                            {[op?.age ? `${op.age} yrs` : null, op?.location].filter(Boolean).join(' · ')}
+                          </p>
+                        </div>
+                      </div>
+
+                      {op?.compatibility_note && (
+                        <p className="border-l-2 border-[#E5A9A9] pl-3 text-sm italic text-[#5C5C5C] mb-3">
+                          {op.compatibility_note}
+                        </p>
+                      )}
+
+                      {interest.intro_message && (
+                        <div className="bg-[#FAF4EE] rounded-[12px] px-3 py-2.5 mb-3 border border-[#EDE8E3]">
+                          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Her message</p>
+                          <p className="text-sm text-[#1A1A1A] italic">&ldquo;{interest.intro_message}&rdquo;</p>
+                        </div>
+                      )}
+
+                      {actionError && (
+                        <div className="mb-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{actionError}</div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#EDE8E3]">
+                        <button
+                          data-testid="decline-btn"
+                          onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
+                          disabled={declining === interest.id}
+                          className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
+                        >
+                          {declining === interest.id ? '…' : 'Decline'}
+                        </button>
+                        <button
+                          data-testid="accept-btn"
+                          onClick={e => {
+                            e.stopPropagation()
+                            if (connectionsFull) {
+                              setActionError('Close an active connection before accepting a new one.')
+                            } else {
+                              setActionError(null)
+                              handleAccept(interest.id)
+                            }
+                          }}
+                          disabled={accepting === interest.id}
+                          className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors"
+                        >
+                          {accepting === interest.id ? '…' : 'Accept'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Link
-                      href={`/dashboard/chat/${conn.id}`}
-                      className="text-center text-sm font-medium text-[#AF4D98] py-2"
-                    >
-                      Open Chat
-                    </Link>
-                    <Link
-                      data-testid="view-nikah-plan-btn"
-                      href={`/dashboard/nikah/${conn.id}`}
-                      className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
-                    >
-                      View Plan
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </section>
         )}
 
-        {/* ── Active Connections ───────────────────────────────── */}
-        <section id="connections" data-testid="connections-section">
-          <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Active Connections</p>
-
-          {activeConns.length === 0 ? (
-            <EmptyState message="No active connections yet. Express interest in a match to begin." />
-          ) : (
-            <div className="space-y-3">
-              {activeConns.map(conn => (
-                <div data-testid="connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
-                    <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Link
-                      data-testid="open-chat-btn"
-                      href={`/dashboard/chat/${conn.id}`}
-                      className="text-center text-sm font-medium text-[#AF4D98] py-2"
-                    >
-                      Open Chat
-                    </Link>
-                    <Link
-                      href={`/dashboard/meetings/${conn.id}`}
-                      className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
-                    >
-                      Meeting
-                    </Link>
-                    <button
-                      onClick={() => { setCloseError(null); setCloseModalConnection(conn) }}
-                      className="text-sm font-medium text-[#9B9B9B]"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        </div>{/* end left column */}
+        <div className="space-y-6 lg:col-span-1 mt-8 lg:mt-0">
 
         {/* ── Notifications ────────────────────────────────────── */}
         <section id="notifications" data-testid="notifications-section">
