@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { saveProfileSection, recalculateProfileCompletion } from '@/lib/profile-utils'
 
 const inputCls = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors'
 
@@ -48,42 +49,20 @@ export default function BrotherBasicInfo() {
     const ageNum = parseInt(age)
     if (isNaN(ageNum) || ageNum < 18) { setError('You must be at least 18 years old.'); return }
     setSaving(true)
-    const supabase = createClient()
-    const { error: saveErr } = await supabase
-      .from('brother_profiles')
-      .upsert({
-        id:        userId,
+    try {
+      await saveProfileSection('brother_profiles', userId, {
         full_name: fullName.trim(),
         age:       ageNum,
         location:  location.trim() || null,
         ethnicity: ethnicity.trim() || null,
         languages: languages.split(',').map(l => l.trim()).filter(Boolean),
-      }, { onConflict: 'id' })
-    if (saveErr) { setError(saveErr.message); setSaving(false); return }
-    const { data: fullProfile } = await supabase
-      .from('brother_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-
-    if (fullProfile) {
-      const { calculateCompletion } = await import('@/lib/profile-completion')
-      const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'brother')
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('status, profile_complete')
-        .eq('id', userId)
-        .single()
-      await supabase
-        .from('profiles')
-        .update({
-          profile_completion_percentage: percentage,
-          profile_complete: currentProfile?.profile_complete || isComplete,
-          status: currentProfile?.status === 'active' ? 'active' : (isComplete ? 'active' : 'pending_verification'),
-        })
-        .eq('id', userId)
+      })
+      await recalculateProfileCompletion(userId, 'brother')
+      router.push('/onboarding/brother/religiosity')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Could not save your answers. Please try again.')
+      setSaving(false)
     }
-    router.push('/onboarding/brother/religiosity')
   }
 
   if (loading) return (

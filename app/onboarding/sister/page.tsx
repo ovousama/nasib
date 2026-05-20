@@ -55,17 +55,30 @@ export default function SisterWali() {
     if (hasWali) {
       setSaving(true)
       const supabase = createClient()
-      const { error: saveErr } = await supabase
+      const waliData = {
+        full_name:               waliName.trim(),
+        relationship:            waliRel.trim() || null,
+        email:                   waliEmail.trim(),
+        phone:                   waliPhone.trim() || null,
+        preferred_contact_method: contactMethod,
+      }
+      const { data: existingWali } = await supabase
         .from('wali_profiles')
-        .upsert({
-          sister_id:               userId,
-          full_name:               waliName.trim(),
-          relationship:            waliRel.trim() || null,
-          email:                   waliEmail.trim(),
-          phone:                   waliPhone.trim() || null,
-          preferred_contact_method: contactMethod,
-        }, { onConflict: 'sister_id' })
-      if (saveErr) { setError(saveErr.message); setSaving(false); return }
+        .select('id')
+        .eq('sister_id', userId)
+        .maybeSingle()
+      if (existingWali) {
+        const { error: saveErr } = await supabase
+          .from('wali_profiles')
+          .update(waliData)
+          .eq('sister_id', userId)
+        if (saveErr) { setError(saveErr.message); setSaving(false); return }
+      } else {
+        const { error: saveErr } = await supabase
+          .from('wali_profiles')
+          .insert({ sister_id: userId, ...waliData })
+        if (saveErr) { setError(saveErr.message); setSaving(false); return }
+      }
     }
     router.push('/onboarding/sister/info')
   }

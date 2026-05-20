@@ -57,17 +57,25 @@ export default function EditWaliPage() {
     setError(null)
     try {
       const supabase = createClient()
-      const { error: upsertErr } = await supabase
-        .from('wali_profiles')
-        .upsert({
-          sister_id:               userId,
-          full_name:               fullName.trim(),
-          relationship:            relationship.trim() || null,
-          email:                   email.trim(),
-          phone:                   phone.trim() || null,
-          preferred_contact_method: contactMethod,
-        }, { onConflict: 'sister_id' })
-      if (upsertErr) throw upsertErr
+      const waliData = {
+        full_name:               fullName.trim(),
+        relationship:            relationship.trim() || null,
+        email:                   email.trim(),
+        phone:                   phone.trim() || null,
+        preferred_contact_method: contactMethod,
+      }
+      if (hasWali) {
+        const { error: updateErr } = await supabase
+          .from('wali_profiles')
+          .update(waliData)
+          .eq('sister_id', userId)
+        if (updateErr) throw updateErr
+      } else {
+        const { error: insertErr } = await supabase
+          .from('wali_profiles')
+          .insert({ sister_id: userId, ...waliData })
+        if (insertErr) throw insertErr
+      }
       recalculateProfileCompletion().catch(() => {})
       setToast('Wali details saved.')
       setTimeout(() => router.push('/dashboard/profile'), 1400)

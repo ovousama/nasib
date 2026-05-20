@@ -65,43 +65,52 @@ export async function GET(request: NextRequest) {
   }
 
   // First-time verification: create profiles row and gender profile row
-  await supabase.from('profiles').upsert(
-    {
+  // (check first to avoid constraint errors)
+  const { data: existingProfiles } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!existingProfiles) {
+    await supabase.from('profiles').insert({
       id: user.id,
       gender,
       status: 'active',
       profile_complete: false,
       profile_completion_percentage: 0,
-    },
-    { onConflict: 'id', ignoreDuplicates: true }
-  )
+    })
+  }
 
   const fullName = user.user_metadata?.full_name as string | undefined
   const age = user.user_metadata?.age as number | string | undefined
   const location = user.user_metadata?.location as string | undefined
 
-  const basicInfo = {
-    id: user.id,
-    full_name: fullName ?? null,
-    age: age ? parseInt(String(age)) : null,
-    location: location ?? null,
+  const table = gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
+
+  // Insert gender profile row only if it doesn't exist
+  const { data: existingGenderProfile } = await supabase
+    .from(table)
+    .select('id')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!existingGenderProfile) {
+    await supabase.from(table).insert({ id: user.id })
   }
 
-  const table = gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
-  await supabase.from(table).upsert({ id: user.id }, { onConflict: 'id', ignoreDuplicates: true })
+  // Update basic info if present in user metadata
   const updateData: Record<string, unknown> = {}
-  if (basicInfo.full_name) updateData.full_name = basicInfo.full_name
-  if (basicInfo.age)       updateData.age       = basicInfo.age
-  if (basicInfo.location)  updateData.location  = basicInfo.location
+  if (fullName) updateData.full_name = fullName
+  if (age)      updateData.age       = parseInt(String(age))
+  if (location) updateData.location  = location
   if (Object.keys(updateData).length > 0) {
     await supabase.from(table).update(updateData).eq('id', user.id)
   }
 
   // Calculate initial completion percentage from the basic info we just saved
   const profileData: Record<string, unknown> = {
-    full_name: basicInfo.full_name,
-    age: basicInfo.age,
-    location: basicInfo.location,
+    full_name: fullName ?? null,
+    age: age ? parseInt(String(age)) : null,
+    location: location ?? null,
   }
   const { percentage } = calculateCompletion(profileData, gender)
 

@@ -44,41 +44,33 @@ export default function BrotherReference() {
     setLoading(true)
 
     const supabase = createClient()
-    const { error: refErr } = await supabase
-      .from('references')
-      .upsert({
-        profile_id:           userId,
-        referee_name:         refName.trim(),
-        referee_relationship: refRelationship.trim(),
-        referee_email:        refEmail.trim(),
-        referee_phone:        refPhone.trim() || null,
-        status:               'pending',
-      }, { onConflict: 'profile_id' })
-
-    if (refErr) { setError(refErr.message); setLoading(false); return }
-    const { data: fullProfile } = await supabase
-      .from('brother_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-
-    if (fullProfile) {
-      const { calculateCompletion } = await import('@/lib/profile-completion')
-      const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'brother')
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('status, profile_complete')
-        .eq('id', userId)
-        .single()
-      await supabase
-        .from('profiles')
-        .update({
-          profile_completion_percentage: percentage,
-          profile_complete: currentProfile?.profile_complete || isComplete,
-          status: currentProfile?.status === 'active' ? 'active' : (isComplete ? 'active' : 'pending_verification'),
-        })
-        .eq('id', userId)
+    const refData = {
+      referee_name:         refName.trim(),
+      referee_relationship: refRelationship.trim(),
+      referee_email:        refEmail.trim(),
+      referee_phone:        refPhone.trim() || null,
+      status:               'pending',
     }
+    const { data: existingRef } = await supabase
+      .from('references')
+      .select('id')
+      .eq('profile_id', userId)
+      .maybeSingle()
+    if (existingRef) {
+      const { error: refErr } = await supabase
+        .from('references')
+        .update(refData)
+        .eq('profile_id', userId)
+      if (refErr) { setError(refErr.message); setLoading(false); return }
+    } else {
+      const { error: refErr } = await supabase
+        .from('references')
+        .insert({ profile_id: userId, ...refData })
+      if (refErr) { setError(refErr.message); setLoading(false); return }
+    }
+
+    const { recalculateProfileCompletion } = await import('@/lib/profile-utils')
+    await recalculateProfileCompletion(userId, 'brother')
     router.push('/dashboard')
   }
 
