@@ -128,20 +128,20 @@ export default function EditEmotionalPage() {
         {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">{error}</div>}
 
         <form onSubmit={handleSave} className="flex flex-col gap-5">
-          <PillGroup label="Therapy experience" options={THERAPY_EXP} value={therapyExperience} onChange={setTherapyExperience} />
-          <PillGroup label="View on couples therapy" options={COUPLES_THERAPY} value={couplesTherapyView} onChange={setCouplesTherapyView} />
-          <PillGroup label="Mental health challenges" options={MH_CHALLENGES} value={mentalHealthChallenges} onChange={setMentalHealthChallenges} />
-          <PillGroup label="How do you express emotions?" options={EMOTIONAL_EXPR} value={emotionalExpressionView} onChange={setEmotionalExpressionView} />
+          <PillGroup label="Have you ever been to therapy or counselling?" options={THERAPY_EXP} value={therapyExperience} onChange={setTherapyExperience} />
+          <PillGroup label="How do you feel about couples therapy?" options={COUPLES_THERAPY} value={couplesTherapyView} onChange={setCouplesTherapyView} />
+          <PillGroup label="Do you have any mental health challenges?" options={MH_CHALLENGES} value={mentalHealthChallenges} onChange={setMentalHealthChallenges} />
+          <PillGroup label="How comfortable are you expressing your emotions?" options={EMOTIONAL_EXPR} value={emotionalExpressionView} onChange={setEmotionalExpressionView} />
           <Slider
             value={emotionalAvailability}
             onChange={setEmotionalAvailability}
-            label="Emotional availability"
-            leftLabel="Needs space"
-            rightLabel="Very available"
+            label="How emotionally available are you in relationships?"
+            leftLabel="Reserved"
+            rightLabel="Very open"
           />
           <TA label="How do you manage stress?" value={stressManagement} onChange={setStressManagement} placeholder="e.g. I take space to reflect, then talk..." />
-          <TA label="What does emotional support look like to you?" value={emotionalSupportStyle} onChange={setEmotionalSupportStyle} placeholder="e.g. I need words of reassurance and presence..." />
-          <TA label="Significant hardship you have overcome" value={significantHardship} onChange={setSignificantHardship} placeholder="Optional — share only if comfortable" optional />
+          <TA label="How do you show up emotionally for those you love?" value={emotionalSupportStyle} onChange={setEmotionalSupportStyle} placeholder="e.g. I need words of reassurance and presence..." />
+          <TA label="Have you experienced any significant hardship that shaped you?" value={significantHardship} onChange={setSignificantHardship} placeholder="Optional — share only if comfortable" optional />
 
           <button type="submit" disabled={saving} className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60">
             {saving ? 'Saving...' : 'Save changes'}

@@ -279,38 +279,38 @@ export default function EditDeenPage() {
           )}
 
           <PillGroup label="How often do you listen to Quran?" options={QURAN_LISTENING} value={quranListening} onChange={setQuranListening} optional />
-          <PillGroup label="Quran memorisation" options={QURAN_MEMORISATION} value={quranMemorisation} onChange={setQuranMemorisation} optional />
+          <PillGroup label="How much of the Quran have you memorised?" options={QURAN_MEMORISATION} value={quranMemorisation} onChange={setQuranMemorisation} optional />
 
           <Slider
             value={traditionalVsReformist}
             onChange={setTraditionalVsReformist}
-            label="Islamic approach"
+            label="Where do you sit on the traditional to reformist spectrum?"
             leftLabel="Traditional"
             rightLabel="Reformist"
           />
 
-          <PillGroup label="Zakah and sadaqah" options={ZAKAH_SADAQAH} value={zakahSadaqah} onChange={setZakahSadaqah} optional />
-          <PillGroup label="Madhab consistency" options={MADHAB_CONSISTENCY} value={madhabConsistency} onChange={setMadhabConsistency} optional />
-          <PillGroup label="View on Mawlid" options={MAWLID_VIEW} value={mawlidView} onChange={setMawlidView} optional />
-          <PillGroup label="Islamic knowledge importance in a spouse" options={SPOUSE_KNOWLEDGE} value={spouseIslamicKnowledge} onChange={setSpouseIslamicKnowledge} optional />
+          <PillGroup label="Do you give zakah and sadaqah regularly?" options={ZAKAH_SADAQAH} value={zakahSadaqah} onChange={setZakahSadaqah} optional />
+          <PillGroup label="How important is following a consistent madhab to you?" options={MADHAB_CONSISTENCY} value={madhabConsistency} onChange={setMadhabConsistency} optional />
+          <PillGroup label="What is your view on celebrating Mawlid an-Nabi?" options={MAWLID_VIEW} value={mawlidView} onChange={setMawlidView} optional />
+          <PillGroup label="How important is your spouse's Islamic knowledge to you?" options={SPOUSE_KNOWLEDGE} value={spouseIslamicKnowledge} onChange={setSpouseIslamicKnowledge} optional />
 
           {gender === 'brother' && (
             <>
-              <PillGroup label="Missed prayer approach" options={MISSED_PRAYER} value={missedPrayerApproach} onChange={setMissedPrayerApproach} optional />
-              <PillGroup label="Wife wearing niqab" options={WIFE_NIQAB} value={wifeNiqabPreference} onChange={setWifeNiqabPreference} optional />
+              <PillGroup label="How do you approach a missed prayer?" options={MISSED_PRAYER} value={missedPrayerApproach} onChange={setMissedPrayerApproach} optional />
+              <PillGroup label="Do you have a preference for whether your wife wears niqab?" options={WIFE_NIQAB} value={wifeNiqabPreference} onChange={setWifeNiqabPreference} optional />
             </>
           )}
 
           {gender === 'sister' && (
             <>
-              <PillGroup label="Deen consistency when busy" options={DEEN_WHEN_BUSY} value={deenWhenBusy} onChange={setDeenWhenBusy} optional />
-              <PillGroup label="Islamic home environment importance" options={ISLAMIC_HOME} value={islamicHomeImportance} onChange={setIslamicHomeImportance} optional />
-              <PillGroup label="Hijab outside home" options={HIJAB_OUTSIDE_OPTS} value={hijabOutsideHome} onChange={setHijabOutsideHome} optional />
-              <PillGroup label="Islamic classes attendance" options={ISLAMIC_CLASSES_OPTS} value={islamicClassesAttendance} onChange={setIslamicClassesAttendance} optional />
+              <PillGroup label="How do you maintain your deen when life gets busy?" options={DEEN_WHEN_BUSY} value={deenWhenBusy} onChange={setDeenWhenBusy} optional />
+              <PillGroup label="How important is having an Islamic home environment?" options={ISLAMIC_HOME} value={islamicHomeImportance} onChange={setIslamicHomeImportance} optional />
+              <PillGroup label="Do you wear hijab outside the home?" options={HIJAB_OUTSIDE_OPTS} value={hijabOutsideHome} onChange={setHijabOutsideHome} optional />
+              <PillGroup label="How often do you attend Islamic classes or talks?" options={ISLAMIC_CLASSES_OPTS} value={islamicClassesAttendance} onChange={setIslamicClassesAttendance} optional />
             </>
           )}
 
-          <TA label="How are you growing in your deen?" value={deenGrowth} onChange={setDeenGrowth} placeholder="e.g. Currently studying tafsir, attending halaqas, working on consistency..." optional />
+          <TA label="How do you actively grow in your deen?" value={deenGrowth} onChange={setDeenGrowth} placeholder="e.g. Currently studying tafsir, attending halaqas, working on consistency..." optional />
 
           <button type="submit" disabled={saving} className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60 transition-opacity">
             {saving ? 'Saving...' : 'Save changes'}

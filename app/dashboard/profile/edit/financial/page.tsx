@@ -163,21 +163,21 @@ export default function EditFinancialPage() {
         <form onSubmit={handleSave} className="flex flex-col gap-5">
           {gender === 'brother' && (
             <>
-              <PillGroup label="Annual income range" options={INCOME_OPTIONS} value={annualIncome} onChange={setAnnualIncome} />
+              <PillGroup label="What is your annual income range?" options={INCOME_OPTIONS} value={annualIncome} onChange={setAnnualIncome} />
               <PillGroup label="Do you own or rent your home?" options={OWN_RENT} value={ownOrRent} onChange={setOwnOrRent} />
               <PillGroup label="Financial readiness for marriage" options={FIN_READY} value={financialReadiness} onChange={setFinancialReadiness} />
-              <PillGroup label="Hajj status" options={HAJJ_OPTIONS} value={hajjStatus} onChange={setHajjStatus} />
-              <PillGroup label="Wife's financial independence" options={WIFE_FIN_INDEP} value={wifeFinancialIndependence} onChange={setWifeFinancialIndependence} />
-              <PillGroup label="Wife earning more than you" options={WIFE_EARNING} value={wifeEarningMore} onChange={setWifeEarningMore} />
-              <PillGroup label="Financial planning approach" options={FIN_PLAN} value={financialPlanningApproach} onChange={setFinancialPlanningApproach} />
+              <PillGroup label="Have you completed Hajj?" options={HAJJ_OPTIONS} value={hajjStatus} onChange={setHajjStatus} />
+              <PillGroup label="How do you feel about your wife having financial independence?" options={WIFE_FIN_INDEP} value={wifeFinancialIndependence} onChange={setWifeFinancialIndependence} />
+              <PillGroup label="How would you feel if your wife earned more than you?" options={WIFE_EARNING} value={wifeEarningMore} onChange={setWifeEarningMore} />
+              <PillGroup label="What is your approach to financial planning as a couple?" options={FIN_PLAN} value={financialPlanningApproach} onChange={setFinancialPlanningApproach} />
             </>
           )}
           {gender === 'sister' && (
             <PillGroup label="Financial dependence view" options={FIN_DEPEND} value={financialDependenceView} onChange={setFinancialDependenceView} />
           )}
-          <PillGroup label="Do you have significant debt?" options={DEBT_OPTIONS} value={hasSignificantDebt} onChange={setHasSignificantDebt} />
-          <PillGroup label="Supporting family financially" options={SUPPORT_OPTIONS} value={supportingFamily} onChange={setSupportingFamily} />
-          <PillGroup label="Savings plan" options={SAVINGS_OPTIONS} value={savingsPlan} onChange={setSavingsPlan} />
+          <PillGroup label="Do you have any significant debt?" options={DEBT_OPTIONS} value={hasSignificantDebt} onChange={setHasSignificantDebt} />
+          <PillGroup label="Are you currently supporting your family financially?" options={SUPPORT_OPTIONS} value={supportingFamily} onChange={setSupportingFamily} />
+          <PillGroup label="Do you have a savings plan?" options={SAVINGS_OPTIONS} value={savingsPlan} onChange={setSavingsPlan} />
           <TA label="How do you approach financial stress in a relationship?" value={financialStressApproach} onChange={setFinancialStressApproach} placeholder="e.g. We talk openly and make a plan together..." optional />
           {gender === 'brother' && (
             <TA label="Mahr approach" value={mahrApproach} onChange={setMahrApproach} placeholder="Your thoughts on mahr..." optional />

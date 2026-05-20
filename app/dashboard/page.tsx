@@ -12,6 +12,7 @@ import {
   getSentPendingInterestOtherIds,
   getNotifications,
 } from '@/lib/database'
+import { calculateCompletion } from '@/lib/profile-completion'
 import BrotherDashboard from '@/components/dashboard/BrotherDashboard'
 import SisterDashboard from '@/components/dashboard/SisterDashboard'
 
@@ -29,7 +30,7 @@ export default async function DashboardPage() {
   }
 
   if (profile.gender === 'brother') {
-    const [brotherProfile, matches, connections, sentInterestOtherIds, incomingInterests, notifications, { data: refRow }] = await Promise.all([
+    const [brotherProfile, matches, connections, sentInterestOtherIds, incomingInterests, notifications, { data: refRow }, { data: fullBrotherProfile }] = await Promise.all([
       getBrotherProfile(user.id),
       getBrotherMatches(user.id),
       getActiveConnections(user.id, 'brother'),
@@ -37,9 +38,22 @@ export default async function DashboardPage() {
       getIncomingPendingInterests(user.id, 'brother'),
       getNotifications(user.id),
       supabase.from('references').select('profile_id').eq('profile_id', user.id).maybeSingle(),
+      supabase.from('brother_profiles').select('*').eq('id', user.id).single(),
     ])
 
     if (!brotherProfile) redirect('/dashboard/profile/edit/basic')
+
+    const { percentage: livePercentage, isComplete } = fullBrotherProfile
+      ? calculateCompletion(fullBrotherProfile as Record<string, unknown>, 'brother')
+      : { percentage: profile.profile_completion_percentage ?? 0, isComplete: profile.profile_complete ?? false }
+
+    if (fullBrotherProfile && livePercentage !== profile.profile_completion_percentage) {
+      await supabase.from('profiles').update({
+        profile_completion_percentage: livePercentage,
+        profile_complete: profile.profile_complete || isComplete,
+        status: profile.status === 'active' ? 'active' : (isComplete ? 'active' : profile.status),
+      }).eq('id', user.id)
+    }
 
     return (
       <BrotherDashboard
@@ -50,26 +64,39 @@ export default async function DashboardPage() {
         sentInterestOtherIds={sentInterestOtherIds}
         incomingInterests={incomingInterests}
         notifications={notifications}
-        profileComplete={profile.profile_complete ?? false}
-        completionPercentage={profile.profile_completion_percentage ?? 0}
+        profileComplete={profile.profile_complete || isComplete}
+        completionPercentage={livePercentage}
         hasReference={!!refRow}
       />
     )
   }
 
   if (profile.gender === 'sister') {
-    const [sisterProfile, matches, connections, incomingInterests, notifications, { data: refRow }] = await Promise.all([
+    const [sisterProfile, matches, connections, incomingInterests, notifications, { data: refRow }, { data: fullSisterProfile }] = await Promise.all([
       getSisterProfile(user.id),
       getSisterMatches(user.id),
       getActiveConnections(user.id, 'sister'),
       getIncomingPendingInterests(user.id, 'sister'),
       getNotifications(user.id),
       supabase.from('references').select('profile_id').eq('profile_id', user.id).maybeSingle(),
+      supabase.from('sister_profiles').select('*').eq('id', user.id).single(),
     ])
 
     if (!sisterProfile) redirect('/dashboard/profile/edit/basic')
 
     const waliProfile = await getWaliProfile(user.id)
+
+    const { percentage: livePercentage, isComplete } = fullSisterProfile
+      ? calculateCompletion(fullSisterProfile as Record<string, unknown>, 'sister')
+      : { percentage: profile.profile_completion_percentage ?? 0, isComplete: profile.profile_complete ?? false }
+
+    if (fullSisterProfile && livePercentage !== profile.profile_completion_percentage) {
+      await supabase.from('profiles').update({
+        profile_completion_percentage: livePercentage,
+        profile_complete: profile.profile_complete || isComplete,
+        status: profile.status === 'active' ? 'active' : (isComplete ? 'active' : profile.status),
+      }).eq('id', user.id)
+    }
 
     return (
       <SisterDashboard
@@ -80,8 +107,8 @@ export default async function DashboardPage() {
         connections={connections}
         incomingInterests={incomingInterests}
         notifications={notifications}
-        profileComplete={profile.profile_complete ?? false}
-        completionPercentage={profile.profile_completion_percentage ?? 0}
+        profileComplete={profile.profile_complete || isComplete}
+        completionPercentage={livePercentage}
         hasReference={!!refRow}
       />
     )

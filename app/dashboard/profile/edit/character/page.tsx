@@ -94,7 +94,7 @@ export default function EditCharacterPage() {
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-              Character Description <span className="text-red-500">*</span>
+              Describe yourself — your character, values, and what makes you who you are <span className="text-red-500">*</span>
             </label>
             <textarea
               value={characterDescription}
@@ -111,13 +111,13 @@ export default function EditCharacterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Goals</label>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">What are your goals in life and marriage?</label>
             <textarea
               value={goals}
               onChange={e => setGoals(e.target.value)}
               rows={4}
               className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white resize-none"
-              placeholder="What are your goals in life and marriage? (optional)"
+              placeholder="Your goals in life and marriage (optional)"
             />
           </div>
 

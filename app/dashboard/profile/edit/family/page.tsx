@@ -150,11 +150,11 @@ export default function EditFamilyPage() {
         <form onSubmit={handleSave} className="flex flex-col gap-5">
           {gender === 'brother' ? (
             <>
-              <PillGroup label="How will your wife interact with your family?" options={BROTHER_WIFE_FAMILY} value={wifeFamilyInteraction} onChange={setWifeFamilyInteraction} />
-              <PillGroup label="Do you carry responsibilities as the eldest?" options={ELDEST_RESP} value={eldestResponsibilities} onChange={setEldestResponsibilities} />
-              <PillGroup label="Child caregiving responsibility" options={CHILD_CAREGIVING} value={childCaregiving} onChange={setChildCaregiving} />
-              <PillGroup label="How will you manage your wife's relationship with her family?" options={WIFE_FAM_REL} value={wifeFamilyRelationship} onChange={setWifeFamilyRelationship} />
-              <PillGroup label="Living near your parents" options={NEAR_PARENTS} value={livingNearParents} onChange={setLivingNearParents} />
+              <PillGroup label="How involved do you expect your wife to be with your family?" options={BROTHER_WIFE_FAMILY} value={wifeFamilyInteraction} onChange={setWifeFamilyInteraction} />
+              <PillGroup label="As the eldest or only son, do you carry significant family responsibilities?" options={ELDEST_RESP} value={eldestResponsibilities} onChange={setEldestResponsibilities} />
+              <PillGroup label="Who do you see as the primary caregiver for young children?" options={CHILD_CAREGIVING} value={childCaregiving} onChange={setChildCaregiving} />
+              <PillGroup label="How do you view your wife maintaining a close relationship with her own family?" options={WIFE_FAM_REL} value={wifeFamilyRelationship} onChange={setWifeFamilyRelationship} />
+              <PillGroup label="Do you plan to live near your parents?" options={NEAR_PARENTS} value={livingNearParents} onChange={setLivingNearParents} />
             </>
           ) : (
             <>
@@ -165,9 +165,9 @@ export default function EditFamilyPage() {
               <PillGroup label="Approach to family life" options={FAM_TRAD_MOD} value={familyTraditionalVsModern} onChange={setFamilyTraditionalVsModern} />
             </>
           )}
-          <PillGroup label="Family conflict style" options={FAM_CONFLICT} value={familyConflictStyle} onChange={setFamilyConflictStyle} />
+          <PillGroup label="How does conflict typically play out in your family?" options={FAM_CONFLICT} value={familyConflictStyle} onChange={setFamilyConflictStyle} />
           <TA label="Describe your relationship with your parents" value={parentRelationship} onChange={setParentRelationship} placeholder="How close are you? What is your role?" />
-          <TA label="How do you handle disagreements between family and spouse?" value={familySpouseDisagreement} onChange={setFamilySpouseDisagreement} placeholder="e.g. My spouse always comes first..." optional />
+          <TA label="How would you handle a conflict between your family and your spouse?" value={familySpouseDisagreement} onChange={setFamilySpouseDisagreement} placeholder="e.g. My spouse always comes first..." optional />
 
           <button type="submit" disabled={saving} className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60">
             {saving ? 'Saving...' : 'Save changes'}

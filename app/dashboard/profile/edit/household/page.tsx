@@ -113,14 +113,14 @@ export default function EditHouseholdPage() {
         </div>
         {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">{error}</div>}
         <form onSubmit={handleSave} className="flex flex-col gap-5">
-          <PillGroup label="Wife working after marriage" options={WIFE_WORKING} value={wifeWorkingOpenness} onChange={setWifeWorkingOpenness} />
-          <PillGroup label="Household management" options={HOUSEHOLD_MGMT} value={householdManagement} onChange={setHouseholdManagement} />
-          <PillGroup label="In-laws living together" options={INLAWS} value={inlawsLivingTogether} onChange={setInlawsLivingTogether} />
-          <PillGroup label="Islamic schooling for children" options={SCHOOLING} value={islamicSchoolingImportance} onChange={setIslamicSchoolingImportance} />
-          <PillGroup label="Child caregiving" options={CHILD_CARE} value={childCaregiving} onChange={setChildCaregiving} />
-          <PillGroup label="Wife wearing hijab" options={HIJAB_IMP} value={wifeHijabImportance} onChange={setWifeHijabImportance} />
-          <PillGroup label="Jumu'ah attendance" options={JUMUAH} value={jumuahAttendance} onChange={setJumuahAttendance} />
-          <PillGroup label="Non-Islamic holidays" options={NON_ISLAMIC} value={celebrateNonIslamicHolidays} onChange={setCelebrateNonIslamicHolidays} />
+          <PillGroup label="Are you open to your wife working after marriage?" options={WIFE_WORKING} value={wifeWorkingOpenness} onChange={setWifeWorkingOpenness} />
+          <PillGroup label="Who do you expect to manage the household day to day?" options={HOUSEHOLD_MGMT} value={householdManagement} onChange={setHouseholdManagement} />
+          <PillGroup label="Would you be open to your in-laws living with you?" options={INLAWS} value={inlawsLivingTogether} onChange={setInlawsLivingTogether} />
+          <PillGroup label="How important is Islamic schooling for your children?" options={SCHOOLING} value={islamicSchoolingImportance} onChange={setIslamicSchoolingImportance} />
+          <PillGroup label="Who do you see as the primary caregiver for young children?" options={CHILD_CARE} value={childCaregiving} onChange={setChildCaregiving} />
+          <PillGroup label="How important is it that your wife wears hijab?" options={HIJAB_IMP} value={wifeHijabImportance} onChange={setWifeHijabImportance} />
+          <PillGroup label="How often do you attend Jumu'ah and congregational prayers?" options={JUMUAH} value={jumuahAttendance} onChange={setJumuahAttendance} />
+          <PillGroup label="Do you celebrate birthdays or non-Islamic holidays?" options={NON_ISLAMIC} value={celebrateNonIslamicHolidays} onChange={setCelebrateNonIslamicHolidays} />
           <button type="submit" disabled={saving} className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60">
             {saving ? 'Saving...' : 'Save changes'}
           </button>

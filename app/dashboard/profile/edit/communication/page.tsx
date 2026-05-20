@@ -179,25 +179,25 @@ export default function EditCommunicationPage() {
         {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">{error}</div>}
 
         <form onSubmit={handleSave} className="flex flex-col gap-5">
-          <PillGroup label="Conflict style" options={CONFLICT_STYLE} value={conflictStyle} onChange={setConflictStyle} />
-          <PillGroup label="Personality" options={PERSONALITY} value={personality} onChange={setPersonality} />
-          <PillGroup label="Need for alone time" options={ALONE_TIME} value={aloneTime} onChange={setAloneTime} />
-          <PillGroup label="How quickly do you apologise after a conflict?" options={APOLOGY_SPEED} value={apologySpeed} onChange={setApologySpeed} />
-          <PillGroup label="Communication when upset" options={COMM_UPSET} value={commWhenUpset} onChange={setCommWhenUpset} />
+          <PillGroup label="How do you handle conflict?" options={CONFLICT_STYLE} value={conflictStyle} onChange={setConflictStyle} />
+          <PillGroup label="Are you more introverted or extroverted?" options={PERSONALITY} value={personality} onChange={setPersonality} />
+          <PillGroup label="How important is alone time to you?" options={ALONE_TIME} value={aloneTime} onChange={setAloneTime} />
+          <PillGroup label="How quickly do you typically apologise after a disagreement?" options={APOLOGY_SPEED} value={apologySpeed} onChange={setApologySpeed} />
+          <PillGroup label="How do you communicate when you are upset?" options={COMM_UPSET} value={commWhenUpset} onChange={setCommWhenUpset} />
           {gender === 'brother' ? (
             <>
-              <PillGroup label="Husband having final say" options={FINAL_SAY} value={husbandFinalSay} onChange={setHusbandFinalSay} />
-              <PillGroup label="Wife's opinion in decisions" options={WIFE_OPINION} value={wifeOpinionImportance} onChange={setWifeOpinionImportance} />
-              <PillGroup label="Have you ended a close friendship?" options={FRIENDSHIP_ENDED} value={friendshipEnded} onChange={setFriendshipEnded} />
+              <PillGroup label="Do you believe the husband should have the final say?" options={FINAL_SAY} value={husbandFinalSay} onChange={setHusbandFinalSay} />
+              <PillGroup label="How important is your wife's opinion in your decision-making?" options={WIFE_OPINION} value={wifeOpinionImportance} onChange={setWifeOpinionImportance} />
+              <PillGroup label="Have you ever ended a friendship due to a serious falling out?" options={FRIENDSHIP_ENDED} value={friendshipEnded} onChange={setFriendshipEnded} />
             </>
           ) : (
             <>
-              <PillGroup label="View on qawwam (male guardianship)" options={QAWWAM} value={qawwamView} onChange={setQawwamView} />
-              <PillGroup label="Husband's opinion in decisions" options={HUSB_OPINION} value={husbandOpinionImportance} onChange={setHusbandOpinionImportance} />
-              <PillGroup label="Primary love language (receiving)" options={RECEIVING_LL} value={receivingLoveLanguage} onChange={setReceivingLoveLanguage} />
+              <PillGroup label="What is your view on qawwam (male guardianship) in marriage?" options={QAWWAM} value={qawwamView} onChange={setQawwamView} />
+              <PillGroup label="How important is your husband's opinion in your decision-making?" options={HUSB_OPINION} value={husbandOpinionImportance} onChange={setHusbandOpinionImportance} />
+              <PillGroup label="What is your primary love language for receiving?" options={RECEIVING_LL} value={receivingLoveLanguage} onChange={setReceivingLoveLanguage} />
             </>
           )}
-          <MultiPillGroup label="Love language(s)" options={LOVE_LANGUAGES} value={loveLanguage} onChange={setLoveLanguage} max={3} />
+          <MultiPillGroup label="How do you express love and affection?" options={LOVE_LANGUAGES} value={loveLanguage} onChange={setLoveLanguage} max={3} />
           <TA label="What does a healthy argument look like to you?" value={healthyArgumentView} onChange={setHealthyArgumentView} placeholder="e.g. Staying calm, no raised voices, focusing on solutions..." optional />
 
           <button type="submit" disabled={saving} className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60">

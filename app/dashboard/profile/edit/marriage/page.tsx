@@ -131,15 +131,15 @@ export default function EditMarriagePage() {
 
         <form onSubmit={handleSave} className="flex flex-col gap-5">
           {gender === 'brother' && (
-            <YesNo label="Open to polygamy?" value={polygamyOpenness} onChange={setPolygamyOpenness} />
+            <YesNo label="Are you open to polygamy?" value={polygamyOpenness} onChange={setPolygamyOpenness} />
           )}
 
-          <YesNo label="Previously married?" value={previouslyMarried} onChange={setPreviouslyMarried} />
-          <YesNo label="Have children?" value={hasChildren} onChange={setHasChildren} />
-          <YesNo label="Want children?" value={wantsChildren} onChange={setWantsChildren} />
+          <YesNo label="Have you been previously married?" value={previouslyMarried} onChange={setPreviouslyMarried} />
+          <YesNo label="Do you have children?" value={hasChildren} onChange={setHasChildren} />
+          <YesNo label="Do you want children?" value={wantsChildren} onChange={setWantsChildren} />
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Timeline to Marry</label>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">What is your timeline to marry?</label>
             <select
               value={timelineToMarry}
               onChange={e => setTimelineToMarry(e.target.value)}

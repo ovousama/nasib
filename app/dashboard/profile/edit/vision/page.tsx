@@ -133,16 +133,16 @@ export default function EditVisionPage() {
         </div>
         {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">{error}</div>}
         <form onSubmit={handleSave} className="flex flex-col gap-5">
-          <PillGroup label="Physical intimacy in marriage" options={PHYSICAL_INTIMACY} value={physicalIntimacy} onChange={setPhysicalIntimacy} />
-          <PillGroup label="Spouse's friendships" options={SPOUSE_FRIENDSHIPS} value={spouseFriendships} onChange={setSpouseFriendships} />
+          <PillGroup label="How important is physical intimacy to you in a marriage?" options={PHYSICAL_INTIMACY} value={physicalIntimacy} onChange={setPhysicalIntimacy} />
+          <PillGroup label="How do you feel about your spouse maintaining close friendships?" options={SPOUSE_FRIENDSHIPS} value={spouseFriendships} onChange={setSpouseFriendships} />
           {gender === 'brother' && (
-            <PillGroup label="Polygamy in your own marriage" options={POLYGAMY_OWN} value={polygamyOwnMarriage} onChange={setPolygamyOwnMarriage} />
+            <PillGroup label="What is your view on polygamy in your own marriage?" options={POLYGAMY_OWN} value={polygamyOwnMarriage} onChange={setPolygamyOwnMarriage} />
           )}
-          <TA label="Your 10-year marriage vision" rows={4} value={marriageVision} onChange={setMarriageVision} placeholder="What does your marriage look like in 10 years? Where do you live, how do you spend your time, what have you built together?" />
-          <TA label="First year of marriage" rows={3} value={firstYearVision} onChange={setFirstYearVision} placeholder="What are your hopes and expectations for the first year?" />
-          <TA label="Your view on romance and affection" value={romanceView} onChange={setRomanceView} placeholder="How important is it? How do you express it?" optional />
-          <TA label="What scares you most about marriage?" value={marriageFear} onChange={setMarriageFear} placeholder="Be honest — this is read with compassion" optional />
-          <TA label="What do you uniquely bring to a marriage?" value={uniqueContribution} onChange={setUniqueContribution} placeholder="Your qualities, values, effort..." optional />
+          <TA label="What does your marriage look like in 10 years?" rows={4} value={marriageVision} onChange={setMarriageVision} placeholder="What does your marriage look like in 10 years? Where do you live, how do you spend your time, what have you built together?" />
+          <TA label="What does your first year of marriage look like?" rows={3} value={firstYearVision} onChange={setFirstYearVision} placeholder="What are your hopes and expectations for the first year?" />
+          <TA label="What does romance look like to you in a marriage?" value={romanceView} onChange={setRomanceView} placeholder="How important is it? How do you express it?" optional />
+          <TA label="What is your biggest fear about marriage?" value={marriageFear} onChange={setMarriageFear} placeholder="Be honest — this is read with compassion" optional />
+          <TA label="What unique thing do you bring to a marriage?" value={uniqueContribution} onChange={setUniqueContribution} placeholder="Your qualities, values, effort..." optional />
           {gender === 'sister' && (
             <TA label="Describe your ideal husband" value={idealHusbandDescription} onChange={setIdealHusbandDescription} placeholder="In your own words — character, deen, how he treats you..." optional />
           )}

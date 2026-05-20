@@ -117,10 +117,10 @@ export default function EditCareerPage() {
         </div>
         {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">{error}</div>}
         <form onSubmit={handleSave} className="flex flex-col gap-5">
-          <PillGroup label="Plan to work after marriage?" options={WORK_AFTER_MARRIAGE} value={planToWork} onChange={setPlanToWork} />
-          <PillGroup label="Career pause for children" options={CAREER_PAUSE} value={careerPause} onChange={setCareerPause} />
-          <PillGroup label="Financial dependence view" options={FIN_DEPEND_VIEW} value={financialDependenceView} onChange={setFinancialDependenceView} />
-          <PillGroup label="Financial independence importance" options={FIN_INDEP} value={financialIndependence} onChange={setFinancialIndependence} />
+          <PillGroup label="Do you plan to work after marriage?" options={WORK_AFTER_MARRIAGE} value={planToWork} onChange={setPlanToWork} />
+          <PillGroup label="Would you pause your career for children?" options={CAREER_PAUSE} value={careerPause} onChange={setCareerPause} />
+          <PillGroup label="How do you view financial dependence on your husband?" options={FIN_DEPEND_VIEW} value={financialDependenceView} onChange={setFinancialDependenceView} />
+          <PillGroup label="How important is financial independence to you?" options={FIN_INDEP} value={financialIndependence} onChange={setFinancialIndependence} />
           <Slider
             value={careerIdentityImportance}
             onChange={setCareerIdentityImportance}
@@ -129,7 +129,7 @@ export default function EditCareerPage() {
             rightLabel="Core identity"
           />
           <TA label="Where do you see your career in 5 years?" value={careerFiveYears} onChange={setCareerFiveYears} placeholder="e.g. I hope to be established in my field and working flexibly..." />
-          <TA label="Career ambitions" value={careerAmbitions} onChange={setCareerAmbitions} placeholder="Optional" optional />
+          <TA label="What are your career ambitions?" value={careerAmbitions} onChange={setCareerAmbitions} placeholder="Optional" optional />
           <button type="submit" disabled={saving} className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60">
             {saving ? 'Saving...' : 'Save changes'}
           </button>

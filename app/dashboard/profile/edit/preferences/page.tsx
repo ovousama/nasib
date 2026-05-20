@@ -103,7 +103,7 @@ export default function EditPreferencesPage() {
 
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Spouse Religiosity Preference</label>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">What is your preferred level of religiosity in a spouse?</label>
             <input
               type="text"
               value={spouseReligiosityPreference}
@@ -139,7 +139,7 @@ export default function EditPreferencesPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Dealbreakers</label>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">What are your dealbreakers?</label>
             <textarea
               value={dealbreakers}
               onChange={e => setDealbreakers(e.target.value)}

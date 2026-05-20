@@ -292,16 +292,8 @@ export default function SisterDashboard({
     <>
       <div className="bg-[#FDF8F3] min-h-screen">
         <div className="lg:max-w-6xl lg:mx-auto">
-        <div className="px-6 pt-6 lg:px-8">
-          <ProfileChecklist
-            gender="sister"
-            profile={sisterProfile as unknown as Record<string, unknown>}
-            completionPercentage={completionPercentage}
-            referenceComplete={hasReference}
-          />
-        </div>
         {/* ── Header ──────────────────────────────────────────── */}
-        <div className="px-6 pt-10 pb-8 lg:px-8">
+        <div className="px-6 pt-10 pb-4 lg:px-8">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
           <p className="text-sm text-[#9B9B9B]">Assalamu Alaikum,</p>
@@ -320,6 +312,14 @@ export default function SisterDashboard({
               </div>
             )}
           </div>
+        </div>
+        <div className="px-6 pt-4 pb-4 lg:px-8">
+          <ProfileChecklist
+            gender="sister"
+            profile={sisterProfile as unknown as Record<string, unknown>}
+            completionPercentage={completionPercentage}
+            referenceComplete={hasReference}
+          />
         </div>
 
         <div className="px-6 pb-6 lg:px-8 lg:pb-10 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">

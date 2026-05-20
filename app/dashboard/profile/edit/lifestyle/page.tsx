@@ -248,7 +248,7 @@ export default function EditLifestylePage() {
 
           {gender === 'brother' && (
             <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Financial Readiness</label>
+              <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Financial Readiness for Marriage</label>
               <select value={financialReadiness} onChange={e => setFinancialReadiness(e.target.value)}
                 className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white">
                 <option value="">Select...</option>
@@ -257,32 +257,32 @@ export default function EditLifestylePage() {
             </div>
           )}
 
-          <PillGroup label="Exercise frequency" options={EXERCISE_FREQ} value={exerciseFrequency} onChange={setExerciseFrequency} optional />
-          <PillGroup label="Halal diet approach" options={HALAL_DIET} value={strictHalalDiet} onChange={setStrictHalalDiet} optional />
-          <PillGroup label="Smoking" options={SMOKING} value={smoking} onChange={setSmoking} optional />
-          <PillGroup label="Pets" options={PETS_VIEW} value={petsView} onChange={setPetsView} optional />
-          <PillGroup label="Healthy eating importance" options={HEALTHY_EATING} value={healthyEatingImportance} onChange={setHealthyEatingImportance} optional />
-          <PillGroup label="Social media" options={SOCIAL_MEDIA} value={socialMediaView} onChange={setSocialMediaView} optional />
-          <PillGroup label="Home organisation" options={HOME_ORGANISATION} value={homeOrganisation} onChange={setHomeOrganisation} optional />
-          <PillGroup label="Political views" options={POLITICAL_VIEWS} value={politicalViews} onChange={setPoliticalViews} optional />
+          <PillGroup label="How often do you exercise?" options={EXERCISE_FREQ} value={exerciseFrequency} onChange={setExerciseFrequency} optional />
+          <PillGroup label="Do you follow a strict halal diet?" options={HALAL_DIET} value={strictHalalDiet} onChange={setStrictHalalDiet} optional />
+          <PillGroup label="Do you smoke or use tobacco products?" options={SMOKING} value={smoking} onChange={setSmoking} optional />
+          <PillGroup label="What is your view on pets?" options={PETS_VIEW} value={petsView} onChange={setPetsView} optional />
+          <PillGroup label="How important is healthy eating to you?" options={HEALTHY_EATING} value={healthyEatingImportance} onChange={setHealthyEatingImportance} optional />
+          <PillGroup label="What is your view on social media use in marriage?" options={SOCIAL_MEDIA} value={socialMediaView} onChange={setSocialMediaView} optional />
+          <PillGroup label="How organised do you like your home to be?" options={HOME_ORGANISATION} value={homeOrganisation} onChange={setHomeOrganisation} optional />
+          <PillGroup label="How would you describe your political views?" options={POLITICAL_VIEWS} value={politicalViews} onChange={setPoliticalViews} optional />
 
           <Slider
             value={culturalBackgroundImportance}
             onChange={setCulturalBackgroundImportance}
-            label="Cultural background importance in a spouse"
+            label="How important is sharing the same cultural background?"
             leftLabel="Not important"
             rightLabel="Very important"
           />
 
-          <PillGroup label="Weekend lifestyle" options={WEEKEND_LIFESTYLE} value={weekendLifestyle} onChange={setWeekendLifestyle} optional />
-          <PillGroup label="Mixed gender social circle" options={MIXED_GENDER} value={mixedGenderSocialCircle} onChange={setMixedGenderSocialCircle} optional />
-          <PillGroup label="Music" options={MUSIC} value={doYouListenToMusic} onChange={setDoYouListenToMusic} optional />
-          <PillGroup label="Non-Islamic holidays" options={NON_ISLAMIC_HOLIDAYS_OPTS} value={celebrateNonIslamicHolidays} onChange={setCelebrateNonIslamicHolidays} optional />
+          <PillGroup label="How do you spend your weekends typically?" options={WEEKEND_LIFESTYLE} value={weekendLifestyle} onChange={setWeekendLifestyle} optional />
+          <PillGroup label="Do you have a mixed gender social circle?" options={MIXED_GENDER} value={mixedGenderSocialCircle} onChange={setMixedGenderSocialCircle} optional />
+          <PillGroup label="Do you listen to music?" options={MUSIC} value={doYouListenToMusic} onChange={setDoYouListenToMusic} optional />
+          <PillGroup label="Do you celebrate birthdays or non-Islamic holidays?" options={NON_ISLAMIC_HOLIDAYS_OPTS} value={celebrateNonIslamicHolidays} onChange={setCelebrateNonIslamicHolidays} optional />
           {gender === 'brother'
-            ? <PillGroup label="Travel frequency" options={TRAVEL_FREQ_OPTS} value={travelFrequency} onChange={setTravelFrequency} optional />
-            : <PillGroup label="Travel importance" options={TRAVEL_IMPORTANCE_OPTS} value={travelImportance} onChange={setTravelImportance} optional />}
+            ? <PillGroup label="How often do you travel and would you expect your wife to travel with you?" options={TRAVEL_FREQ_OPTS} value={travelFrequency} onChange={setTravelFrequency} optional />
+            : <PillGroup label="How important is travel to you?" options={TRAVEL_IMPORTANCE_OPTS} value={travelImportance} onChange={setTravelImportance} optional />}
 
-          <TA label="Ramadan routine" value={ramadanRoutine} onChange={setRamadanRoutine} placeholder="How do you spend Ramadan? Daily habits, routines, community..." optional />
+          <TA label="Describe your Ramadan routine" value={ramadanRoutine} onChange={setRamadanRoutine} placeholder="How do you spend Ramadan? Daily habits, routines, community..." optional />
 
           <button type="submit" disabled={saving} className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60 transition-opacity">
             {saving ? 'Saving...' : 'Save changes'}
