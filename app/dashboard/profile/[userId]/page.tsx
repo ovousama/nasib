@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createStorageClient } from '@/lib/supabase'
 import { getProfile, getProfileForViewing } from '@/lib/database'
 import { getConnectionBetween } from '@/lib/connections'
 import ProfileInterestActions from '@/components/dashboard/ProfileInterestActions'
@@ -132,10 +133,12 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       .eq('id', userId)
       .maybeSingle()
     const paths: string[] = sp?.photo_urls ?? []
+    const storageClient = createStorageClient()
     for (const path of paths) {
-      const { data: signed } = await supabase.storage
+      const { data: signed, error } = await storageClient.storage
         .from('sister-photos')
         .createSignedUrl(path, 3600)
+      console.log('Signed URL:', signed?.signedUrl, 'Error:', error)
       if (signed?.signedUrl) photoUrls.push(signed.signedUrl)
     }
   }

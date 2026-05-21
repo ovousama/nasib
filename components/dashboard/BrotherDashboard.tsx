@@ -12,6 +12,7 @@ import {
   closeConnection,
   markNotificationRead,
 } from '@/app/dashboard/actions'
+import { getSisterPhotoUrls } from '@/app/actions/photos'
 import type {
   Profile,
   BrotherProfile,
@@ -101,6 +102,7 @@ export default function BrotherDashboard({
   const [matches, setMatches] = useState<BrotherMatch[]>(initialMatches ?? [])
   const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections ?? [])
   const connectionsFull = connections.length >= 3
+  const [connPhotoUrls, setConnPhotoUrls] = useState<Record<string, string>>({})
 
   useEffect(() => {
     function onMatchExpired(e: Event) {
@@ -110,6 +112,18 @@ export default function BrotherDashboard({
     window.addEventListener('match-expired', onMatchExpired)
     return () => window.removeEventListener('match-expired', onMatchExpired)
   }, [])
+
+  useEffect(() => {
+    const connsWithPhotos = connections.filter(c => c.other_photo_urls?.length)
+    if (!connsWithPhotos.length) return
+    connsWithPhotos.forEach(async (conn) => {
+      const paths = conn.other_photo_urls!
+      const signed = await getSisterPhotoUrls(paths)
+      if (signed[0]) {
+        setConnPhotoUrls(prev => ({ ...prev, [conn.id]: signed[0] }))
+      }
+    })
+  }, [connections])
 
   const [interestModal, setInterestModal] = useState<{ brotherId: string; sisterId: string; firstName: string } | null>(null)
   const [introMessage, setIntroMessage] = useState('')
@@ -268,7 +282,12 @@ export default function BrotherDashboard({
               {nikahConns.map(conn => (
                 <div data-testid="nikah-connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#AF4D98]/30 shadow-[0_1px_3px_rgba(175,77,152,0.12)]">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="text-base mr-1">🤍</span>
+                    {connPhotoUrls[conn.id] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={connPhotoUrls[conn.id]} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <span className="text-base mr-1">🤍</span>
+                    )}
                     <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
                     <span className="ml-auto text-xs font-medium text-[#AF4D98] bg-[#F5E6F2] px-2.5 py-1 rounded-full">Nikah Planning</span>
                   </div>
@@ -446,7 +465,12 @@ export default function BrotherDashboard({
               {activeConns.map(conn => (
                 <div data-testid="connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
+                    {connPhotoUrls[conn.id] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={connPhotoUrls[conn.id]} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
+                    )}
                     <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
                   </div>
                   <div className="grid grid-cols-4 gap-2">

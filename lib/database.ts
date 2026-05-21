@@ -247,6 +247,7 @@ export type ConnectionWithProfile = {
   created_at: string
   closed_at: string | null
   other_name: string
+  other_photo_urls?: string[] | null
 }
 
 export type Notification = {
@@ -513,15 +514,23 @@ export async function getActiveConnections(userId: string, gender: GenderType): 
   const profileTable = isBrother ? 'sister_profiles' : 'brother_profiles'
   const fallback = isBrother ? 'Sister' : 'Brother'
 
+  const profileSelect = isBrother ? 'id, full_name, photo_urls' : 'id, full_name'
   const { data: otherProfiles } = await supabase
     .from(profileTable)
-    .select('id, full_name')
+    .select(profileSelect)
     .in('id', otherIds)
 
-  return conns.map(conn => ({
-    ...conn,
-    other_name: otherProfiles?.find(p => p.id === (isBrother ? conn.sister_id : conn.brother_id))?.full_name ?? fallback,
-  }))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return conns.map(conn => {
+    const otherId = isBrother ? conn.sister_id : conn.brother_id
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const other = (otherProfiles as any[])?.find((p: { id: string }) => p.id === otherId)
+    return {
+      ...conn,
+      other_name: other?.full_name ?? fallback,
+      ...(isBrother ? { other_photo_urls: (other?.photo_urls ?? null) as string[] | null } : {}),
+    }
+  })
 }
 
 export async function getIncomingPendingInterests(userId: string, gender: GenderType): Promise<InterestWithProfile[]> {
