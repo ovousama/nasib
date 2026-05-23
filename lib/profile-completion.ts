@@ -11,7 +11,7 @@ export const BROTHER_REQUIRED_FIELDS: string[] = [
   'timeline_to_marry',
   'character_description',
   'goals',
-  'photo_url',
+  'photo_urls',
   'do_you_listen_to_music',
   'celebrate_non_islamic_holidays',
   'wife_hijab_importance',
@@ -79,6 +79,7 @@ export const SISTER_REQUIRED_FIELDS: string[] = [
   'timeline_to_marry',
   'character_description',
   'goals',
+  'photo_urls',
   'do_you_listen_to_music',
   'celebrate_non_islamic_holidays',
   'hijab_outside_home',
@@ -147,7 +148,13 @@ export function calculateCompletion(
   gender: 'brother' | 'sister',
 ): { percentage: number; missingFields: string[]; isComplete: boolean } {
   const fields = gender === 'brother' ? BROTHER_REQUIRED_FIELDS : SISTER_REQUIRED_FIELDS
-  const missingFields = fields.filter(f => isMissing(profile[f]))
+  const missingFields = fields.filter(f => {
+    if (f === 'photo_urls') {
+      const urls = profile[f]
+      return !Array.isArray(urls) || urls.length < 3
+    }
+    return isMissing(profile[f])
+  })
   const filled = fields.length - missingFields.length
   const percentage = Math.round((filled / fields.length) * 100)
   return {

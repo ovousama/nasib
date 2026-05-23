@@ -150,8 +150,8 @@ export default async function WaliDashboardPage() {
               return (
                 <div key={match.id} className="bg-white rounded-2xl p-4 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                   <div className="flex items-start gap-3">
-                    {b?.photo_url ? (
-                      <Image src={b.photo_url} alt={brotherFirst} width={40} height={40} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                    {(b?.photo_urls?.[0] ?? b?.photo_url) ? (
+                      <Image src={(b?.photo_urls?.[0] ?? b?.photo_url)!} alt={brotherFirst} width={40} height={40} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
                     ) : (
                       <div className="w-10 h-10 rounded-xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] font-medium text-sm flex-shrink-0">
                         {brotherFirst[0]?.toUpperCase()}
@@ -196,8 +196,8 @@ export default async function WaliDashboardPage() {
               return (
                 <div key={interest.id} className="bg-white rounded-2xl p-4 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                   <div className="flex items-start gap-3 mb-3">
-                    {op?.photo_url ? (
-                      <Image src={op.photo_url} alt={op.full_name} width={40} height={40} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                    {(op?.photo_urls?.[0] ?? op?.photo_url) ? (
+                      <Image src={(op?.photo_urls?.[0] ?? op?.photo_url)!} alt={op?.full_name ?? ''} width={40} height={40} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
                     ) : (
                       <div className="w-10 h-10 rounded-xl bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] font-medium text-sm flex-shrink-0">
                         {(op?.full_name ?? 'B')[0]?.toUpperCase()}

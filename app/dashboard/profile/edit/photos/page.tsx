@@ -1,20 +1,116 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
+
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
 
-const MAX_PHOTOS = 5
+type PhotoSlot = {
+  file: File | null
+  preview: string
+  path: string
+  uploaded: boolean
+} | null
 
-function toStoragePath(urlOrPath: string): string {
-  const marker = '/object/public/sister-photos/'
-  const idx = urlOrPath.indexOf(marker)
-  if (idx !== -1) return decodeURIComponent(urlOrPath.slice(idx + marker.length))
-  const signMarker = '/object/sign/sister-photos/'
-  const signIdx = urlOrPath.indexOf(signMarker)
-  if (signIdx !== -1) return decodeURIComponent(urlOrPath.slice(signIdx + signMarker.length).split('?')[0])
-  return urlOrPath
+function PhotoSlotComponent({ index, photo, onAdd, onRemove, required }: {
+  index: number
+  photo: PhotoSlot
+  onAdd: () => void
+  onRemove: () => void
+  required: boolean
+}) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        aspectRatio: '3/4',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        border: photo ? 'none' : `1.5px dashed ${required ? '#AF4D98' : '#EDE8E3'}`,
+        background: photo ? 'transparent' : '#FDFAF7',
+        cursor: photo ? 'default' : 'pointer',
+      }}
+      onClick={!photo ? onAdd : undefined}
+    >
+      {photo ? (
+        <>
+          <img
+            src={photo.preview}
+            alt={`Photo ${index + 1}`}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          <button
+            onClick={(e) => { e.stopPropagation(); onRemove() }}
+            style={{
+              position: 'absolute',
+              top: '6px',
+              right: '6px',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              background: 'rgba(0,0,0,0.6)',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+            }}
+          >
+            ×
+          </button>
+          {index === 0 && (
+            <span style={{
+              position: 'absolute',
+              bottom: '6px',
+              left: '6px',
+              background: '#AF4D98',
+              color: 'white',
+              fontSize: '10px',
+              fontWeight: 500,
+              padding: '2px 8px',
+              borderRadius: '999px',
+            }}>
+              Main
+            </span>
+          )}
+          {!photo.uploaded && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(255,255,255,0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <div className="w-6 h-6 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </>
+      ) : (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          gap: '6px',
+        }}>
+          <span style={{ fontSize: '24px', color: required ? '#AF4D98' : '#C0B8B0' }}>+</span>
+          <span style={{
+            fontSize: '10px',
+            color: required ? '#AF4D98' : '#9B9B9B',
+            fontWeight: required ? 500 : 400,
+          }}>
+            {required ? 'Required' : 'Optional'}
+          </span>
+        </div>
+      )}
+    </div>
+  )
 }
 
 async function getSignedUrl(path: string): Promise<string> {
@@ -23,18 +119,26 @@ async function getSignedUrl(path: string): Promise<string> {
   return data?.signedUrl ?? ''
 }
 
+function toStoragePath(urlOrPath: string): string {
+  const signMarker = '/object/sign/sister-photos/'
+  const signIdx = urlOrPath.indexOf(signMarker)
+  if (signIdx !== -1) return decodeURIComponent(urlOrPath.slice(signIdx + signMarker.length).split('?')[0])
+  const pubMarker = '/object/public/sister-photos/'
+  const pubIdx = urlOrPath.indexOf(pubMarker)
+  if (pubIdx !== -1) return decodeURIComponent(urlOrPath.slice(pubIdx + pubMarker.length))
+  return urlOrPath
+}
+
 export default function EditPhotosPage() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [targetSlot, setTargetSlot] = useState(0)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState(false)
   const [userId, setUserId] = useState<string>('')
-  const [photoPaths, setPhotoPaths] = useState<string[]>([])
-  const [displayUrls, setDisplayUrls] = useState<string[]>([])
-  const [confirmRemoveIndex, setConfirmRemoveIndex] = useState<number | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [photos, setPhotos] = useState<PhotoSlot[]>([null, null, null, null, null])
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -43,82 +147,99 @@ export default function EditPhotosPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth/login'); return }
       const { data: profile } = await supabase.from('profiles').select('gender').eq('id', user.id).single()
-      if (!profile || profile.gender !== 'sister') {
-        router.push('/dashboard/profile')
-        return
-      }
+      if (!profile || profile.gender !== 'sister') { router.push('/dashboard/profile'); return }
       setUserId(user.id)
-      const { data } = await supabase.from('sister_profiles').select('photo_urls, photos_uploaded').eq('id', user.id).single()
+
+      const { data } = await supabase.from('sister_profiles').select('photo_urls').eq('id', user.id).single()
       if (data && Array.isArray(data.photo_urls) && data.photo_urls.length > 0) {
         const paths = (data.photo_urls as string[]).map(toStoragePath)
-        setPhotoPaths(paths)
-        const urls = await Promise.all(paths.map(getSignedUrl))
-        setDisplayUrls(urls)
+        const previews = await Promise.all(paths.map(getSignedUrl))
+        const loaded = paths.map((path, i) => ({ file: null, preview: previews[i], path, uploaded: true }))
+        const slots: PhotoSlot[] = [null, null, null, null, null]
+        loaded.forEach((p, i) => { if (i < 5) slots[i] = p })
+        setPhotos(slots)
       }
       setLoading(false)
     }
     load()
   }, [])
 
-  async function confirmRemove(index: number) {
-    setConfirmRemoveIndex(null)
-    const supabase = createClient()
-    await supabase.storage.from('sister-photos').remove([photoPaths[index]])
-    const newPaths = photoPaths.filter((_, i) => i !== index)
-    const newUrls = displayUrls.filter((_, i) => i !== index)
-    setPhotoPaths(newPaths)
-    setDisplayUrls(newUrls)
-    await supabase
-      .from('sister_profiles')
-      .update({ photo_urls: newPaths, photos_uploaded: newPaths.length > 0 })
-      .eq('id', userId)
+  function triggerFileInput(index: number) {
+    setTargetSlot(index)
+    fileInputRef.current?.click()
   }
 
-  async function handleAddPhoto(file: File) {
+  async function uploadPhoto(file: File, index: number): Promise<string | null> {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `${user.id}/${Date.now()}-${index}.${ext}`
+    const { data, error: uploadError } = await supabase.storage
+      .from('sister-photos')
+      .upload(path, file, { cacheControl: '3600', upsert: false })
+    if (uploadError) { console.error('Upload error:', uploadError); return null }
+    return data.path
+  }
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
     setError(null)
-    if (photoPaths.length >= MAX_PHOTOS) {
-      setError(`You can upload a maximum of ${MAX_PHOTOS} photos.`)
-      return
-    }
     if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
       setError('Please upload a JPEG, PNG, or WebP image.')
       return
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Each photo must be under 5MB.')
-      return
-    }
-    setUploading(true)
-    try {
-      const supabase = createClient()
-      const ext = file.name.split('.').pop() ?? 'jpg'
-      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { error: uploadError } = await supabase.storage.from('sister-photos').upload(path, file)
-      if (uploadError) throw uploadError
-      const signedUrl = await getSignedUrl(path)
-      setPhotoPaths(prev => [...prev, path])
-      setDisplayUrls(prev => [...prev, signedUrl])
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
-    } finally {
-      setUploading(false)
-    }
+    if (file.size > 10 * 1024 * 1024) { setError('File must be under 10MB.'); return }
+
+    const slot = targetSlot
+    const preview = URL.createObjectURL(file)
+    setPhotos(prev => {
+      const next = [...prev]
+      next[slot] = { file, preview, path: '', uploaded: false }
+      return next
+    })
+
+    const path = await uploadPhoto(file, slot)
+    setPhotos(prev => {
+      const next = [...prev]
+      const current = next[slot]
+      if (current && !current.uploaded) {
+        next[slot] = { ...current, path: path ?? '', uploaded: !!path }
+      }
+      return next
+    })
+    if (!path) setError('Failed to upload photo. Please try again.')
   }
 
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) handleAddPhoto(file)
-    e.target.value = ''
+  async function removePhoto(index: number) {
+    const photo = photos[index]
+    if (!photo) return
+    if (photo.path) {
+      const supabase = createClient()
+      await supabase.storage.from('sister-photos').remove([photo.path])
+    }
+    setPhotos(prev => {
+      const next = [...prev]
+      next[index] = null
+      return next
+    })
   }
 
   async function handleSave() {
+    const paths = photos.filter(Boolean).map(p => p!.path).filter(Boolean)
+    if (paths.length < 3) { setError('You need at least 3 photos.'); return }
+    const stillUploading = photos.filter(Boolean).some(p => !p?.uploaded)
+    if (stillUploading) { setError('Please wait for all photos to finish uploading.'); return }
+
     setSaving(true)
     setError(null)
     try {
       const supabase = createClient()
       const { error: updateError } = await supabase
         .from('sister_profiles')
-        .update({ photo_urls: photoPaths, photos_uploaded: photoPaths.length > 0 })
+        .update({ photo_urls: paths, photos_uploaded: paths.length > 0 })
         .eq('id', userId)
       if (updateError) throw updateError
       recalculateProfileCompletion().catch(() => {})
@@ -138,6 +259,10 @@ export default function EditPhotosPage() {
       </div>
     )
   }
+
+  const uploadedCount = photos.filter(Boolean).length
+  const allUploaded = photos.filter(Boolean).every(p => p?.uploaded)
+  const canSave = uploadedCount >= 3 && allUploaded
 
   return (
     <div className="min-h-screen bg-[#FDF8F3]">
@@ -163,92 +288,61 @@ export default function EditPhotosPage() {
           </div>
         )}
 
-        <p className="text-sm text-[#9B9B9B] mb-4">{photoPaths.length} of {MAX_PHOTOS} photos</p>
+        <p className="text-sm text-[#9B9B9B] mb-4">
+          {uploadedCount} of 5 photos · minimum 3 required
+        </p>
 
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          {displayUrls.map((url, index) => (
-            <div key={photoPaths[index] + index} className="relative aspect-square rounded-xl overflow-hidden border border-[#EDE8E3] bg-[#F5E6F2]">
-              {url ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={url} alt="Your photo" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={() => setConfirmRemoveIndex(index)}
-                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                  <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                </svg>
-              </button>
-            </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
+          {[0, 1, 2, 3, 4].map(index => (
+            <PhotoSlotComponent
+              key={index}
+              index={index}
+              photo={photos[index]}
+              onAdd={() => triggerFileInput(index)}
+              onRemove={() => removePhoto(index)}
+              required={index < 3}
+            />
           ))}
-
-          {photoPaths.length < MAX_PHOTOS && (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="aspect-square rounded-xl border-2 border-dashed border-[#EDE8E3] hover:border-[#AF4D98] flex flex-col items-center justify-center gap-1 transition-colors disabled:opacity-60"
-            >
-              {uploading ? (
-                <div className="w-5 h-5 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#AF4D98" className="w-5 h-5">
-                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                  </svg>
-                  <span className="text-xs text-[#AF4D98] font-medium">Add photo</span>
-                </>
-              )}
-            </button>
-          )}
         </div>
 
-        <input ref={fileInputRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp" className="hidden" onChange={onFileChange} />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          style={{ display: 'none' }}
+          onChange={handleFileSelect}
+        />
 
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving || uploading}
-          className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-4 disabled:opacity-60 transition-opacity"
+          disabled={!canSave || saving}
+          style={{
+            width: '100%',
+            background: canSave ? '#AF4D98' : '#EDE8E3',
+            color: canSave ? 'white' : '#9B9B9B',
+            border: 'none',
+            borderRadius: '999px',
+            padding: '14px',
+            fontSize: '15px',
+            fontWeight: 500,
+            cursor: canSave ? 'pointer' : 'not-allowed',
+            marginTop: '4px',
+          }}
         >
-          {saving ? 'Saving...' : 'Save changes'}
+          {saving
+            ? 'Saving...'
+            : !allUploaded && uploadedCount > 0
+            ? 'Uploading...'
+            : canSave
+            ? 'Save changes'
+            : `Add ${Math.max(0, 3 - uploadedCount)} more photo${3 - uploadedCount !== 1 ? 's' : ''} to save`}
         </button>
 
         <Link href="/dashboard/profile" className="block text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors mt-4">
           Cancel
         </Link>
       </div>
-
-      {confirmRemoveIndex !== null && (
-        <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50 px-4 pb-8">
-          <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-lg">
-            <p className="text-base font-medium text-[#1A1A1A] text-center mb-1">Remove this photo?</p>
-            <p className="text-sm text-[#9B9B9B] text-center mb-5">This action cannot be undone.</p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setConfirmRemoveIndex(null)}
-                className="flex-1 py-3 border border-[#EDE8E3] rounded-full text-sm font-medium text-[#1A1A1A] hover:bg-[#FDF8F3] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => confirmRemove(confirmRemoveIndex)}
-                className="flex-1 py-3 bg-red-500 text-white rounded-full text-sm font-medium hover:bg-red-600 transition-colors"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {toast && (
         <div className="fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center bg-[#AF4D98] text-white">

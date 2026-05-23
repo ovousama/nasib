@@ -5,88 +5,249 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
-function toStoragePath(urlOrPath: string): string {
-  const marker = '/object/public/brother-photos/'
-  const idx = urlOrPath.indexOf(marker)
-  if (idx !== -1) return decodeURIComponent(urlOrPath.slice(idx + marker.length))
-  const signMarker = '/object/sign/brother-photos/'
-  const signIdx = urlOrPath.indexOf(signMarker)
-  if (signIdx !== -1) return decodeURIComponent(urlOrPath.slice(signIdx + signMarker.length).split('?')[0])
-  return urlOrPath
+type PhotoSlot = {
+  file: File | null
+  preview: string
+  path?: string
+  uploaded: boolean
+} | null
+
+function PhotoSlotComponent({ index, photo, onAdd, onRemove, required }: {
+  index: number
+  photo: PhotoSlot
+  onAdd: () => void
+  onRemove: () => void
+  required: boolean
+}) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        aspectRatio: '3/4',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        border: photo ? 'none' : `1.5px dashed ${required ? '#AF4D98' : '#EDE8E3'}`,
+        background: photo ? 'transparent' : '#FDFAF7',
+        cursor: photo ? 'default' : 'pointer',
+      }}
+      onClick={!photo ? onAdd : undefined}
+    >
+      {photo ? (
+        <>
+          <img
+            src={photo.preview}
+            alt={`Photo ${index + 1}`}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          <button
+            onClick={(e) => { e.stopPropagation(); onRemove() }}
+            style={{
+              position: 'absolute',
+              top: '6px',
+              right: '6px',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              background: 'rgba(0,0,0,0.6)',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+            }}
+          >
+            ×
+          </button>
+          {index === 0 && (
+            <span style={{
+              position: 'absolute',
+              bottom: '6px',
+              left: '6px',
+              background: '#AF4D98',
+              color: 'white',
+              fontSize: '10px',
+              fontWeight: 500,
+              padding: '2px 8px',
+              borderRadius: '999px',
+            }}>
+              Main
+            </span>
+          )}
+          {!photo.uploaded && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(255,255,255,0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <div className="w-6 h-6 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </>
+      ) : (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          gap: '6px',
+        }}>
+          <span style={{ fontSize: '24px', color: required ? '#AF4D98' : '#C0B8B0' }}>+</span>
+          <span style={{
+            fontSize: '10px',
+            color: required ? '#AF4D98' : '#9B9B9B',
+            fontWeight: required ? 500 : 400,
+          }}>
+            {required ? 'Required' : 'Optional'}
+          </span>
+        </div>
+      )}
+    </div>
+  )
 }
 
-export default function BrotherPhoto() {
-  const router      = useRouter()
-  const inputRef    = useRef<HTMLInputElement>(null)
-  const [userId,    setUserId]    = useState('')
-  const [preview,   setPreview]   = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [uploaded,  setUploaded]  = useState(false)
-  const [error,     setError]     = useState<string | null>(null)
+export default function BrotherPhotoPage() {
+  const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [targetSlot, setTargetSlot] = useState(0)
+  const [photos, setPhotos] = useState<PhotoSlot[]>([null, null, null, null, null])
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function load() {
+    async function loadExisting() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.replace('/auth/login'); return }
-      setUserId(user.id)
+
       const { data } = await supabase
         .from('brother_profiles')
-        .select('photo_url')
+        .select('photo_urls, photo_url')
         .eq('id', user.id)
         .single()
-      if (data?.photo_url) {
-        setUploaded(true)
-        const path = toStoragePath(data.photo_url)
-        const { data: signed } = await supabase.storage.from('brother-photos').createSignedUrl(path, 3600)
-        if (signed?.signedUrl) setPreview(signed.signedUrl)
-      }
+
+      const existingPaths: string[] = data?.photo_urls?.length
+        ? data.photo_urls
+        : data?.photo_url
+        ? [data.photo_url]
+        : []
+
+      if (!existingPaths.length) return
+
+      const loaded = existingPaths.map((path: string) => {
+        const publicUrl = path.startsWith('http')
+          ? path
+          : supabase.storage.from('brother-photos').getPublicUrl(path).data.publicUrl
+        return { file: null, preview: publicUrl, path, uploaded: true }
+      })
+
+      const slots: PhotoSlot[] = [null, null, null, null, null]
+      loaded.forEach((p, i) => { if (i < 5) slots[i] = p })
+      setPhotos(slots)
     }
-    load()
+    loadExisting()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function handleFile(file: File) {
+  function triggerFileInput(index: number) {
+    setTargetSlot(index)
+    fileInputRef.current?.click()
+  }
+
+  async function uploadPhoto(file: File, index: number): Promise<string | null> {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `${user.id}/${Date.now()}-${index}.${ext}`
+    const { data, error: uploadError } = await supabase.storage
+      .from('brother-photos')
+      .upload(path, file, { cacheControl: '3600', upsert: false })
+    if (uploadError) { console.error('Upload error:', uploadError); return null }
+    return data.path
+  }
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
     setError(null)
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file.')
-      return
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File must be under 5MB.')
-      return
-    }
+    if (!file.type.startsWith('image/')) { setError('Please upload an image file.'); return }
+    if (file.size > 10 * 1024 * 1024) { setError('File must be under 10MB.'); return }
 
-    setPreview(URL.createObjectURL(file))
-    setUploading(true)
+    const slot = targetSlot
+    const preview = URL.createObjectURL(file)
+    setPhotos(prev => {
+      const next = [...prev]
+      next[slot] = { file, preview, uploaded: false }
+      return next
+    })
 
-    try {
-      const supabase = createClient()
-      const ext  = file.name.split('.').pop() ?? 'jpg'
-      const path = `${userId}/photo.${ext}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('brother-photos')
-        .upload(path, file, { upsert: true })
-
-      if (uploadError) throw uploadError
-
-      const { data: existingRow } = await supabase.from('brother_profiles').select('id').eq('id', userId).maybeSingle()
-      if (!existingRow) {
-        const { error: insertErr } = await supabase.from('brother_profiles').insert({ id: userId })
-        if (insertErr) throw insertErr
+    const path = await uploadPhoto(file, slot)
+    setPhotos(prev => {
+      const next = [...prev]
+      const current = next[slot]
+      if (current && !current.uploaded) {
+        next[slot] = { ...current, path: path ?? undefined, uploaded: !!path }
       }
-      const { error: dbErr } = await supabase
-        .from('brother_profiles')
-        .update({ photo_url: path })
-        .eq('id', userId)
+      return next
+    })
+    if (!path) setError('Failed to upload photo. Please try again.')
+  }
 
-      if (dbErr) throw dbErr
+  async function removePhoto(index: number) {
+    const photo = photos[index]
+    if (!photo) return
+    if (photo.path) {
+      const supabase = createClient()
+      await supabase.storage.from('brother-photos').remove([photo.path])
+    }
+    setPhotos(prev => {
+      const next = [...prev]
+      next[index] = null
+      return next
+    })
+  }
 
-      const { data: fullProfile } = await supabase
+  async function handleNext() {
+    const filled = photos.filter(Boolean)
+    if (filled.length < 3) { setError('Please upload at least 3 photos.'); return }
+    const stillUploading = filled.some(p => !p?.uploaded)
+    if (stillUploading) { setError('Please wait for all photos to finish uploading.'); return }
+
+    const paths = photos.filter(Boolean).map(p => p!.path!).filter(Boolean)
+    if (paths.length < 3) { setError('Please upload at least 3 photos.'); return }
+
+    setSaving(true)
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setSaving(false); return }
+
+    const { data: existingRow } = await supabase.from('brother_profiles').select('id').eq('id', user.id).maybeSingle()
+    if (!existingRow) {
+      await supabase.from('brother_profiles').insert({ id: user.id })
+    }
+
+    const { error: saveError } = await supabase
+      .from('brother_profiles')
+      .update({ photo_urls: paths, photo_url: paths[0] })
+      .eq('id', user.id)
+
+    if (saveError) {
+      setError('Could not save photos. Please try again.')
+      setSaving(false)
+      return
+    }
+
+    const { data: fullProfile } = await supabase
       .from('brother_profiles')
       .select('*')
-      .eq('id', userId)
+      .eq('id', user.id)
       .single()
 
     if (fullProfile) {
@@ -95,7 +256,7 @@ export default function BrotherPhoto() {
       const { data: currentProfile } = await supabase
         .from('profiles')
         .select('status, profile_complete')
-        .eq('id', userId)
+        .eq('id', user.id)
         .single()
       await supabase
         .from('profiles')
@@ -104,90 +265,81 @@ export default function BrotherPhoto() {
           profile_complete: currentProfile?.profile_complete || isComplete,
           status: currentProfile?.status === 'active' ? 'active' : (isComplete ? 'active' : 'pending_verification'),
         })
-        .eq('id', userId)
+        .eq('id', user.id)
     }
-      setUploaded(true)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
-      setPreview(null)
-    } finally {
-      setUploading(false)
-    }
-  }
 
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault()
-    const file = e.dataTransfer.files[0]
-    if (file) handleFile(file)
-  }
-
-  function handleNext() {
-    if (!uploaded) { setError('Please upload a photo to continue.'); return }
     router.push('/onboarding/brother/reference')
   }
 
+  const uploadedCount = photos.filter(Boolean).length
+  const allUploaded = photos.filter(Boolean).every(p => p?.uploaded)
+  const canContinue = uploadedCount >= 3 && allUploaded
+
   return (
     <div className="min-h-screen bg-[#FDF8F3]">
-      <div className="max-w-[480px] mx-auto px-5 py-8 pb-28">
-        <h2 className="text-2xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-1">Your Photo</h2>
-        <p className="text-[15px] text-[#9B9B9B] mb-2">Upload a clear photo of yourself</p>
-        <p className="text-xs text-[#9B9B9B] mb-8">
-          Your photo is only shared with sisters you are connected with — not publicly visible.
+      <div className="max-w-[480px] mx-auto px-5 py-8 pb-32">
+        <h2 className="text-2xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-1">Your photos</h2>
+        <p className="text-[14px] text-[#9B9B9B] mb-6">
+          Upload at least 3 photos so sisters can get a genuine sense of who you are. You can add up to 5.
         </p>
 
-        {/* Upload area */}
-        <div
-          onClick={() => !uploading && inputRef.current?.click()}
-          onDrop={handleDrop}
-          onDragOver={e => e.preventDefault()}
-          className={`relative rounded-2xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden ${
-            uploaded
-              ? 'border-[#AF4D98] bg-[#F9F0F6]'
-              : 'border-[#EDE8E3] bg-[#FDF8F3] hover:border-[#AF4D98] hover:bg-[#F9F0F6]'
-          }`}
-          style={{ minHeight: 280 }}
-        >
-          {preview ? (
-            <img src={preview} alt="Your photo" className="w-full h-72 object-cover rounded-2xl" />
-          ) : uploaded ? (
-            <div className="flex flex-col items-center justify-center h-72 gap-3">
-              <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-72 gap-3 px-4 text-center">
-              <div className="w-14 h-14 bg-[#EDE8E3] rounded-full flex items-center justify-center">
-                <svg className="w-7 h-7 text-[#9B9B9B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-[#5C5C5C] font-medium text-sm">Tap to upload a photo</p>
-                <p className="text-[#9B9B9B] text-xs mt-1">JPG, PNG or WEBP · Max 5MB</p>
-              </div>
-            </div>
-          )}
-
-          {uploading && (
-            <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl">
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-                <p className="text-sm text-[#5C5C5C]">Uploading...</p>
-              </div>
-            </div>
-          )}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '8px' }}>
+          {[0, 1, 2, 3, 4].map(index => (
+            <PhotoSlotComponent
+              key={index}
+              index={index}
+              photo={photos[index]}
+              onAdd={() => triggerFileInput(index)}
+              onRemove={() => removePhoto(index)}
+              required={index < 3}
+            />
+          ))}
         </div>
 
-        <input ref={inputRef} type="file" accept="image/*" className="hidden"
-          onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }} />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          style={{ display: 'none' }}
+          onChange={handleFileSelect}
+        />
 
         {error && (
-          <div className="mt-4 border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">{error}</div>
+          <div className="mt-3 border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">
+            {error}
+          </div>
         )}
 
-        <button onClick={handleNext} disabled={uploading}
-          className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors mt-6 disabled:opacity-40 disabled:cursor-not-allowed">
-          Next →
+        <button
+          onClick={handleNext}
+          disabled={!canContinue || saving}
+          style={{
+            width: '100%',
+            background: canContinue ? '#AF4D98' : '#EDE8E3',
+            color: canContinue ? 'white' : '#9B9B9B',
+            border: 'none',
+            borderRadius: '999px',
+            padding: '14px',
+            fontSize: '15px',
+            fontWeight: 500,
+            cursor: canContinue ? 'pointer' : 'not-allowed',
+            transition: 'all 0.2s ease',
+            marginTop: '20px',
+          }}
+        >
+          {saving
+            ? 'Saving...'
+            : !allUploaded && uploadedCount > 0
+            ? 'Uploading...'
+            : uploadedCount < 3
+            ? `Add ${3 - uploadedCount} more photo${3 - uploadedCount > 1 ? 's' : ''} to continue`
+            : 'Continue →'}
         </button>
+
+        <p style={{ textAlign: 'center', fontSize: '13px', color: '#9B9B9B', marginTop: '10px' }}>
+          {uploadedCount} of 5 photos added
+          {uploadedCount >= 3 && uploadedCount < 5 && ' · You can add more'}
+        </p>
       </div>
     </div>
   )

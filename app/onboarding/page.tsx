@@ -16,7 +16,7 @@ export default async function OnboardingPage() {
 
   if (profile?.gender === 'brother') {
     const [{ data: bp }, { data: ref }] = await Promise.all([
-      supabase.from('brother_profiles').select('full_name,religiosity_level,occupation,timeline_to_marry,spouse_religiosity_preference,character_description,do_you_listen_to_music,deen_growth,photo_url').eq('id', user.id).single(),
+      supabase.from('brother_profiles').select('full_name,religiosity_level,occupation,timeline_to_marry,spouse_religiosity_preference,character_description,do_you_listen_to_music,deen_growth,photo_url,photo_urls').eq('id', user.id).single(),
       supabase.from('references').select('profile_id').eq('profile_id', user.id).single(),
     ])
     if (!bp?.full_name)                          redirect('/onboarding/brother')
@@ -27,7 +27,7 @@ export default async function OnboardingPage() {
     else if (!bp?.character_description)         redirect('/onboarding/brother/character')
     else if (!bp?.do_you_listen_to_music)        redirect('/onboarding/brother/additional')
     else if (!bp?.deen_growth)                   redirect('/onboarding/brother/deepdive')
-    else if (!bp?.photo_url)                     redirect('/onboarding/brother/photo')
+    else if ((bp?.photo_urls?.length ?? 0) < 3)   redirect('/onboarding/brother/photo')
     else if (!ref)                               redirect('/onboarding/brother/reference')
     else                                         redirect('/dashboard')
   }

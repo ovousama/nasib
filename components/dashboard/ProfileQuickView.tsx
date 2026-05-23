@@ -21,6 +21,7 @@ type QuickViewData = {
   occupation: string | null
   wants_children: boolean | null
   timeline_to_marry: string | null
+  photo_urls: string[] | null
   photo_url: string | null
   reference_status: 'pending' | 'completed' | null
 }
@@ -97,7 +98,7 @@ export default function ProfileQuickView({
       const supabase = createClient()
       const table = gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
       const select = gender === 'brother'
-        ? 'full_name, age, location, religiosity_level, education_level, occupation, wants_children, timeline_to_marry, photo_url'
+        ? 'full_name, age, location, religiosity_level, education_level, occupation, wants_children, timeline_to_marry, photo_url, photo_urls'
         : 'full_name, age, location, religiosity_level, education_level, occupation, wants_children, timeline_to_marry'
 
       const [{ data: ext }, { data: base }, { data: ref }] = await Promise.all([
@@ -119,6 +120,7 @@ export default function ProfileQuickView({
           occupation: e.occupation ?? null,
           wants_children: e.wants_children ?? null,
           timeline_to_marry: e.timeline_to_marry ?? null,
+          photo_urls: gender === 'brother' ? (e.photo_urls ?? null) : null,
           photo_url: gender === 'brother' ? (e.photo_url ?? null) : null,
           reference_status: ref?.status ?? null,
         })
@@ -180,11 +182,11 @@ export default function ProfileQuickView({
               </>
             ) : data ? (
               <>
-                {gender === 'brother' && data.photo_url ? (
+                {gender === 'brother' && (data.photo_urls?.[0] ?? data.photo_url) ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     data-testid="sister-photo"
-                    src={toBrotherPhotoUrl(data.photo_url) ?? data.photo_url}
+                    src={toBrotherPhotoUrl(data.photo_urls?.[0] ?? data.photo_url) ?? (data.photo_urls?.[0] ?? data.photo_url)!}
                     alt={data.first_name}
                     className="w-20 h-20 rounded-full object-cover ring-2 ring-[#EDE8E3] mb-3"
                   />

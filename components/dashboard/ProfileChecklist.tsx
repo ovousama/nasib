@@ -89,9 +89,9 @@ export default function ProfileChecklist({ gender, profile: p, completionPercent
       editPath: '/dashboard/profile/edit/vision',
     },
     {
-      key: 'photo',
-      label: 'Profile photo',
-      complete: !!(p?.photo_url),
+      key: 'photos',
+      label: `Profile photos (${(p?.photo_urls as string[])?.length ?? 0}/3 minimum)`,
+      complete: ((p?.photo_urls as string[])?.length ?? 0) >= 3,
       editPath: '/dashboard/profile/edit/photo',
     },
     {
@@ -171,8 +171,8 @@ export default function ProfileChecklist({ gender, profile: p, completionPercent
     },
     {
       key: 'photos',
-      label: 'Profile photos',
-      complete: !!((p?.photo_urls as unknown[])?.length > 0),
+      label: `Profile photos (${(p?.photo_urls as string[])?.length ?? 0}/3 minimum)`,
+      complete: ((p?.photo_urls as string[])?.length ?? 0) >= 3,
       editPath: '/dashboard/profile/edit/photos',
     },
     {

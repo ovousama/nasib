@@ -278,7 +278,7 @@ export default function ProfilePageClient({
       : 'bg-red-50 text-red-600'
 
   const photoUrl = isBrother
-    ? toBrotherPhotoUrl(p?.photo_url)
+    ? toBrotherPhotoUrl(p?.photo_urls?.[0] ?? p?.photo_url)
     : (sisterSignedUrls[0] ?? null)
   const firstName = p?.full_name?.split(' ')[0] ?? 'N'
 
@@ -648,12 +648,22 @@ export default function ProfilePageClient({
 
         {/* ── PHOTO(S) ─────────────────────────────────────────────────────── */}
         {isBrother ? (
-          <Section title="Photo" editHref="/dashboard/profile/edit/photo" testId="section-photo">
+          <Section title="Photos" editHref="/dashboard/profile/edit/photo" testId="section-photo">
             <FW label="">
-              {toBrotherPhotoUrl(p?.photo_url)
-                // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={toBrotherPhotoUrl(p?.photo_url)!} alt="Profile" className="w-20 h-20 rounded-[12px] object-cover border border-[#EDE8E3]" />
-                : <span className="text-[14px] text-[#9B9B9B]">No photo uploaded yet</span>}
+              {(() => {
+                const urls: string[] = (Array.isArray(p?.photo_urls) && p.photo_urls.length > 0)
+                  ? p.photo_urls.map((path: string) => toBrotherPhotoUrl(path)).filter(Boolean) as string[]
+                  : p?.photo_url ? [toBrotherPhotoUrl(p.photo_url)!] : []
+                return urls.length > 0
+                  ? <div className="flex flex-wrap gap-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {urls.map((url: string, i: number) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={i} src={url} alt={`Photo ${i + 1}`} className="w-16 h-16 rounded-[12px] object-cover border border-[#EDE8E3]" />
+                      ))}
+                    </div>
+                  : <span className="text-[14px] text-[#9B9B9B]">No photos uploaded yet</span>
+              })()}
             </FW>
           </Section>
         ) : (

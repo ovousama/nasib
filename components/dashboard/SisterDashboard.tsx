@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 function toBrotherPhotoUrl(path: string | null | undefined): string | null {
@@ -110,7 +109,7 @@ export default function SisterDashboard({
 
   const [matches, setMatches] = useState<SisterMatch[]>(initialMatches ?? [])
   const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections ?? [])
-  const [hasPhotos, setHasPhotos] = useState<boolean>(sisterProfile?.photos_uploaded ?? false)
+  const sisterPhotoCount = (sisterProfile?.photo_urls as string[])?.length ?? 0
 
   useEffect(() => {
     function onMatchExpired(e: Event) {
@@ -129,9 +128,6 @@ export default function SisterDashboard({
 
   const [acceptModalInterest, setAcceptModalInterest] = useState<InterestWithProfile | null>(null)
   const [needsPhotosInterest, setNeedsPhotosInterest] = useState<InterestWithProfile | null>(null)
-  const [preAcceptUploading, setPreAcceptUploading] = useState(false)
-  const [preAcceptError, setPreAcceptError] = useState<string | null>(null)
-  const preAcceptFileRef = useRef<HTMLInputElement>(null)
 
   const [closeModalConnection, setCloseModalConnection] = useState<ConnectionWithProfile | null>(null)
   const [accepting, setAccepting] = useState(false)
@@ -175,40 +171,10 @@ export default function SisterDashboard({
 
   function openAcceptOrPromptPhotos(interest: InterestWithProfile) {
     setActionError(null)
-    if (!hasPhotos) {
-      setPreAcceptError(null)
+    if (sisterPhotoCount < 3) {
       setNeedsPhotosInterest(interest)
     } else {
       setAcceptModalInterest(interest)
-    }
-  }
-
-  async function handlePreAcceptUpload(file: File) {
-    if (!file.type.startsWith('image/')) { setPreAcceptError('Please upload an image file.'); return }
-    if (file.size > 5 * 1024 * 1024) { setPreAcceptError('Photo must be under 5MB.'); return }
-    setPreAcceptUploading(true)
-    setPreAcceptError(null)
-    try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-      const ext = file.name.split('.').pop() ?? 'jpg'
-      const path = `${user.id}/${Date.now()}.${ext}`
-      const { error: uploadError } = await supabase.storage.from('sister-photos').upload(path, file)
-      if (uploadError) throw uploadError
-      const { error: updateError } = await supabase.from('sister_profiles').update({
-        photo_urls: [path],
-        photos_uploaded: true,
-      }).eq('id', user.id)
-      if (updateError) throw updateError
-      setHasPhotos(true)
-      const interest = needsPhotosInterest
-      setNeedsPhotosInterest(null)
-      setAcceptModalInterest(interest)
-    } catch (err: unknown) {
-      setPreAcceptError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
-    } finally {
-      setPreAcceptUploading(false)
     }
   }
 
@@ -402,8 +368,8 @@ export default function SisterDashboard({
                     <div data-testid="match-card" key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
                       <div className="p-5">
                         <div className="flex items-start gap-3 mb-3">
-                          {b?.photo_url ? (
-                            <Image src={toBrotherPhotoUrl(b.photo_url) ?? b.photo_url} alt={brotherFirstName} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
+                          {(b?.photo_urls?.[0] ?? b?.photo_url) ? (
+                            <Image src={toBrotherPhotoUrl(b?.photo_urls?.[0] ?? b?.photo_url) ?? (b?.photo_urls?.[0] ?? b?.photo_url)!} alt={brotherFirstName} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
                           ) : (
                             <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
                               {brotherFirstName[0]?.toUpperCase()}
@@ -549,8 +515,8 @@ export default function SisterDashboard({
                     <div data-testid="pending-interest-card" key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
                       <div className="p-5">
                         <div className="flex items-start gap-3 mb-3">
-                          {op?.photo_url ? (
-                            <Image src={toBrotherPhotoUrl(op.photo_url) ?? op.photo_url} alt={op.full_name} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
+                          {(op?.photo_urls?.[0] ?? op?.photo_url) ? (
+                            <Image src={toBrotherPhotoUrl(op?.photo_urls?.[0] ?? op?.photo_url) ?? (op?.photo_urls?.[0] ?? op?.photo_url)!} alt={op?.full_name ?? ''} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
                           ) : (
                             <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
                               {(op?.full_name ?? 'B')[0]?.toUpperCase()}
@@ -684,63 +650,126 @@ export default function SisterDashboard({
 
       {/* ── Needs Photos Modal ──────────────────────────────────── */}
       {needsPhotosInterest && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-[24px] p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
-            <div className="w-12 h-12 bg-[#FAF4EE] rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#AF4D98" className="w-6 h-6">
-                <path fillRule="evenodd" d="M1 8a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 018.07 3h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0016.07 6H17a2 2 0 012 2v7a2 2 0 01-2 2H3a2 2 0 01-2-2V8zm13.5 3a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM10 14a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-              </svg>
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px 20px 0 0',
+            padding: '28px 24px',
+            width: '100%',
+            maxWidth: '480px',
+          }}>
+            <p style={{
+              fontFamily: 'Noto Naskh Arabic, serif',
+              fontSize: '24px',
+              color: '#AF4D98',
+              textAlign: 'center',
+              marginBottom: '4px',
+            }}>نصيب</p>
+
+            <h2 style={{
+              fontFamily: 'Cormorant Garamond, serif',
+              fontSize: '22px',
+              fontWeight: 400,
+              textAlign: 'center',
+              color: '#1A1A1A',
+              marginBottom: '12px',
+            }}>
+              Add your photos first
+            </h2>
+
+            <p style={{
+              fontSize: '14px',
+              color: '#9B9B9B',
+              textAlign: 'center',
+              lineHeight: 1.6,
+              marginBottom: '8px',
+            }}>
+              To accept this interest you need at least 3 photos on your profile. You currently have{' '}
+              <strong style={{ color: '#AF4D98' }}>
+                {sisterPhotoCount} photo{sisterPhotoCount !== 1 ? 's' : ''}
+              </strong>.
+            </p>
+
+            <p style={{
+              fontSize: '13px',
+              color: '#9B9B9B',
+              textAlign: 'center',
+              lineHeight: 1.6,
+              marginBottom: '24px',
+            }}>
+              Your photos are only shared with brothers whose interest you accept — they remain completely private otherwise.
+            </p>
+
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              justifyContent: 'center',
+              marginBottom: '24px',
+            }}>
+              {[0, 1, 2].map(i => (
+                <div key={i} style={{
+                  width: '72px',
+                  height: '90px',
+                  borderRadius: '10px',
+                  border: `1.5px dashed ${i < sisterPhotoCount ? '#AF4D98' : '#EDE8E3'}`,
+                  overflow: 'hidden',
+                  background: '#FDFAF7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  {i < sisterPhotoCount ? (
+                    <span style={{ fontSize: '20px', color: '#AF4D98' }}>✓</span>
+                  ) : (
+                    <span style={{ fontSize: '20px', color: '#EDE8E3' }}>+</span>
+                  )}
+                </div>
+              ))}
             </div>
-            <h3 className="text-xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-2 text-center">Add a photo first</h3>
-            <p className="text-[#5C5C5C] text-sm leading-relaxed mb-2 text-center">
-              Before accepting, you need to add at least one photo. Your photo will be shared with{' '}
-              <strong className="text-[#1A1A1A] font-medium">{needsPhotosInterest.other_profile?.full_name?.split(' ')[0] ?? 'this brother'}</strong>{' '}
-              when you confirm.
-            </p>
-            <p className="text-xs text-[#9B9B9B] text-center mb-6">
-              Your photo is private — only visible to brothers you accept.
-            </p>
 
-            {preAcceptError && (
-              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">
-                {preAcceptError}
-              </div>
-            )}
-
-            <input
-              ref={preAcceptFileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={e => {
-                const file = e.target.files?.[0]
-                if (file) handlePreAcceptUpload(file)
-                e.target.value = ''
+            <button
+              onClick={() => {
+                setNeedsPhotosInterest(null)
+                router.push('/dashboard/profile/edit/photos')
               }}
-            />
+              style={{
+                width: '100%',
+                background: '#AF4D98',
+                color: 'white',
+                border: 'none',
+                borderRadius: '999px',
+                padding: '14px',
+                fontSize: '15px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                marginBottom: '12px',
+              }}
+            >
+              Add photos now →
+            </button>
 
-            <div className="space-y-3">
-              <button
-                onClick={() => preAcceptFileRef.current?.click()}
-                disabled={preAcceptUploading}
-                className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-3 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors text-sm flex items-center justify-center gap-2"
-              >
-                {preAcceptUploading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Uploading…
-                  </>
-                ) : (
-                  'Upload a photo'
-                )}
-              </button>
-              <button
-                onClick={() => { setNeedsPhotosInterest(null); setPreAcceptError(null) }}
-                className="w-full text-[#9B9B9B] text-sm py-2 hover:text-[#1A1A1A] transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
+            <button
+              onClick={() => setNeedsPhotosInterest(null)}
+              style={{
+                width: '100%',
+                background: 'transparent',
+                border: 'none',
+                color: '#9B9B9B',
+                fontSize: '14px',
+                cursor: 'pointer',
+                padding: '8px',
+              }}
+            >
+              Not now
+            </button>
           </div>
         </div>
       )}

@@ -61,6 +61,7 @@ export type BrotherProfile = {
   character_description: string | null
   goals: string | null
   photo_url: string | null
+  photo_urls: string[] | null
   created_at: string
   updated_at: string
 }
@@ -154,6 +155,7 @@ export type SisterMatchBrother = {
   wants_children: boolean | null
   timeline_to_marry: string | null
   photo_url: string | null
+  photo_urls: string[] | null
   verification_badge: boolean
 }
 
@@ -183,6 +185,7 @@ export type InterestOtherProfile = {
   verification_badge: boolean
   compatibility_note: string | null
   photo_url: string | null
+  photo_urls: string[] | null
 }
 
 export type InterestBrotherProfile = InterestOtherProfile
@@ -454,7 +457,7 @@ export async function getSisterMatches(userId: string): Promise<SisterMatch[]> {
   ] = await Promise.all([
     supabase
       .from('brother_profiles')
-      .select('id, full_name, age, location, religiosity_level, wants_children, timeline_to_marry, photo_url')
+      .select('id, full_name, age, location, religiosity_level, wants_children, timeline_to_marry, photo_url, photo_urls')
       .in('id', brotherIds),
     supabase
       .from('profiles')
@@ -488,7 +491,8 @@ export async function getSisterMatches(userId: string): Promise<SisterMatch[]> {
             religiosity_level: bp.religiosity_level ?? null,
             wants_children: bp.wants_children ?? null,
             timeline_to_marry: bp.timeline_to_marry ?? null,
-            photo_url: toPublicUrl(bp.photo_url, 'brother-photos'),
+            photo_url: toPublicUrl(bp.photo_urls?.[0] ?? bp.photo_url, 'brother-photos'),
+            photo_urls: bp.photo_urls?.map((p: string) => toPublicUrl(p, 'brother-photos')).filter(Boolean) as string[] | null ?? null,
             verification_badge: pf?.verification_badge ?? false,
           }
         : null,
@@ -559,7 +563,7 @@ export async function getIncomingPendingInterests(userId: string, gender: Gender
 
   const otherIds = interests.map((i: { brother_id: string; sister_id: string }) => i[otherCol as 'brother_id' | 'sister_id'])
 
-  const photoSelect = gender === 'brother' ? 'id, full_name, age, location, photo_urls' : 'id, full_name, age, location, photo_url'
+  const photoSelect = gender === 'brother' ? 'id, full_name, age, location, photo_urls' : 'id, full_name, age, location, photo_url, photo_urls'
 
   const [{ data: profiles }, { data: profileStatuses }, { data: matchNotes }] = await Promise.all([
     supabase.from(otherTable).select(photoSelect).in('id', otherIds),
@@ -590,7 +594,10 @@ export async function getIncomingPendingInterests(userId: string, gender: Gender
             compatibility_note: note?.compatibility_note ?? null,
             photo_url: gender === 'brother'
               ? toPublicUrl(profile.photo_urls?.[0], 'sister-photos')
-              : toPublicUrl(profile.photo_url, 'brother-photos'),
+              : toPublicUrl(profile.photo_urls?.[0] ?? profile.photo_url, 'brother-photos'),
+            photo_urls: gender === 'brother'
+              ? null
+              : profile.photo_urls?.map((p: string) => toPublicUrl(p, 'brother-photos')).filter(Boolean) as string[] | null ?? null,
           }
         : null,
     }
@@ -842,7 +849,7 @@ export async function getWaliSisterMatches(sisterId: string): Promise<SisterMatc
 
   const [{ data: brotherProfiles }, { data: profiles }] = await Promise.all([
     admin.from('brother_profiles')
-      .select('id, full_name, age, location, photo_url')
+      .select('id, full_name, age, location, photo_url, photo_urls')
       .in('id', brotherIds),
     admin.from('profiles').select('id, verification_badge').in('id', brotherIds),
   ])
@@ -868,7 +875,8 @@ export async function getWaliSisterMatches(sisterId: string): Promise<SisterMatc
         religiosity_level: null,
         wants_children: null,
         timeline_to_marry: null,
-        photo_url: toPublicUrl(bp.photo_url, 'brother-photos'),
+        photo_url: toPublicUrl(bp.photo_urls?.[0] ?? bp.photo_url, 'brother-photos'),
+        photo_urls: bp.photo_urls?.map((p: string) => toPublicUrl(p, 'brother-photos')).filter(Boolean) as string[] | null ?? null,
         verification_badge: pf?.verification_badge ?? false,
       } : null,
       interest: null,

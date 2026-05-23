@@ -55,12 +55,19 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
   // - Sister + active connection → signed URLs via service role client
   // - Sister + interest only → no photos shown
   const photoUrls: string[] = []
-  if (isBrother && profileData.photo_url) {
-    const path = profileData.photo_url
-    const url = path.startsWith('http')
-      ? path
-      : supabase.storage.from('brother-photos').getPublicUrl(path).data.publicUrl
-    photoUrls.push(url)
+  if (isBrother) {
+    const paths: string[] =
+      (profileData.photo_urls as string[] | null)?.length
+        ? (profileData.photo_urls as string[])
+        : profileData.photo_url
+        ? [profileData.photo_url as string]
+        : []
+    for (const path of paths) {
+      const url = path.startsWith('http')
+        ? path
+        : supabase.storage.from('brother-photos').getPublicUrl(path).data.publicUrl
+      photoUrls.push(url)
+    }
   } else if (!isBrother && activeConnectionId) {
     const { data: sp } = await supabase
       .from('sister_profiles')
