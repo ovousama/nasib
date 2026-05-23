@@ -256,7 +256,8 @@ export async function closeConnection(connectionId: string) {
   if (error) return { error: error.message }
 
   if (conn) {
-    await supabase
+    const admin = createAdminClient()
+    await admin
       .from('matches')
       .update({ status: 'expired' })
       .eq('brother_id', conn.brother_id)

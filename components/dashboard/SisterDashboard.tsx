@@ -257,9 +257,13 @@ export default function SisterDashboard({
 
   const visibleInterests = incomingInterests.filter(i => !localDeclinedIds.has(i.id))
   const visibleNotifications = notifications.filter(n => !readNotifIds.has(n.id))
-  const visibleMatches = matches
   const activeConns = connections.filter(c => c.status === 'active')
   const nikahConns = connections.filter(c => c.status === 'nikah_planning')
+  const isInNikahPlanning = nikahConns.length > 0
+  const visibleMatches = matches.filter(match => {
+    const matchConn = connections.find(c => c.brother_id === match.brother_id && c.status === 'nikah_planning')
+    return !matchConn
+  })
 
   return (
     <>
@@ -287,12 +291,14 @@ export default function SisterDashboard({
           </div>
         </div>
         <div className="px-6 pt-4 pb-4 lg:px-8">
-          <ProfileChecklist
-            gender="sister"
-            profile={sisterProfile as unknown as Record<string, unknown>}
-            completionPercentage={completionPercentage}
-            referenceComplete={hasReference}
-          />
+          {!isInNikahPlanning && (
+            <ProfileChecklist
+              gender="sister"
+              profile={sisterProfile as unknown as Record<string, unknown>}
+              completionPercentage={completionPercentage}
+              referenceComplete={hasReference}
+            />
+          )}
 
           {profile.verification_status !== 'verified' && completionPercentage >= 80 && (
             <div style={{
@@ -345,7 +351,7 @@ export default function SisterDashboard({
         <div className="px-6 pb-6 lg:px-8 lg:pb-10 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
           <div className="space-y-8 lg:col-span-2">
           {/* ── Connections Counter ──────────────────────────────── */}
-          <div data-testid="connections-counter" className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          {!isInNikahPlanning && <div data-testid="connections-counter" className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <p className="text-sm text-[#5C5C5C] mb-3 leading-relaxed">
               You have{' '}
               <span className="font-medium text-[#1A1A1A]">{connections.length}</span> of 3
@@ -361,7 +367,7 @@ export default function SisterDashboard({
                 />
               ))}
             </div>
-          </div>
+          </div>}
 
           {/* ── Nikah Planning Connections ───────────────────────── */}
           {nikahConns.length > 0 && (
@@ -385,6 +391,19 @@ export default function SisterDashboard({
               </div>
             </section>
           )}
+
+          {isInNikahPlanning && (
+            <div style={{ textAlign: 'center', padding: '32px 20px', background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px' }}>
+              <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '20px', color: '#AF4D98', marginBottom: '8px' }}>
+                بَارَكَ اللَّهُ لَكُمَا
+              </p>
+              <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '280px', margin: '0 auto' }}>
+                May Allah bless your union and make it a source of peace and taqwa.
+              </p>
+            </div>
+          )}
+
+          {!isInNikahPlanning && (<>
 
           {/* ── Matches ─────────────────────────────────────────── */}
           <section id="matches" data-testid="matches-section">
@@ -634,6 +653,8 @@ export default function SisterDashboard({
               )}
             </section>
           )}
+
+          </>)}
 
           </div>{/* end left column */}
           <div className="space-y-6 lg:col-span-1 mt-8 lg:mt-0">

@@ -243,9 +243,13 @@ export default function BrotherDashboard({
 
   const visibleNotifications = notifications.filter(n => !readNotifIds.has(n.id))
   const visibleIncoming = incomingInterests.filter(i => !localDeclinedIds.has(i.id))
-  const visibleMatches = matches
   const activeConns = connections.filter(c => c.status === 'active')
   const nikahConns = connections.filter(c => c.status === 'nikah_planning')
+  const isInNikahPlanning = nikahConns.length > 0
+  const visibleMatches = matches.filter(match => {
+    const matchConn = connections.find(c => c.sister_id === match.sister_id && c.status === 'nikah_planning')
+    return !matchConn
+  })
 
   return (
     <div className="bg-[#FDF8F3] min-h-screen">
@@ -263,12 +267,14 @@ export default function BrotherDashboard({
         </div>
       </div>
       <div className="px-6 pt-4 pb-4 lg:px-8">
-        <ProfileChecklist
-          gender="brother"
-          profile={brotherProfile as unknown as Record<string, unknown>}
-          completionPercentage={completionPercentage}
-          referenceComplete={hasReference}
-        />
+        {!isInNikahPlanning && (
+          <ProfileChecklist
+            gender="brother"
+            profile={brotherProfile as unknown as Record<string, unknown>}
+            completionPercentage={completionPercentage}
+            referenceComplete={hasReference}
+          />
+        )}
 
         {profile.verification_status !== 'verified' && completionPercentage >= 80 && (
           <div style={{
@@ -364,6 +370,19 @@ export default function BrotherDashboard({
             </div>
           </section>
         )}
+
+        {isInNikahPlanning && (
+          <div style={{ textAlign: 'center', padding: '32px 20px', background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px' }}>
+            <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '20px', color: '#AF4D98', marginBottom: '8px' }}>
+              بَارَكَ اللَّهُ لَكُمَا
+            </p>
+            <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '280px', margin: '0 auto' }}>
+              May Allah bless your union and make it a source of peace and taqwa.
+            </p>
+          </div>
+        )}
+
+        {!isInNikahPlanning && (<>
 
         {/* ── Matches ─────────────────────────────────────────── */}
         <section id="matches" data-testid="matches-section">
@@ -629,6 +648,8 @@ export default function BrotherDashboard({
             </div>
           </section>
         )}
+
+        </>)}
 
         </div>{/* end left column */}
         <div className="space-y-6 lg:col-span-1 mt-8 lg:mt-0">
