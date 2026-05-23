@@ -240,7 +240,7 @@ export async function declineInterest(interestId: string) {
   return { success: true }
 }
 
-export async function closeConnection(connectionId: string) {
+export async function closeConnection(connectionId: string, reason?: string) {
   const supabase = await createServerSupabaseClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -252,7 +252,10 @@ export async function closeConnection(connectionId: string) {
     .eq('id', connectionId)
     .single()
 
-  const { error } = await supabase.rpc('close_connection', { p_connection_id: connectionId })
+  const { error } = await supabase.rpc('close_connection', {
+    p_connection_id: connectionId,
+    ...(reason ? { p_close_reason: reason } : {}),
+  })
   if (error) return { error: error.message }
 
   if (conn) {
@@ -263,6 +266,17 @@ export async function closeConnection(connectionId: string) {
       .eq('brother_id', conn.brother_id)
       .eq('sister_id', conn.sister_id)
       .eq('status', 'active')
+
+    const otherUserId = conn.brother_id === user.id ? conn.sister_id : conn.brother_id
+    await admin.from('notifications').insert({
+      profile_id: otherUserId,
+      type: 'connection_closed',
+      title: 'A connection has been closed',
+      body: reason === 'We have mutually agreed to part ways'
+        ? 'Your connection has been closed by mutual agreement. May Allah guide you both.'
+        : 'Your connection has been closed. May Allah guide you both to what is best.',
+      read: false,
+    })
 
     const gender: GenderType = conn.brother_id === user.id ? 'brother' : 'sister'
     await checkAndRefreshMatches(user.id, gender)

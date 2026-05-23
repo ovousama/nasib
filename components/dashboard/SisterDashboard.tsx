@@ -134,6 +134,9 @@ export default function SisterDashboard({
   const [declining, setDeclining] = useState<string | null>(null)
   const [closing, setClosing] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [nikahCloseModal, setNikahCloseModal] = useState<ConnectionWithProfile | null>(null)
+  const [nikahCloseReason, setNikahCloseReason] = useState<string>('')
+  const [nikahClosing, setNikahClosing] = useState(false)
   const [closedToast, setClosedToast] = useState(false)
   const [mutualToast, setMutualToast] = useState(false)
   const [readNotifIds, setReadNotifIds] = useState<Set<string>>(new Set())
@@ -232,21 +235,19 @@ export default function SisterDashboard({
     }
   }
 
-  const handleCloseConnection = async () => {
-    if (!closeModalConnection) return
-    setClosing(true)
-    setActionError(null)
-    const result = await closeConnection(closeModalConnection.id)
-    setClosing(false)
+  const handleCloseConnection = async (connectionId: string, reason?: string) => {
+    const conn = connections.find(c => c.id === connectionId)
+    if (!conn) return
+    const result = await closeConnection(connectionId, reason)
     if (result?.error) {
       setActionError(result.error)
-    } else {
-      setMatches(prev => prev.filter(m => m.brother_id !== closeModalConnection.brother_id))
-      setConnections(prev => prev.filter(c => c.id !== closeModalConnection.id))
-      setCloseModalConnection(null)
-      setClosedToast(true)
-      setTimeout(() => setClosedToast(false), 3000)
+      return
     }
+    setConnections(prev => prev.filter(c => c.id !== connectionId))
+    setMatches(prev => prev.filter(m => m.brother_id !== conn.brother_id))
+    if (closeModalConnection?.id === connectionId) setCloseModalConnection(null)
+    setClosedToast(true)
+    setTimeout(() => setClosedToast(false), 3000)
   }
 
   const handleMarkRead = async (notifId: string) => {
@@ -381,10 +382,20 @@ export default function SisterDashboard({
                       <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
                       <span className="ml-auto text-xs font-medium text-[#AF4D98] bg-[#F5E6F2] px-2.5 py-1 rounded-full">Nikah Planning</span>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <Link href={`/dashboard/chat/${conn.id}`} className="text-center text-sm font-medium text-[#AF4D98] py-2">Chat</Link>
-                      <Link href={`/dashboard/profile/${conn.brother_id}?context=connection&connectionId=${conn.id}`} className="text-center text-sm font-medium text-[#5C5C5C] py-2">Profile</Link>
-                      <Link data-testid="view-nikah-plan-btn" href={`/dashboard/nikah/${conn.id}`} className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors">View Plan</Link>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Link href={`/dashboard/chat/${conn.id}`} className="text-center text-sm font-medium text-[#AF4D98] py-2">Chat</Link>
+                        <Link href={`/dashboard/profile/${conn.brother_id}?context=connection&connectionId=${conn.id}`} className="text-center text-sm font-medium text-[#5C5C5C] py-2">Profile</Link>
+                        <Link data-testid="view-nikah-plan-btn" href={`/dashboard/nikah/${conn.id}`} className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors">View Plan</Link>
+                      </div>
+                      <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '1px solid #EDE8E3' }}>
+                        <button
+                          onClick={() => { setNikahCloseReason(''); setNikahCloseModal(conn) }}
+                          style={{ background: 'transparent', border: 'none', fontSize: '12px', color: '#C0B8B0', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '4px 8px' }}
+                        >
+                          Close this connection
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -842,6 +853,90 @@ export default function SisterDashboard({
         </div>
       )}
 
+      {/* ── Nikah Planning Close Modal ───────────────────────────── */}
+      {nikahCloseModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: 'white', borderRadius: '20px', padding: '28px 24px', width: '100%', maxWidth: '400px' }}>
+            <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '20px', color: '#AF4D98', textAlign: 'center', marginBottom: '16px' }}>
+              إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ
+            </p>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 400, color: '#1A1A1A', textAlign: 'center', marginBottom: '8px' }}>
+              Close nikah planning?
+            </h2>
+            <p style={{ fontSize: '14px', color: '#5C5C5C', textAlign: 'center', lineHeight: 1.6, marginBottom: '20px' }}>
+              We understand that not every journey reaches its destination. May Allah ease your path and guide you to what is best, in sha Allah.
+            </p>
+            <div style={{ background: '#FDFAF7', border: '1px solid #EDE8E3', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px' }}>
+              <p style={{ fontSize: '12px', fontWeight: 500, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                What happens when you close:
+              </p>
+              {[
+                'The connection is permanently closed',
+                'Both parties are notified respectfully',
+                'Chat history is no longer accessible',
+                'Your profile returns to active status',
+                'You may receive new matches in time',
+              ].map((item, i) => (
+                <p key={i} style={{ fontSize: '13px', color: '#5C5C5C', margin: '0 0 4px', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: 1.5 }}>
+                  <span style={{ color: '#9B9B9B' }}>·</span>{item}
+                </p>
+              ))}
+            </div>
+            <p style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>Please select a reason:</p>
+            {[
+              'We are not compatible',
+              'Family concerns',
+              'Personal circumstances have changed',
+              'We have mutually agreed to part ways',
+              'I prefer not to say',
+            ].map(reason => (
+              <div
+                key={reason}
+                onClick={() => setNikahCloseReason(reason)}
+                style={{
+                  padding: '11px 14px', borderRadius: '10px',
+                  border: `1px solid ${nikahCloseReason === reason ? '#AF4D98' : '#EDE8E3'}`,
+                  background: nikahCloseReason === reason ? '#F5E6F2' : 'white',
+                  cursor: 'pointer', marginBottom: '6px', fontSize: '13px',
+                  color: nikahCloseReason === reason ? '#AF4D98' : '#5C5C5C',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {reason}
+              </div>
+            ))}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+              <button
+                onClick={() => { setNikahCloseModal(null); setNikahCloseReason('') }}
+                style={{ flex: 1, background: 'white', border: '1px solid #EDE8E3', borderRadius: '999px', padding: '12px', fontSize: '14px', color: '#5C5C5C', cursor: 'pointer' }}
+              >
+                Keep going
+              </button>
+              <button
+                onClick={async () => {
+                  if (!nikahCloseReason || !nikahCloseModal) return
+                  setNikahClosing(true)
+                  await handleCloseConnection(nikahCloseModal.id, nikahCloseReason)
+                  setNikahCloseModal(null)
+                  setNikahCloseReason('')
+                  setNikahClosing(false)
+                }}
+                disabled={!nikahCloseReason || nikahClosing}
+                style={{
+                  flex: 1, background: nikahCloseReason ? '#C13515' : '#EDE8E3',
+                  color: nikahCloseReason ? 'white' : '#9B9B9B', border: 'none', borderRadius: '999px',
+                  padding: '12px', fontSize: '14px', fontWeight: 500,
+                  cursor: nikahCloseReason && !nikahClosing ? 'pointer' : 'not-allowed',
+                  opacity: nikahClosing ? 0.7 : 1,
+                }}
+              >
+                {nikahClosing ? 'Closing...' : 'Close connection'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Express Interest Modal ───────────────────────────────── */}
       {interestModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
@@ -944,7 +1039,13 @@ export default function SisterDashboard({
             )}
             <div className="space-y-3">
               <button
-                onClick={handleCloseConnection}
+                onClick={async () => {
+                  if (!closeModalConnection) return
+                  setClosing(true)
+                  setActionError(null)
+                  await handleCloseConnection(closeModalConnection.id)
+                  setClosing(false)
+                }}
                 disabled={closing}
                 className="w-full bg-[#C13515] text-white font-medium py-3 rounded-full hover:bg-[#a02d10] disabled:opacity-50 transition-colors text-sm"
               >

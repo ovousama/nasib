@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { sendMessage, confirmMeeting, declineMeeting } from '@/app/dashboard/actions'
+import { sendMessage, confirmMeeting, declineMeeting, closeConnection } from '@/app/dashboard/actions'
 import type { Message, MeetingRequest, ConnectionDetail } from '@/lib/database'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
@@ -216,6 +216,9 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
   const [isConnected, setIsConnected] = useState(false)
   const [pendingProposal, setPendingProposal] = useState<PendingProposal | null>(initialPendingProposal)
   const [checkinLoading, setCheckinLoading] = useState(false)
+  const [nikahCloseModalOpen, setNikahCloseModalOpen] = useState(false)
+  const [nikahCloseReason, setNikahCloseReason] = useState<string>('')
+  const [nikahClosing, setNikahClosing] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const channelRef = useRef<RealtimeChannel | null>(null)
@@ -484,6 +487,18 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
         </span>
       </div>
 
+      {/* Subtle close link for nikah planning connections */}
+      {connection.status === 'nikah_planning' && (
+        <div style={{ textAlign: 'center', paddingBottom: '4px' }}>
+          <button
+            onClick={() => { setNikahCloseReason(''); setNikahCloseModalOpen(true) }}
+            style={{ background: 'transparent', border: 'none', fontSize: '12px', color: '#C0B8B0', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '4px 8px' }}
+          >
+            Close this connection
+          </button>
+        </div>
+      )}
+
       {/* Suggested questions */}
       {showSuggestions && (
         <div data-testid="suggested-questions" className="border-t border-[#EDE8E3] flex gap-2 px-4 py-2.5 overflow-x-auto">
@@ -496,6 +511,93 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
               {q}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Nikah planning close modal */}
+      {nikahCloseModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: 'white', borderRadius: '20px', padding: '28px 24px', width: '100%', maxWidth: '400px' }}>
+            <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '20px', color: '#AF4D98', textAlign: 'center', marginBottom: '16px' }}>
+              إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ
+            </p>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 400, color: '#1A1A1A', textAlign: 'center', marginBottom: '8px' }}>
+              Close nikah planning?
+            </h2>
+            <p style={{ fontSize: '14px', color: '#5C5C5C', textAlign: 'center', lineHeight: 1.6, marginBottom: '20px' }}>
+              We understand that not every journey reaches its destination. May Allah ease your path and guide you to what is best, in sha Allah.
+            </p>
+            <div style={{ background: '#FDFAF7', border: '1px solid #EDE8E3', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px' }}>
+              <p style={{ fontSize: '12px', fontWeight: 500, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                What happens when you close:
+              </p>
+              {[
+                'The connection is permanently closed',
+                'Both parties are notified respectfully',
+                'Chat history is no longer accessible',
+                'Your profile returns to active status',
+                'You may receive new matches in time',
+              ].map((item, i) => (
+                <p key={i} style={{ fontSize: '13px', color: '#5C5C5C', margin: '0 0 4px', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: 1.5 }}>
+                  <span style={{ color: '#9B9B9B' }}>·</span>{item}
+                </p>
+              ))}
+            </div>
+            <p style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>Please select a reason:</p>
+            {[
+              'We are not compatible',
+              'Family concerns',
+              'Personal circumstances have changed',
+              'We have mutually agreed to part ways',
+              'I prefer not to say',
+            ].map(reason => (
+              <div
+                key={reason}
+                onClick={() => setNikahCloseReason(reason)}
+                style={{
+                  padding: '11px 14px', borderRadius: '10px',
+                  border: `1px solid ${nikahCloseReason === reason ? '#AF4D98' : '#EDE8E3'}`,
+                  background: nikahCloseReason === reason ? '#F5E6F2' : 'white',
+                  cursor: 'pointer', marginBottom: '6px', fontSize: '13px',
+                  color: nikahCloseReason === reason ? '#AF4D98' : '#5C5C5C',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {reason}
+              </div>
+            ))}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+              <button
+                onClick={() => { setNikahCloseModalOpen(false); setNikahCloseReason('') }}
+                style={{ flex: 1, background: 'white', border: '1px solid #EDE8E3', borderRadius: '999px', padding: '12px', fontSize: '14px', color: '#5C5C5C', cursor: 'pointer' }}
+              >
+                Keep going
+              </button>
+              <button
+                onClick={async () => {
+                  if (!nikahCloseReason) return
+                  setNikahClosing(true)
+                  const result = await closeConnection(connection.id, nikahCloseReason)
+                  setNikahClosing(false)
+                  if (!result?.error) {
+                    setNikahCloseModalOpen(false)
+                    setNikahCloseReason('')
+                    router.push('/dashboard')
+                  }
+                }}
+                disabled={!nikahCloseReason || nikahClosing}
+                style={{
+                  flex: 1, background: nikahCloseReason ? '#C13515' : '#EDE8E3',
+                  color: nikahCloseReason ? 'white' : '#9B9B9B', border: 'none', borderRadius: '999px',
+                  padding: '12px', fontSize: '14px', fontWeight: 500,
+                  cursor: nikahCloseReason && !nikahClosing ? 'pointer' : 'not-allowed',
+                  opacity: nikahClosing ? 0.7 : 1,
+                }}
+              >
+                {nikahClosing ? 'Closing...' : 'Close connection'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
