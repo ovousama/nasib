@@ -564,46 +564,61 @@ export default function BrotherDashboard({
                   <div
                     data-testid="connection-card"
                     key={conn.id}
-                    style={{ background: '#1C1A1F', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}
+                    style={{ background: '#1C1A1F', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px' }}
                   >
-                    {/* Avatar */}
-                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(135deg, #AF4D98, #D66BA0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '18px', color: 'white', flexShrink: 0, overflow: 'hidden' }}>
-                      {connPhotoUrls[conn.id] ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={connPhotoUrls[conn.id]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-                      ) : (
-                        conn.other_name?.[0] ?? '?'
-                      )}
+                    {/* Top row: avatar + info + actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {/* Avatar */}
+                      <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(135deg, #AF4D98, #D66BA0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '18px', color: 'white', flexShrink: 0, overflow: 'hidden' }}>
+                        {connPhotoUrls[conn.id] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={connPhotoUrls[conn.id]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                        ) : (
+                          conn.other_name?.[0] ?? '?'
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: '14px', fontWeight: 500, color: 'white', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {conn.other_name?.split(' ')[0]}
+                        </p>
+                        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Active connection</p>
+                      </div>
+
+                      {/* Actions column */}
+                      <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <button
+                          data-testid="open-chat-btn"
+                          onClick={() => router.push(`/dashboard/chat/${conn.id}`)}
+                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '7px 14px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
+                        >
+                          Chat
+                        </button>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                          <button
+                            onClick={() => router.push(`/dashboard/profile/${conn.sister_id}?context=connection&connectionId=${conn.id}`)}
+                            style={{ flex: 1, background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '999px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer' }}
+                          >
+                            Profile
+                          </button>
+                          <button
+                            onClick={() => router.push(`/dashboard/meetings/${conn.id}`)}
+                            style={{ flex: 1, background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '999px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer' }}
+                          >
+                            Meeting
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: '14px', fontWeight: 500, color: 'white', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {conn.other_name?.split(' ')[0]}
-                      </p>
-                      <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Active connection</p>
-                    </div>
-
-                    {/* Actions */}
-                    <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                      <Link
-                        data-testid="open-chat-btn"
-                        href={`/dashboard/chat/${conn.id}`}
-                        style={{ background: '#AF4D98', color: 'white', textDecoration: 'none', borderRadius: '999px', padding: '7px 14px', fontSize: '12px', fontWeight: 500 }}
-                      >
-                        Chat
-                      </Link>
-                      <Link
-                        href={`/dashboard/profile/${conn.sister_id}?context=connection&connectionId=${conn.id}`}
-                        style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', textDecoration: 'none', borderRadius: '999px', padding: '7px 14px', fontSize: '12px' }}
-                      >
-                        Profile
-                      </Link>
+                    {/* Close link */}
+                    <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '0.5px solid rgba(255,255,255,0.08)', marginTop: '8px' }}>
                       <button
                         onClick={() => { setCloseError(null); setCloseModalConnection(conn) }}
-                        style={{ background: 'transparent', color: 'rgba(255,255,255,0.3)', border: 'none', fontSize: '12px', cursor: 'pointer', padding: '7px 8px' }}
+                        style={{ background: 'transparent', border: 'none', fontSize: '11px', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '2px 8px' }}
                       >
-                        ✕
+                        Close connection
                       </button>
                     </div>
                   </div>
