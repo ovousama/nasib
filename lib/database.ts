@@ -21,11 +21,18 @@ export type CheckinOutcome = 'continue' | 'nikah_planning' | 'close'
 
 // ─── Table Types ──────────────────────────────────────────────────────────────
 
+export type VerificationStatusType = 'unverified' | 'pending' | 'verified' | 'rejected'
+
 export type Profile = {
   id: string
   gender: GenderType
   status: ProfileStatusType
   verification_badge: boolean
+  verification_status: VerificationStatusType
+  verification_selfie_path: string | null
+  verification_submitted_at: string | null
+  verification_reviewed_at: string | null
+  verification_rejection_reason: string | null
   created_at: string
   updated_at: string
   profile_complete: boolean

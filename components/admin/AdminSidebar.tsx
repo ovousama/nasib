@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -52,11 +52,30 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    label: 'Verification',
+    href: '/admin/verification',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+        <path fillRule="evenodd" d="M16.403 12.652a3 3 0 000-5.304 3 3 0 00-3.75-3.751 3 3 0 00-5.305 0 3 3 0 00-3.751 3.75 3 3 0 000 5.305 3 3 0 003.75 3.751 3 3 0 005.305 0 3 3 0 003.751-3.75zm-2.546-4.46a.75.75 0 00-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+      </svg>
+    ),
+  },
 ]
 
 function NavContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
+  const [verificationCount, setVerificationCount] = useState(0)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('verification_status', 'pending')
+      .then(({ count }) => setVerificationCount(count ?? 0))
+  }, [pathname])
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -89,6 +108,14 @@ function NavContent({ onClose }: { onClose?: () => void }) {
             >
               {item.icon}
               {item.label}
+              {item.href === '/admin/verification' && verificationCount > 0 && (
+                <span style={{
+                  background: '#C13515', color: 'white', fontSize: '11px',
+                  fontWeight: 500, padding: '1px 6px', borderRadius: '999px', marginLeft: 'auto',
+                }}>
+                  {verificationCount}
+                </span>
+              )}
             </Link>
           )
         })}

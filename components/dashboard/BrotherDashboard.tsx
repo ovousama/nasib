@@ -269,6 +269,53 @@ export default function BrotherDashboard({
           completionPercentage={completionPercentage}
           referenceComplete={hasReference}
         />
+
+        {profile.verification_status !== 'verified' && completionPercentage >= 80 && (
+          <div style={{
+            background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px',
+            padding: '20px', marginTop: '16px', display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', gap: '16px',
+          }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ marginBottom: '4px' }}>
+                {profile.verification_status === 'pending' ? (
+                  <span style={{ background: '#FFF7E6', color: '#B45309', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>
+                    Under review
+                  </span>
+                ) : (
+                  <span style={{ background: '#FDECEA', color: '#C13515', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>
+                    Not verified
+                  </span>
+                )}
+              </div>
+              <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>
+                {profile.verification_status === 'pending'
+                  ? 'Verification under review'
+                  : profile.verification_status === 'rejected'
+                  ? 'Verification needs attention'
+                  : 'Verify your identity'}
+              </p>
+              <p style={{ fontSize: '13px', color: '#9B9B9B', lineHeight: 1.5 }}>
+                {profile.verification_status === 'pending'
+                  ? 'We will notify you within 24 hours, in sha Allah.'
+                  : profile.verification_status === 'rejected'
+                  ? `Rejected: ${profile.verification_rejection_reason}`
+                  : 'A quick selfie to confirm your identity.'}
+              </p>
+            </div>
+            {profile.verification_status !== 'pending' && (
+              <button
+                onClick={() => router.push('/dashboard/verify')}
+                style={{
+                  background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px',
+                  padding: '10px 18px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                }}
+              >
+                {profile.verification_status === 'rejected' ? 'Resubmit →' : 'Verify now →'}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="px-6 pb-6 lg:px-8 lg:pb-10 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
