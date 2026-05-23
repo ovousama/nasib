@@ -41,7 +41,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const completionPercentage = profile?.profile_completion_percentage ?? 0
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3]">
+    <div className="min-h-screen bg-[#F5F0FB]">
       {/* Mobile top bar — hidden on desktop */}
       <div className="lg:hidden">
         <TopBar initials={initials} />

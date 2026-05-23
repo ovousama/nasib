@@ -77,8 +77,19 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#EDE8E3] safe-area-pb">
-      <div className="flex items-stretch h-[60px] max-w-lg mx-auto">
+    <nav
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: '#1C1A1F',
+        borderTop: '0.5px solid rgba(255,255,255,0.08)',
+        padding: '8px 0',
+        zIndex: 40,
+      }}
+    >
+      <div className="flex items-stretch h-[52px] max-w-lg mx-auto">
         {navItems.map(({ label, href, icon: Icon, testId }) => {
           const active = label === 'Profile'
             ? pathname.startsWith('/dashboard/profile')
@@ -90,12 +101,11 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
               key={href}
               href={href}
               data-testid={testId}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors ${
-                active ? 'text-[#AF4D98]' : 'text-[#9B9B9B] hover:text-[#5C5C5C]'
-              }`}
+              style={{ color: active ? '#AF4D98' : 'rgba(255,255,255,0.4)' }}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
             >
               <Icon active={active} />
-              <span className="text-[10px] font-medium">{label}</span>
+              <span style={{ fontSize: '10px', fontWeight: active ? 500 : 400 }}>{label}</span>
             </Link>
           )
         })}
@@ -106,12 +116,11 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
             <Link
               href={`/dashboard/nikah/${nikahConnectionId}`}
               data-testid="nav-nikah"
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors ${
-                active ? 'text-[#AF4D98]' : 'text-[#9B9B9B] hover:text-[#5C5C5C]'
-              }`}
+              style={{ color: active ? '#AF4D98' : 'rgba(255,255,255,0.4)' }}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
             >
               <NikahIcon active={active} />
-              <span className="text-[10px] font-medium">Nikah</span>
+              <span style={{ fontSize: '10px', fontWeight: active ? 500 : 400 }}>Nikah</span>
             </Link>
           )
         })()}
@@ -122,12 +131,11 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
             <Link
               href="/dashboard/how-it-works"
               data-testid="nav-help"
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors ${
-                active ? 'text-[#AF4D98]' : 'text-[#9B9B9B] hover:text-[#5C5C5C]'
-              }`}
+              style={{ color: active ? '#AF4D98' : 'rgba(255,255,255,0.4)' }}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
             >
               <HelpIcon active={active} />
-              <span className="text-[10px] font-medium">Help</span>
+              <span style={{ fontSize: '10px', fontWeight: active ? 500 : 400 }}>Help</span>
             </Link>
           )
         })()}
@@ -138,17 +146,27 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
             <Link
               href="/dashboard/notifications"
               data-testid="nav-notifications"
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors relative ${
-                active ? 'text-[#AF4D98]' : 'text-[#9B9B9B] hover:text-[#5C5C5C]'
-              }`}
+              style={{ color: active ? '#AF4D98' : 'rgba(255,255,255,0.4)' }}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors relative"
             >
               <div className="relative">
                 <BellIcon active={active} />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-[7px] h-[7px] bg-[#AF4D98] rounded-full" />
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '-2px',
+                      right: '-2px',
+                      width: '7px',
+                      height: '7px',
+                      background: '#AF4D98',
+                      borderRadius: '50%',
+                      border: '1.5px solid #1C1A1F',
+                    }}
+                  />
                 )}
               </div>
-              <span className="text-[10px] font-medium">Alerts</span>
+              <span style={{ fontSize: '10px', fontWeight: active ? 500 : 400 }}>Alerts</span>
             </Link>
           )
         })()}

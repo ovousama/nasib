@@ -418,7 +418,7 @@ export default function ChatUI({ connection, initialMessages, initialMeetings, c
       )}
 
       {/* Timeline */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-[#FDF8F3]">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-[#F5F0FB]">
         {allItems.length === 0 && (
           <div className="text-center py-8">
             <p className="text-[#9B9B9B] text-sm">Bismillah. Begin your conversation with kindness.</p>

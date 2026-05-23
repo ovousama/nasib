@@ -11,6 +11,7 @@ function toBrotherPhotoUrl(path: string | null | undefined): string | null {
   if (path.startsWith('http')) return path
   return `${SUPABASE_URL}/storage/v1/object/public/brother-photos/${path}`
 }
+
 import ProfileQuickView from '@/components/dashboard/ProfileQuickView'
 import ProfileChecklist from '@/components/dashboard/ProfileChecklist'
 import {
@@ -30,6 +31,68 @@ import type {
   Notification,
 } from '@/lib/database'
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function getAvatarGradient(name?: string): string {
+  const gradients = [
+    'linear-gradient(135deg, #F5E6F2, #F4E4BA)',
+    'linear-gradient(135deg, #F4E4BA, #E5A9A9)',
+    'linear-gradient(135deg, #E5A9A9, #F5E6F2)',
+    'linear-gradient(135deg, #F5E6F2, #9DF7E5)',
+    'linear-gradient(135deg, #F4E4BA, #F5E6F2)',
+  ]
+  const index = (name?.charCodeAt(0) ?? 0) % gradients.length
+  return gradients[index]
+}
+
+function getRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(mins / 60)
+  const days = Math.floor(hours / 24)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days === 1) return 'Yesterday'
+  return `${days} days ago`
+}
+
+const AYAHS = [
+  {
+    arabic: 'وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً',
+    translation: 'And He placed between you affection and mercy',
+    reference: 'Ar-Rum 30:21',
+  },
+  {
+    arabic: 'وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا',
+    translation: 'And of His signs is that He created for you mates from yourselves',
+    reference: 'Ar-Rum 30:21',
+  },
+  {
+    arabic: 'هُنَّ لِبَاسٌ لَّكُمْ وَأَنتُمْ لِبَاسٌ لَّهُنَّ',
+    translation: 'They are a garment for you and you are a garment for them',
+    reference: 'Al-Baqarah 2:187',
+  },
+  {
+    arabic: 'رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ',
+    translation: 'Our Lord, grant us from our spouses and offspring comfort to our eyes',
+    reference: 'Al-Furqan 25:74',
+  },
+]
+
+function VerifiedBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 bg-[#E6F9F7] text-[#00A699] text-xs font-medium px-2 py-0.5 rounded-full">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+        <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.844-8.791a.75.75 0 00-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.15-.086l4.25-5.5-.001-.002z" clipRule="evenodd" />
+      </svg>
+      Verified
+    </span>
+  )
+}
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
 type Props = {
   profile: Profile
   sisterProfile: SisterProfile
@@ -43,54 +106,7 @@ type Props = {
   hasReference: boolean
 }
 
-function VerifiedBadge({ dark = false }: { dark?: boolean }) {
-  if (dark) {
-    return (
-      <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-        </svg>
-        Verified
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center gap-1 bg-[#E6F9F7] text-[#00A699] text-xs font-medium px-2.5 py-1 rounded-full">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
-        <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.844-8.791a.75.75 0 00-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.15-.086l4.25-5.5-.001-.002z" clipRule="evenodd" />
-      </svg>
-      Verified
-    </span>
-  )
-}
-
-function PendingBadge() {
-  return (
-    <span className="inline-flex items-center gap-1.5 bg-[#FFF4CC]/40 text-[#FFF4CC] text-xs font-medium px-3 py-1.5 rounded-full">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clipRule="evenodd" />
-      </svg>
-      Pending Verification
-    </span>
-  )
-}
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="rounded-[16px] p-6 text-center border border-[#EDE8E3] bg-[#FAF4EE]">
-      <p className="text-[#9B9B9B] text-sm leading-relaxed">{message}</p>
-    </div>
-  )
-}
-
-function formatRelativeDate(dateStr: string) {
-  const diffMs = Date.now() - new Date(dateStr).getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  if (diffMins < 60) return `${diffMins}m ago`
-  const diffHours = Math.floor(diffMins / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-  return `${Math.floor(diffHours / 24)}d ago`
-}
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function SisterDashboard({
   profile,
@@ -106,6 +122,7 @@ export default function SisterDashboard({
 }: Props) {
   const router = useRouter()
   const firstName = sisterProfile?.full_name?.split(' ')[0] ?? 'there'
+  const initials = (sisterProfile?.full_name ?? '').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'N'
 
   const [matches, setMatches] = useState<SisterMatch[]>(initialMatches ?? [])
   const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections ?? [])
@@ -256,6 +273,7 @@ export default function SisterDashboard({
     router.refresh()
   }
 
+  // Derived state
   const visibleInterests = incomingInterests.filter(i => !localDeclinedIds.has(i.id))
   const visibleNotifications = notifications.filter(n => !readNotifIds.has(n.id))
   const activeConns = connections.filter(c => c.status === 'active')
@@ -266,32 +284,107 @@ export default function SisterDashboard({
     return !matchConn
   })
 
-  return (
-    <>
-      <div className="bg-[#FDF8F3] min-h-screen">
-        <div className="lg:max-w-6xl lg:mx-auto">
-        {/* ── Header ──────────────────────────────────────────── */}
-        <div className="px-6 pt-10 pb-4 lg:px-8">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-          <p className="text-sm text-[#9B9B9B]">Assalamu Alaikum,</p>
-          <h1 className="text-[26px] lg:text-[32px] font-medium text-[#1A1A1A] tracking-[-0.02em] leading-snug mb-1">{firstName}</h1>
-          </div>
-          </div>
-          <div className="mt-2 space-y-2">
-            {profile?.verification_badge ? <VerifiedBadge /> : <PendingBadge />}
+  // Hero stats
+  const matchCount = visibleMatches.length
+  const connectionCount = activeConns.length
+  const unreadCount = visibleNotifications.length
 
-            {waliProfile && (
-              <div data-testid="wali-status" className="inline-flex items-center gap-1.5 bg-[#FAF4EE] text-[#5C5C5C] text-xs font-medium px-3 py-1.5 rounded-full border border-[#EDE8E3]">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                  <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
-                </svg>
-                Wali: {waliProfile.full_name} · Read-only access
-              </div>
-            )}
+  // Daily ayah
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
+  const todayAyah = AYAHS[dayOfYear % AYAHS.length]
+
+  const sectionLabel: React.CSSProperties = {
+    fontSize: '11px',
+    fontWeight: 500,
+    color: '#6B6080',
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
+    marginBottom: '10px',
+  }
+
+  return (
+    <div style={{ background: '#F5F0FB', minHeight: '100vh' }}>
+
+      {/* ── Dark Hero Header ────────────────────────────────────── */}
+      <div style={{ background: '#1C1A1F', padding: '20px 20px 28px', position: 'relative', overflow: 'hidden' }}>
+        {/* Geometric pattern overlay */}
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.04,
+          backgroundImage: 'repeating-linear-gradient(45deg, #AF4D98 0, #AF4D98 1px, transparent 0, transparent 50%)',
+          backgroundSize: '12px 12px', pointerEvents: 'none',
+        }} />
+
+        {/* Top row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', position: 'relative' }}>
+          <span style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '22px', color: '#AF4D98', opacity: 0.7 }}>نصيب</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => router.push('/dashboard/notifications')}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              {unreadCount > 0 && (
+                <div style={{ position: 'absolute', top: '-2px', right: '-2px', width: '7px', height: '7px', background: '#AF4D98', borderRadius: '50%', border: '1.5px solid #1C1A1F' }} />
+              )}
+            </div>
+            <div
+              onClick={() => router.push('/dashboard/profile')}
+              style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#AF4D98', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: 'white', cursor: 'pointer', flexShrink: 0 }}
+            >
+              {initials}
+            </div>
           </div>
         </div>
-        <div className="px-6 pt-4 pb-4 lg:px-8">
+
+        {/* Greeting */}
+        <div style={{ position: 'relative', marginBottom: waliProfile ? '12px' : '20px' }}>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', marginBottom: '3px' }}>Assalamu Alaikum,</p>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '28px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>{firstName}</h1>
+        </div>
+
+        {/* Wali badge */}
+        {waliProfile && (
+          <div data-testid="wali-status" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '999px', padding: '5px 12px', marginBottom: '16px', position: 'relative' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="rgba(255,255,255,0.5)" width="13" height="13">
+              <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+            </svg>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>Wali: {waliProfile.full_name} · Read-only access</span>
+          </div>
+        )}
+
+        {/* Stats row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', position: 'relative' }}>
+          {[
+            { num: matchCount, label: 'Matches', active: false },
+            { num: connectionCount, label: 'Connected', active: connectionCount > 0 },
+            { num: unreadCount, label: 'Unread', active: false },
+          ].map(stat => (
+            <div key={stat.label} style={{
+              background: stat.active ? 'rgba(175,77,152,0.2)' : 'rgba(255,255,255,0.07)',
+              border: `0.5px solid ${stat.active ? 'rgba(175,77,152,0.4)' : 'rgba(255,255,255,0.1)'}`,
+              borderRadius: '10px', padding: '12px 10px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '22px', fontWeight: 500, color: stat.active ? '#D66BA0' : 'white', lineHeight: 1, marginBottom: '3px' }}>{stat.num}</div>
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Body ────────────────────────────────────────────────── */}
+      <div className="px-4 pb-20 lg:px-8 lg:pb-10 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+
+        {/* Left column */}
+        <div className="space-y-4 lg:col-span-2">
+
+          {/* Ayah card */}
+          <div style={{ background: '#1C1A1F', borderRadius: '14px', padding: '18px 20px', marginTop: '16px', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '17px', color: '#AF4D98', marginBottom: '8px', lineHeight: 1.6, letterSpacing: '0.02em' }}>{todayAyah.arabic}</p>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '6px' }}>&ldquo;{todayAyah.translation}&rdquo;</p>
+            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{todayAyah.reference}</p>
+          </div>
+
+          {/* Profile checklist */}
           {!isInNikahPlanning && (
             <ProfileChecklist
               gender="sister"
@@ -301,79 +394,36 @@ export default function SisterDashboard({
             />
           )}
 
+          {/* Verification prompt */}
           {profile.verification_status !== 'verified' && completionPercentage >= 80 && (
-            <div style={{
-              background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px',
-              padding: '20px', marginTop: '16px', display: 'flex', alignItems: 'center',
-              justifyContent: 'space-between', gap: '16px',
-            }}>
+            <div style={{ background: 'white', border: '0.5px solid #EDE8E3', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ marginBottom: '4px' }}>
                   {profile.verification_status === 'pending' ? (
-                    <span style={{ background: '#FFF7E6', color: '#B45309', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>
-                      Under review
-                    </span>
+                    <span style={{ background: '#FFF7E6', color: '#B45309', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>Under review</span>
                   ) : (
-                    <span style={{ background: '#FDECEA', color: '#C13515', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>
-                      Not verified
-                    </span>
+                    <span style={{ background: '#FDECEA', color: '#C13515', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>Not verified</span>
                   )}
                 </div>
                 <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>
-                  {profile.verification_status === 'pending'
-                    ? 'Verification under review'
-                    : profile.verification_status === 'rejected'
-                    ? 'Verification needs attention'
-                    : 'Verify your identity'}
+                  {profile.verification_status === 'pending' ? 'Verification under review' : profile.verification_status === 'rejected' ? 'Verification needs attention' : 'Verify your identity'}
                 </p>
                 <p style={{ fontSize: '13px', color: '#9B9B9B', lineHeight: 1.5 }}>
-                  {profile.verification_status === 'pending'
-                    ? 'We will notify you within 24 hours, in sha Allah.'
-                    : profile.verification_status === 'rejected'
-                    ? `Rejected: ${profile.verification_rejection_reason}`
-                    : 'A quick selfie to confirm your identity.'}
+                  {profile.verification_status === 'pending' ? 'We will notify you within 24 hours, in sha Allah.' : profile.verification_status === 'rejected' ? `Rejected: ${profile.verification_rejection_reason}` : 'A quick selfie to confirm your identity.'}
                 </p>
               </div>
               {profile.verification_status !== 'pending' && (
-                <button
-                  onClick={() => router.push('/dashboard/verify')}
-                  style={{
-                    background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px',
-                    padding: '10px 18px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                  }}
-                >
+                <button onClick={() => router.push('/dashboard/verify')} style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '10px 18px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {profile.verification_status === 'rejected' ? 'Resubmit →' : 'Verify now →'}
                 </button>
               )}
             </div>
           )}
-        </div>
 
-        <div className="px-6 pb-6 lg:px-8 lg:pb-10 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
-          <div className="space-y-8 lg:col-span-2">
-          {/* ── Connections Counter ──────────────────────────────── */}
-          {!isInNikahPlanning && <div data-testid="connections-counter" className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-            <p className="text-sm text-[#5C5C5C] mb-3 leading-relaxed">
-              You have{' '}
-              <span className="font-medium text-[#1A1A1A]">{connections.length}</span> of 3
-              active connections
-            </p>
-            <div className="flex gap-2">
-              {[0, 1, 2].map(i => (
-                <div
-                  key={i}
-                  className={`h-1.5 flex-1 rounded-full transition-colors ${
-                    i < connections.length ? 'bg-[#AF4D98]' : 'bg-[#EDE8E3]'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>}
-
-          {/* ── Nikah Planning Connections ───────────────────────── */}
+          {/* ── Nikah Planning ──────────────────────────────────── */}
           {nikahConns.length > 0 && (
             <section id="nikah" data-testid="nikah-connections-section">
-              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Nikah Planning</p>
+              <p style={sectionLabel}>Nikah Planning</p>
               <div className="space-y-3">
                 {nikahConns.map(conn => (
                   <div data-testid="nikah-connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#AF4D98]/30 shadow-[0_1px_3px_rgba(175,77,152,0.12)]">
@@ -403,14 +453,11 @@ export default function SisterDashboard({
             </section>
           )}
 
+          {/* Dua card during nikah planning */}
           {isInNikahPlanning && (
-            <div style={{ textAlign: 'center', padding: '32px 20px', background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px' }}>
-              <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '20px', color: '#AF4D98', marginBottom: '8px' }}>
-                بَارَكَ اللَّهُ لَكُمَا
-              </p>
-              <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '280px', margin: '0 auto' }}>
-                May Allah bless your union and make it a source of peace and taqwa.
-              </p>
+            <div style={{ textAlign: 'center', padding: '32px 20px', background: '#1C1A1F', borderRadius: '16px' }}>
+              <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '20px', color: '#AF4D98', marginBottom: '8px' }}>بَارَكَ اللَّهُ لَكُمَا</p>
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, maxWidth: '280px', margin: '0 auto' }}>May Allah bless your union and make it a source of peace and taqwa.</p>
             </div>
           )}
 
@@ -418,162 +465,175 @@ export default function SisterDashboard({
 
           {/* ── Matches ─────────────────────────────────────────── */}
           <section id="matches" data-testid="matches-section">
-            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Your Matches</p>
+            <p style={sectionLabel}>Your Matches</p>
 
             {!profileComplete ? null : visibleMatches.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 20px' }}>
+              <div style={{ textAlign: 'center', padding: '48px 20px', background: '#1C1A1F', borderRadius: '14px' }}>
                 <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '32px', color: '#AF4D98', marginBottom: '12px', opacity: 0.4 }}>نصيب</p>
-                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 400, color: '#AF4D98', marginBottom: '8px' }}>
-                  Matches coming soon
-                </p>
-                <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '260px', margin: '0 auto' }}>
-                  We will notify you when they are ready, in sha Allah.
-                </p>
+                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 400, color: 'rgba(255,255,255,0.7)', marginBottom: '8px' }}>Matches coming soon</p>
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, maxWidth: '260px', margin: '0 auto' }}>We will notify you when they are ready, in sha Allah.</p>
               </div>
             ) : (
-              <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {visibleMatches.map(match => {
                   const b = match.brother
                   const brotherFirstName = b?.full_name?.split(' ')[0] ?? 'Brother'
                   const matchConnection = connections.find(c => c.brother_id === match.brother_id)
+                  const isConnected = !!matchConnection
                   const incomingFromThis = matchConnection ? null : incomingInterests.find(i => i.brother_id === match.brother_id && !localDeclinedIds.has(i.id))
                   const hasSent = !matchConnection && (match.interest?.status === 'pending' || localSentIds.includes(match.brother_id))
-                  const isAccepted = !matchConnection && match.interest?.status === 'accepted'
-                  const hasAnyInterest = !matchConnection && (match.interest !== null || localSentIds.includes(match.brother_id))
 
                   return (
-                    <div data-testid="match-card" key={match.id} onClick={() => openMatchQuickView(match)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 overflow-hidden cursor-pointer">
-                      <div className="p-5">
-                        <div className="flex items-start gap-3 mb-3">
-                          {(b?.photo_urls?.[0] ?? b?.photo_url) ? (
-                            <Image src={toBrotherPhotoUrl(b?.photo_urls?.[0] ?? b?.photo_url) ?? (b?.photo_urls?.[0] ?? b?.photo_url)!} alt={brotherFirstName} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
-                          ) : (
-                            <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
-                              {brotherFirstName[0]?.toUpperCase()}
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{brotherFirstName}</span>
-                              {b?.verification_badge && <VerifiedBadge />}
-                            </div>
-                            <p className="text-sm text-[#9B9B9B] mt-0.5">
-                              {[b?.age ? `${b.age} yrs` : null, b?.location].filter(Boolean).join(' · ')}
-                            </p>
-                          </div>
+                    <div
+                      data-testid="match-card"
+                      key={match.id}
+                      onClick={() => openMatchQuickView(match)}
+                      style={{
+                        background: isConnected ? '#F5E6F2' : 'white',
+                        border: isConnected ? '1.5px solid #AF4D98' : '0.5px solid #EDE8E3',
+                        borderRadius: '14px',
+                        padding: '14px',
+                        transition: 'all 0.15s ease',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {/* Avatar */}
+                      {(b?.photo_urls?.[0] ?? b?.photo_url) ? (
+                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', overflow: 'hidden', marginBottom: '10px' }}>
+                          <Image
+                            src={toBrotherPhotoUrl(b?.photo_urls?.[0] ?? b?.photo_url) ?? (b?.photo_urls?.[0] ?? b?.photo_url)!}
+                            alt={brotherFirstName}
+                            width={48}
+                            height={48}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
                         </div>
-
-                        {match.compatibility_note && (
-                          <p className="border-l-2 border-[#E5A9A9] pl-3 text-sm italic text-[#5C5C5C] mb-3">
-                            {match.compatibility_note}
-                          </p>
-                        )}
-
-                        <div className="pt-3 border-t border-[#EDE8E3]">
-                          {matchConnection ? (
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="text-xs font-medium text-[#00A699] bg-[#E6F9F7] px-2.5 py-1 rounded-full">Active Connection</span>
-                              <div className="flex gap-2">
-                                <Link
-                                  href={`/dashboard/profile/${match.brother_id}?context=connection&connectionId=${matchConnection.id}`}
-                                  onClick={e => e.stopPropagation()}
-                                  className="text-sm font-medium text-[#5C5C5C] py-1 px-2"
-                                >
-                                  Profile
-                                </Link>
-                                <Link
-                                  href={`/dashboard/chat/${matchConnection.id}`}
-                                  onClick={e => e.stopPropagation()}
-                                  className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
-                                >
-                                  Open Chat
-                                </Link>
-                              </div>
-                            </div>
-                          ) : incomingFromThis ? (
-                            <div>
-                              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#AF4D98] mb-2">{brotherFirstName} has expressed interest</p>
-                              {incomingFromThis.intro_message && (
-                                <div className="bg-[#FAF4EE] rounded-[12px] px-3 py-2.5 mb-3 border border-[#EDE8E3]">
-                                  <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Their message</p>
-                                  <p className="text-sm text-[#1A1A1A] italic">&ldquo;{incomingFromThis.intro_message}&rdquo;</p>
-                                </div>
-                              )}
-                              <div className="grid grid-cols-2 gap-2">
-                                <button
-                                  onClick={e => { e.stopPropagation(); handleDecline(incomingFromThis.id) }}
-                                  disabled={declining === incomingFromThis.id}
-                                  className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
-                                >
-                                  {declining === incomingFromThis.id ? '…' : 'Decline'}
-                                </button>
-                                <button
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    if (connectionsFull) setActionError('Close an active connection before accepting.')
-                                    else openAcceptOrPromptPhotos(incomingFromThis)
-                                  }}
-                                  className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
-                                >
-                                  Accept
-                                </button>
-                              </div>
-                            </div>
-                          ) : isAccepted ? (
-                            <div className="flex items-center justify-center py-1">
-                              <span className="text-sm text-[#AF4D98] font-medium">Connected — open chat to continue</span>
-                            </div>
-                          ) : hasSent ? (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-[#9B9B9B] italic">Awaiting response…</span>
-                              <span className="text-sm font-medium text-[#AF4D98]">Interest Sent</span>
-                            </div>
-                          ) : !hasAnyInterest ? (
-                            <div className="flex items-center justify-end">
-                              <button
-                                data-testid="express-interest-btn"
-                                onClick={e => { e.stopPropagation(); openInterestModal(match.brother_id, match.sister_id, brotherFirstName) }}
-                                disabled={connectionsFull}
-                                title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
-                                className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              >
-                                Express Interest
-                              </button>
-                            </div>
-                          ) : null}
+                      ) : (
+                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: getAvatarGradient(b?.full_name), display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: '#AF4D98', marginBottom: '10px' }}>
+                          {b?.full_name?.[0] ?? 'B'}
                         </div>
+                      )}
+
+                      {/* Name + verified */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
+                        <p style={{ fontSize: '14px', fontWeight: 500, color: isConnected ? '#AF4D98' : '#1A1A1A' }}>{brotherFirstName}</p>
+                        {b?.verification_badge && <VerifiedBadge />}
                       </div>
+
+                      {/* Meta */}
+                      <p style={{ fontSize: '11px', color: '#9B9B9B', lineHeight: 1.4, marginBottom: '10px' }}>
+                        {[b?.age ? `${b.age} yrs` : null, b?.location?.split(',')[0]].filter(Boolean).join(' · ')}
+                      </p>
+
+                      {/* CTA */}
+                      {isConnected ? (
+                        <button
+                          onClick={e => { e.stopPropagation(); router.push(`/dashboard/chat/${matchConnection!.id}`) }}
+                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '6px 12px', fontSize: '11px', fontWeight: 500, cursor: 'pointer', width: '100%' }}
+                        >
+                          Open chat
+                        </button>
+                      ) : hasSent ? (
+                        <span style={{ display: 'inline-block', background: '#F5E6F2', color: '#7B2F6E', fontSize: '10px', fontWeight: 500, padding: '4px 10px', borderRadius: '999px' }}>
+                          Awaiting response
+                        </span>
+                      ) : incomingFromThis ? (
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                          <button
+                            onClick={e => {
+                              e.stopPropagation()
+                              if (connectionsFull) setActionError('Close an active connection before accepting.')
+                              else openAcceptOrPromptPhotos(incomingFromThis)
+                            }}
+                            style={{ flex: 1, background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '6px 8px', fontSize: '11px', fontWeight: 500, cursor: 'pointer' }}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleDecline(incomingFromThis.id) }}
+                            disabled={declining === incomingFromThis.id}
+                            style={{ flex: 1, background: 'transparent', color: '#9B9B9B', border: '0.5px solid #EDE8E3', borderRadius: '999px', padding: '6px 8px', fontSize: '11px', cursor: 'pointer', opacity: declining === incomingFromThis.id ? 0.6 : 1 }}
+                          >
+                            {declining === incomingFromThis.id ? '…' : 'Decline'}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          data-testid="express-interest-btn"
+                          onClick={e => { e.stopPropagation(); openInterestModal(match.brother_id, match.sister_id, brotherFirstName) }}
+                          disabled={connectionsFull}
+                          title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
+                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '6px 12px', fontSize: '11px', fontWeight: 500, cursor: connectionsFull ? 'not-allowed' : 'pointer', width: '100%', opacity: connectionsFull ? 0.5 : 1 }}
+                        >
+                          Express Interest
+                        </button>
+                      )}
                     </div>
                   )
                 })}
               </div>
             )}
 
-            {interestError && (
-              <div className="mt-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">
-                {interestError}
-              </div>
+            {actionError && (
+              <div style={{ marginTop: '10px', background: '#FDECEA', border: '1px solid rgba(193,53,21,0.2)', borderRadius: '12px', padding: '12px', fontSize: '13px', color: '#C13515' }}>{actionError}</div>
+            )}
+            {connectionsFull && (
+              <p style={{ marginTop: '10px', fontSize: '12px', color: '#5C5C5C', background: 'rgba(244,228,186,0.4)', border: '0.5px solid #EDE8E3', borderRadius: '12px', padding: '10px 12px' }}>
+                You have 3 active connections. Close one before expressing new interest.
+              </p>
             )}
           </section>
 
           {/* ── Active Connections ───────────────────────────────── */}
           <section id="connections" data-testid="connections-section">
-            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Active Connections</p>
+            <p style={sectionLabel}>Active Connections</p>
+
             {activeConns.length === 0 ? (
-              <EmptyState message="No active connections yet. When a match interest is accepted, a connection will appear here." />
+              <div style={{ background: 'white', border: '0.5px solid #EDE8E3', borderRadius: '14px', padding: '24px', textAlign: 'center' }}>
+                <p style={{ fontSize: '13px', color: '#9B9B9B', lineHeight: 1.5 }}>No active connections yet. When a match interest is accepted, a connection will appear here.</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div>
                 {activeConns.map(conn => (
-                  <div data-testid="connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9DF7E5] mr-1.5 flex-shrink-0" />
-                      <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
+                  <div
+                    data-testid="connection-card"
+                    key={conn.id}
+                    style={{ background: '#1C1A1F', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}
+                  >
+                    {/* Avatar */}
+                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(135deg, #AF4D98, #D66BA0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '18px', color: 'white', flexShrink: 0 }}>
+                      {conn.other_name?.[0] ?? '?'}
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
-                      <Link data-testid="open-chat-btn" href={`/dashboard/chat/${conn.id}`} className="text-center text-sm font-medium text-[#AF4D98] py-2">Chat</Link>
-                      <Link href={`/dashboard/profile/${conn.brother_id}?context=connection&connectionId=${conn.id}`} className="text-center text-sm font-medium text-[#5C5C5C] py-2">Profile</Link>
-                      <Link href={`/dashboard/meetings/${conn.id}`} className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-2 py-2 hover:bg-[#9B3D85] transition-colors">Meeting</Link>
-                      <button onClick={() => { setActionError(null); setCloseModalConnection(conn) }} className="text-sm font-medium text-[#9B9B9B]">Close</button>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: 'white', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {conn.other_name?.split(' ')[0]}
+                      </p>
+                      <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Active connection</p>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                      <Link
+                        data-testid="open-chat-btn"
+                        href={`/dashboard/chat/${conn.id}`}
+                        style={{ background: '#AF4D98', color: 'white', textDecoration: 'none', borderRadius: '999px', padding: '7px 14px', fontSize: '12px', fontWeight: 500 }}
+                      >
+                        Chat
+                      </Link>
+                      <Link
+                        href={`/dashboard/profile/${conn.brother_id}?context=connection&connectionId=${conn.id}`}
+                        style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', textDecoration: 'none', borderRadius: '999px', padding: '7px 14px', fontSize: '12px' }}
+                      >
+                        Profile
+                      </Link>
+                      <button
+                        onClick={() => { setActionError(null); setCloseModalConnection(conn) }}
+                        style={{ background: 'transparent', color: 'rgba(255,255,255,0.3)', border: 'none', fontSize: '12px', cursor: 'pointer', padding: '7px 8px' }}
+                      >
+                        ✕
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -583,74 +643,79 @@ export default function SisterDashboard({
 
           {/* ── Incoming Interests ───────────────────────────────── */}
           {visibleInterests.length > 0 && (
-            <section id="interests">
-              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">New Interest</p>
+            <section id="interests" data-testid="pending-interests-section">
+              <p style={sectionLabel}>New Interest</p>
               <div className="space-y-3">
                 {visibleInterests.map(interest => {
                   const op = interest.other_profile
+                  const brotherFirstName = op?.full_name?.split(' ')[0] ?? 'Brother'
                   return (
-                    <div data-testid="pending-interest-card" key={interest.id} onClick={() => openInterestQuickView(interest)} className="bg-white rounded-[16px] border border-[#EDE8E3] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#D4CBC4] hover:-translate-y-px transition-all duration-150 cursor-pointer">
-                      <div className="p-5">
-                        <div className="flex items-start gap-3 mb-3">
-                          {(op?.photo_urls?.[0] ?? op?.photo_url) ? (
-                            <Image src={toBrotherPhotoUrl(op?.photo_urls?.[0] ?? op?.photo_url) ?? (op?.photo_urls?.[0] ?? op?.photo_url)!} alt={op?.full_name ?? ''} width={56} height={56} className="w-14 h-14 rounded-[12px] object-cover flex-shrink-0" />
-                          ) : (
-                            <div className="w-14 h-14 rounded-[12px] bg-[#F4E4BA] flex items-center justify-center text-[#AF4D98] text-xl font-medium flex-shrink-0">
-                              {(op?.full_name ?? 'B')[0]?.toUpperCase()}
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{op?.full_name ?? 'Brother'}</span>
-                              {op?.verification_badge && <VerifiedBadge />}
-                            </div>
-                            <p className="text-sm text-[#9B9B9B] mt-0.5">
-                              {[op?.age ? `${op.age} yrs` : null, op?.location].filter(Boolean).join(' · ')}
-                            </p>
+                    <div
+                      data-testid="pending-interest-card"
+                      key={interest.id}
+                      onClick={() => openInterestQuickView(interest)}
+                      style={{ background: 'white', border: '0.5px solid #EDE8E3', borderRadius: '14px', padding: '16px', cursor: 'pointer' }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+                        {(op?.photo_urls?.[0] ?? op?.photo_url) ? (
+                          <div style={{ width: '44px', height: '44px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                            <Image
+                              src={toBrotherPhotoUrl(op?.photo_urls?.[0] ?? op?.photo_url) ?? (op?.photo_urls?.[0] ?? op?.photo_url)!}
+                              alt={brotherFirstName}
+                              width={44}
+                              height={44}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                           </div>
-                        </div>
-
-                        {op?.compatibility_note && (
-                          <p className="border-l-2 border-[#E5A9A9] pl-3 text-sm italic text-[#5C5C5C] mb-3">
-                            {op.compatibility_note}
-                          </p>
-                        )}
-
-                        {interest.intro_message && (
-                          <div className="bg-[#FAF4EE] rounded-[12px] px-3 py-2.5 mb-3 border border-[#EDE8E3]">
-                            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-1">Their message</p>
-                            <p className="text-sm text-[#1A1A1A] italic">&ldquo;{interest.intro_message}&rdquo;</p>
+                        ) : (
+                          <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: getAvatarGradient(op?.full_name), display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '18px', color: '#AF4D98', flexShrink: 0 }}>
+                            {brotherFirstName[0]}
                           </div>
                         )}
-
-                        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#EDE8E3]">
-                          <Link
-                            href={`/dashboard/profile/${interest.brother_id}?context=interest&interestId=${interest.id}`}
-                            onClick={e => e.stopPropagation()}
-                            className="text-center text-sm font-medium text-[#AF4D98] py-2"
-                          >
-                            View
-                          </Link>
-                          <button
-                            data-testid="accept-btn"
-                            onClick={e => {
-                              e.stopPropagation()
-                              if (connectionsFull) setActionError('Close an active connection before accepting a new one.')
-                              else openAcceptOrPromptPhotos(interest)
-                            }}
-                            className="text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors"
-                          >
-                            Accept
-                          </button>
-                          <button
-                            data-testid="decline-btn"
-                            onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
-                            disabled={declining === interest.id}
-                            className="text-sm font-medium text-[#9B9B9B] py-2 disabled:opacity-50 transition-colors"
-                          >
-                            {declining === interest.id ? '…' : 'Decline'}
-                          </button>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A' }}>{brotherFirstName}</p>
+                            {op?.verification_badge && <VerifiedBadge />}
+                          </div>
+                          <p style={{ fontSize: '12px', color: '#9B9B9B' }}>{[op?.age ? `${op.age} yrs` : null, op?.location].filter(Boolean).join(' · ')}</p>
                         </div>
+                        <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#AF4D98', fontWeight: 500, background: '#F5E6F2', padding: '3px 10px', borderRadius: '999px' }}>Interested</span>
+                      </div>
+
+                      {interest.intro_message && (
+                        <div style={{ background: '#FDFAF7', borderRadius: '10px', padding: '10px 12px', marginBottom: '10px', border: '0.5px solid #EDE8E3' }}>
+                          <p style={{ fontSize: '11px', color: '#9B9B9B', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>His message</p>
+                          <p style={{ fontSize: '13px', color: '#1A1A1A', fontStyle: 'italic' }}>&ldquo;{interest.intro_message}&rdquo;</p>
+                        </div>
+                      )}
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                        <Link
+                          href={`/dashboard/profile/${interest.brother_id}?context=interest&interestId=${interest.id}`}
+                          onClick={e => e.stopPropagation()}
+                          style={{ textAlign: 'center', fontSize: '13px', fontWeight: 500, color: '#AF4D98', padding: '10px 0', textDecoration: 'none' }}
+                        >
+                          View
+                        </Link>
+                        <button
+                          data-testid="accept-btn"
+                          onClick={e => {
+                            e.stopPropagation()
+                            if (connectionsFull) setActionError('Close an active connection before accepting a new one.')
+                            else openAcceptOrPromptPhotos(interest)
+                          }}
+                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '10px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          data-testid="decline-btn"
+                          onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
+                          disabled={declining === interest.id}
+                          style={{ background: 'transparent', color: '#9B9B9B', border: '0.5px solid #EDE8E3', borderRadius: '999px', padding: '10px', fontSize: '13px', cursor: 'pointer', opacity: declining === interest.id ? 0.6 : 1 }}
+                        >
+                          {declining === interest.id ? '…' : 'Decline'}
+                        </button>
                       </div>
                     </div>
                   )
@@ -658,51 +723,64 @@ export default function SisterDashboard({
               </div>
 
               {actionError && (
-                <div className="mt-3 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">
-                  {actionError}
-                </div>
+                <div style={{ marginTop: '10px', background: '#FDECEA', border: '1px solid rgba(193,53,21,0.2)', borderRadius: '12px', padding: '12px', fontSize: '13px', color: '#C13515' }}>{actionError}</div>
               )}
             </section>
           )}
 
           </>)}
 
-          </div>{/* end left column */}
-          <div className="space-y-6 lg:col-span-1 mt-8 lg:mt-0">
+        </div>{/* end left column */}
+
+        {/* Right column */}
+        <div className="space-y-4 lg:col-span-1 mt-4 lg:mt-4">
+
           {/* ── Notifications ────────────────────────────────────── */}
           <section id="notifications" data-testid="notifications-section">
-            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#9B9B9B] mb-4">Notifications</p>
+            <p style={sectionLabel}>Notifications</p>
 
             {visibleNotifications.length === 0 ? (
-              <EmptyState message="You're all caught up. May Allah bless your journey." />
+              <div style={{ background: 'white', border: '0.5px solid #EDE8E3', borderRadius: '14px', padding: '24px', textAlign: 'center' }}>
+                <p style={{ fontSize: '13px', color: '#9B9B9B' }}>You&apos;re all caught up. May Allah bless your journey.</p>
+              </div>
             ) : (
-              <div className="space-y-2">
-                {visibleNotifications.map(notif => (
+              <div>
+                {visibleNotifications.slice(0, 8).map(notif => (
                   <button
                     key={notif.id}
                     onClick={() => handleMarkRead(notif.id)}
-                    className="w-full text-left bg-[#F9F0F6] rounded-[16px] p-4 border border-[#EDE8E3] hover:border-[#D4CBC4] transition-colors group"
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      background: 'white',
+                      borderLeft: `3px solid ${notif.read ? '#EDE8E3' : '#AF4D98'}`,
+                      borderTop: '0.5px solid #F0EDE8',
+                      borderRight: '0.5px solid #F0EDE8',
+                      borderBottom: '0.5px solid #F0EDE8',
+                      borderRadius: '0 14px 14px 0',
+                      padding: '14px 16px',
+                      marginBottom: '8px',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '10px',
+                      cursor: 'pointer',
+                    }}
                   >
-                    <div className="flex items-start gap-3">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#AF4D98] flex-shrink-0 mt-1.5" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-[#1A1A1A] text-sm">{notif.title}</p>
-                        <p className="text-[#9B9B9B] text-xs mt-0.5 line-clamp-2 leading-relaxed">{notif.body}</p>
-                        <p className="text-[#9B9B9B] text-xs mt-1">{formatRelativeDate(notif.created_at)}</p>
-                      </div>
-                      <span className="text-[10px] text-[#9B9B9B] group-hover:text-[#AF4D98] flex-shrink-0 mt-1 transition-colors">
-                        Mark read
-                      </span>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: notif.read ? '#EDE8E3' : '#AF4D98', flexShrink: 0, marginTop: '4px' }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: '13px', fontWeight: notif.read ? 400 : 500, color: notif.read ? '#9B9B9B' : '#1A1A1A', marginBottom: '2px' }}>{notif.title}</p>
+                      <p style={{ fontSize: '12px', color: '#9B9B9B', lineHeight: 1.4, marginBottom: '3px' }}>{notif.body}</p>
+                      <p style={{ fontSize: '11px', color: '#C0B8B0' }}>{getRelativeTime(notif.created_at)}</p>
                     </div>
                   </button>
                 ))}
               </div>
             )}
           </section>
-          </div>{/* end right column */}
-        </div>{/* end grid */}
-        </div>{/* end max-width */}
-      </div>
+
+        </div>{/* end right column */}
+
+      </div>{/* end grid */}
 
       {/* ── Quick View Modal ─────────────────────────────────────── */}
       <ProfileQuickView
@@ -729,82 +807,20 @@ export default function SisterDashboard({
 
       {/* ── Needs Photos Modal ──────────────────────────────────── */}
       {needsPhotosInterest && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.5)',
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
-        }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '20px 20px 0 0',
-            padding: '28px 24px',
-            width: '100%',
-            maxWidth: '480px',
-          }}>
-            <p style={{
-              fontFamily: 'Noto Naskh Arabic, serif',
-              fontSize: '24px',
-              color: '#AF4D98',
-              textAlign: 'center',
-              marginBottom: '4px',
-            }}>نصيب</p>
-
-            <h2 style={{
-              fontFamily: 'Cormorant Garamond, serif',
-              fontSize: '22px',
-              fontWeight: 400,
-              textAlign: 'center',
-              color: '#1A1A1A',
-              marginBottom: '12px',
-            }}>
-              Add your photos first
-            </h2>
-
-            <p style={{
-              fontSize: '14px',
-              color: '#9B9B9B',
-              textAlign: 'center',
-              lineHeight: 1.6,
-              marginBottom: '8px',
-            }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div style={{ background: 'white', borderRadius: '20px 20px 0 0', padding: '28px 24px', width: '100%', maxWidth: '480px' }}>
+            <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '24px', color: '#AF4D98', textAlign: 'center', marginBottom: '4px' }}>نصيب</p>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 400, textAlign: 'center', color: '#1A1A1A', marginBottom: '12px' }}>Add your photos first</h2>
+            <p style={{ fontSize: '14px', color: '#9B9B9B', textAlign: 'center', lineHeight: 1.6, marginBottom: '8px' }}>
               To accept this interest you need at least 3 photos on your profile. You currently have{' '}
-              <strong style={{ color: '#AF4D98' }}>
-                {sisterPhotoCount} photo{sisterPhotoCount !== 1 ? 's' : ''}
-              </strong>.
+              <strong style={{ color: '#AF4D98' }}>{sisterPhotoCount} photo{sisterPhotoCount !== 1 ? 's' : ''}</strong>.
             </p>
-
-            <p style={{
-              fontSize: '13px',
-              color: '#9B9B9B',
-              textAlign: 'center',
-              lineHeight: 1.6,
-              marginBottom: '24px',
-            }}>
+            <p style={{ fontSize: '13px', color: '#9B9B9B', textAlign: 'center', lineHeight: 1.6, marginBottom: '24px' }}>
               Your photos are only shared with brothers whose interest you accept — they remain completely private otherwise.
             </p>
-
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              justifyContent: 'center',
-              marginBottom: '24px',
-            }}>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
               {[0, 1, 2].map(i => (
-                <div key={i} style={{
-                  width: '72px',
-                  height: '90px',
-                  borderRadius: '10px',
-                  border: `1.5px dashed ${i < sisterPhotoCount ? '#AF4D98' : '#EDE8E3'}`,
-                  overflow: 'hidden',
-                  background: '#FDFAF7',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
+                <div key={i} style={{ width: '72px', height: '90px', borderRadius: '10px', border: `1.5px dashed ${i < sisterPhotoCount ? '#AF4D98' : '#EDE8E3'}`, overflow: 'hidden', background: '#FDFAF7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {i < sisterPhotoCount ? (
                     <span style={{ fontSize: '20px', color: '#AF4D98' }}>✓</span>
                   ) : (
@@ -813,39 +829,15 @@ export default function SisterDashboard({
                 </div>
               ))}
             </div>
-
             <button
-              onClick={() => {
-                setNeedsPhotosInterest(null)
-                router.push('/dashboard/profile/edit/photos')
-              }}
-              style={{
-                width: '100%',
-                background: '#AF4D98',
-                color: 'white',
-                border: 'none',
-                borderRadius: '999px',
-                padding: '14px',
-                fontSize: '15px',
-                fontWeight: 500,
-                cursor: 'pointer',
-                marginBottom: '12px',
-              }}
+              onClick={() => { setNeedsPhotosInterest(null); router.push('/dashboard/profile/edit/photos') }}
+              style={{ width: '100%', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '14px', fontSize: '15px', fontWeight: 500, cursor: 'pointer', marginBottom: '12px' }}
             >
               Add photos now →
             </button>
-
             <button
               onClick={() => setNeedsPhotosInterest(null)}
-              style={{
-                width: '100%',
-                background: 'transparent',
-                border: 'none',
-                color: '#9B9B9B',
-                fontSize: '14px',
-                cursor: 'pointer',
-                padding: '8px',
-              }}
+              style={{ width: '100%', background: 'transparent', border: 'none', color: '#9B9B9B', fontSize: '14px', cursor: 'pointer', padding: '8px' }}
             >
               Not now
             </button>
@@ -860,47 +852,24 @@ export default function SisterDashboard({
             <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '20px', color: '#AF4D98', textAlign: 'center', marginBottom: '16px' }}>
               إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ
             </p>
-            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 400, color: '#1A1A1A', textAlign: 'center', marginBottom: '8px' }}>
-              Close nikah planning?
-            </h2>
+            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 400, color: '#1A1A1A', textAlign: 'center', marginBottom: '8px' }}>Close nikah planning?</h2>
             <p style={{ fontSize: '14px', color: '#5C5C5C', textAlign: 'center', lineHeight: 1.6, marginBottom: '20px' }}>
               We understand that not every journey reaches its destination. May Allah ease your path and guide you to what is best, in sha Allah.
             </p>
             <div style={{ background: '#FDFAF7', border: '1px solid #EDE8E3', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px' }}>
-              <p style={{ fontSize: '12px', fontWeight: 500, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
-                What happens when you close:
-              </p>
-              {[
-                'The connection is permanently closed',
-                'Both parties are notified respectfully',
-                'Chat history is no longer accessible',
-                'Your profile returns to active status',
-                'You may receive new matches in time',
-              ].map((item, i) => (
+              <p style={{ fontSize: '12px', fontWeight: 500, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>What happens when you close:</p>
+              {['The connection is permanently closed', 'Both parties are notified respectfully', 'Chat history is no longer accessible', 'Your profile returns to active status', 'You may receive new matches in time'].map((item, i) => (
                 <p key={i} style={{ fontSize: '13px', color: '#5C5C5C', margin: '0 0 4px', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: 1.5 }}>
                   <span style={{ color: '#9B9B9B' }}>·</span>{item}
                 </p>
               ))}
             </div>
             <p style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>Please select a reason:</p>
-            {[
-              'We are not compatible',
-              'Family concerns',
-              'Personal circumstances have changed',
-              'We have mutually agreed to part ways',
-              'I prefer not to say',
-            ].map(reason => (
+            {['We are not compatible', 'Family concerns', 'Personal circumstances have changed', 'We have mutually agreed to part ways', 'I prefer not to say'].map(reason => (
               <div
                 key={reason}
                 onClick={() => setNikahCloseReason(reason)}
-                style={{
-                  padding: '11px 14px', borderRadius: '10px',
-                  border: `1px solid ${nikahCloseReason === reason ? '#AF4D98' : '#EDE8E3'}`,
-                  background: nikahCloseReason === reason ? '#F5E6F2' : 'white',
-                  cursor: 'pointer', marginBottom: '6px', fontSize: '13px',
-                  color: nikahCloseReason === reason ? '#AF4D98' : '#5C5C5C',
-                  transition: 'all 0.15s ease',
-                }}
+                style={{ padding: '11px 14px', borderRadius: '10px', border: `1px solid ${nikahCloseReason === reason ? '#AF4D98' : '#EDE8E3'}`, background: nikahCloseReason === reason ? '#F5E6F2' : 'white', cursor: 'pointer', marginBottom: '6px', fontSize: '13px', color: nikahCloseReason === reason ? '#AF4D98' : '#5C5C5C', transition: 'all 0.15s ease' }}
               >
                 {reason}
               </div>
@@ -922,13 +891,7 @@ export default function SisterDashboard({
                   setNikahClosing(false)
                 }}
                 disabled={!nikahCloseReason || nikahClosing}
-                style={{
-                  flex: 1, background: nikahCloseReason ? '#C13515' : '#EDE8E3',
-                  color: nikahCloseReason ? 'white' : '#9B9B9B', border: 'none', borderRadius: '999px',
-                  padding: '12px', fontSize: '14px', fontWeight: 500,
-                  cursor: nikahCloseReason && !nikahClosing ? 'pointer' : 'not-allowed',
-                  opacity: nikahClosing ? 0.7 : 1,
-                }}
+                style={{ flex: 1, background: nikahCloseReason ? '#C13515' : '#EDE8E3', color: nikahCloseReason ? 'white' : '#9B9B9B', border: 'none', borderRadius: '999px', padding: '12px', fontSize: '14px', fontWeight: 500, cursor: nikahCloseReason && !nikahClosing ? 'pointer' : 'not-allowed', opacity: nikahClosing ? 0.7 : 1 }}
               >
                 {nikahClosing ? 'Closing...' : 'Close connection'}
               </button>
@@ -996,10 +959,7 @@ export default function SisterDashboard({
               <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{actionError}</div>
             )}
             <div className="space-y-3">
-              <Link
-                href="/dashboard/profile"
-                className="block w-full text-center text-sm font-medium text-[#AF4D98] py-3"
-              >
+              <Link href="/dashboard/profile" className="block w-full text-center text-sm font-medium text-[#AF4D98] py-3">
                 Review My Photos
               </Link>
               <button
@@ -1073,6 +1033,6 @@ export default function SisterDashboard({
           It&apos;s a match! Chat is now open.
         </div>
       )}
-    </>
+    </div>
   )
 }
