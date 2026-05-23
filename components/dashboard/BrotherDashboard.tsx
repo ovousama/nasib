@@ -113,7 +113,6 @@ export default function BrotherDashboard({
 }: Props) {
   const router = useRouter()
   const firstName = brotherProfile?.full_name?.split(' ')[0] ?? 'there'
-  const initials = (brotherProfile?.full_name ?? '').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'N'
 
   const [matches, setMatches] = useState<BrotherMatch[]>(initialMatches ?? [])
   const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections ?? [])
@@ -291,41 +290,19 @@ export default function BrotherDashboard({
   return (
     <div style={{ background: '#F5F0FB', minHeight: '100vh' }}>
 
-      {/* ── Dark Hero Header ────────────────────────────────────── */}
-      <div style={{ background: '#1C1A1F', padding: '20px 20px 28px', position: 'relative', overflow: 'hidden' }}>
-        {/* Geometric pattern overlay */}
+      {/* ── Hero Header ─────────────────────────────────────────── */}
+      <div style={{ background: 'linear-gradient(135deg, #AF4D98, #D66BA0)', padding: '24px 20px 28px', position: 'relative', overflow: 'hidden' }}>
+        {/* Subtle pattern overlay */}
         <div style={{
-          position: 'absolute', inset: 0, opacity: 0.04,
-          backgroundImage: 'repeating-linear-gradient(45deg, #AF4D98 0, #AF4D98 1px, transparent 0, transparent 50%)',
+          position: 'absolute', inset: 0, opacity: 0.06,
+          backgroundImage: 'repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)',
           backgroundSize: '12px 12px', pointerEvents: 'none',
         }} />
 
-        {/* Top row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', position: 'relative' }}>
-          <span style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '22px', color: '#AF4D98', opacity: 0.7 }}>نصيب</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => router.push('/dashboard/notifications')}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              {unreadCount > 0 && (
-                <div style={{ position: 'absolute', top: '-2px', right: '-2px', width: '7px', height: '7px', background: '#AF4D98', borderRadius: '50%', border: '1.5px solid #1C1A1F' }} />
-              )}
-            </div>
-            <div
-              onClick={() => router.push('/dashboard/profile')}
-              style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#AF4D98', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: 'white', cursor: 'pointer', flexShrink: 0 }}
-            >
-              {initials}
-            </div>
-          </div>
-        </div>
-
         {/* Greeting */}
         <div style={{ position: 'relative', marginBottom: '20px' }}>
-          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', marginBottom: '3px' }}>Assalamu Alaikum,</p>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '28px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>{firstName}</h1>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}>Assalamu Alaikum,</p>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '30px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>{firstName}</h1>
         </div>
 
         {/* Stats row */}
@@ -336,12 +313,12 @@ export default function BrotherDashboard({
             { num: unreadCount, label: 'Unread', active: false },
           ].map(stat => (
             <div key={stat.label} style={{
-              background: stat.active ? 'rgba(175,77,152,0.2)' : 'rgba(255,255,255,0.07)',
-              border: `0.5px solid ${stat.active ? 'rgba(175,77,152,0.4)' : 'rgba(255,255,255,0.1)'}`,
+              background: stat.active ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+              border: `1px solid ${stat.active ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)'}`,
               borderRadius: '10px', padding: '12px 10px', textAlign: 'center',
             }}>
-              <div style={{ fontSize: '22px', fontWeight: 500, color: stat.active ? '#D66BA0' : 'white', lineHeight: 1, marginBottom: '3px' }}>{stat.num}</div>
-              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{stat.label}</div>
+              <div style={{ fontSize: '22px', fontWeight: 500, color: 'white', lineHeight: 1, marginBottom: '3px' }}>{stat.num}</div>
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{stat.label}</div>
             </div>
           ))}
         </div>
@@ -353,11 +330,11 @@ export default function BrotherDashboard({
         {/* Left column */}
         <div className="space-y-4 lg:col-span-2">
 
-          {/* Ayah card */}
-          <div style={{ background: '#1C1A1F', borderRadius: '14px', padding: '18px 20px', marginTop: '16px', textAlign: 'center' }}>
+          {/* Ayah card — mobile only (desktop shows verse in top nav) */}
+          <div className="block lg:hidden" style={{ background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px', padding: '18px 20px', marginTop: '16px', textAlign: 'center' }}>
             <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '17px', color: '#AF4D98', marginBottom: '8px', lineHeight: 1.6, letterSpacing: '0.02em' }}>{todayAyah.arabic}</p>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '6px' }}>&ldquo;{todayAyah.translation}&rdquo;</p>
-            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{todayAyah.reference}</p>
+            <p style={{ fontSize: '13px', color: '#5C5C5C', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '6px' }}>&ldquo;{todayAyah.translation}&rdquo;</p>
+            <p style={{ fontSize: '10px', color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{todayAyah.reference}</p>
           </div>
 
           {/* Profile checklist */}
@@ -433,9 +410,9 @@ export default function BrotherDashboard({
 
           {/* Dua card during nikah planning */}
           {isInNikahPlanning && (
-            <div style={{ textAlign: 'center', padding: '32px 20px', background: '#1C1A1F', borderRadius: '16px' }}>
+            <div style={{ textAlign: 'center', padding: '32px 20px', background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px' }}>
               <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '20px', color: '#AF4D98', marginBottom: '8px' }}>بَارَكَ اللَّهُ لَكُمَا</p>
-              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, maxWidth: '280px', margin: '0 auto' }}>May Allah bless your union and make it a source of peace and taqwa.</p>
+              <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '280px', margin: '0 auto' }}>May Allah bless your union and make it a source of peace and taqwa.</p>
             </div>
           )}
 
@@ -446,10 +423,10 @@ export default function BrotherDashboard({
             <p style={sectionLabel}>Your Matches</p>
 
             {!profileComplete ? null : visibleMatches.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 20px', background: '#1C1A1F', borderRadius: '14px' }}>
+              <div style={{ textAlign: 'center', padding: '48px 20px', background: 'white', border: '1px solid #EDE8E3', borderRadius: '14px' }}>
                 <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '32px', color: '#AF4D98', marginBottom: '12px', opacity: 0.4 }}>نصيب</p>
-                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 400, color: 'rgba(255,255,255,0.7)', marginBottom: '8px' }}>Your matches are being prepared</p>
-                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, maxWidth: '260px', margin: '0 auto' }}>We will notify you when they are ready, in sha Allah.</p>
+                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 400, color: '#AF4D98', marginBottom: '8px' }}>Your matches are being prepared</p>
+                <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '260px', margin: '0 auto' }}>We will notify you when they are ready, in sha Allah.</p>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -564,7 +541,7 @@ export default function BrotherDashboard({
                   <div
                     data-testid="connection-card"
                     key={conn.id}
-                    style={{ background: '#1C1A1F', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px' }}
+                    style={{ background: 'white', border: '1px solid #EDE8E3', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px' }}
                   >
                     {/* Top row: avatar + info + actions */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -580,10 +557,10 @@ export default function BrotherDashboard({
 
                       {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: '14px', fontWeight: 500, color: 'white', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {conn.other_name?.split(' ')[0]}
                         </p>
-                        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>Active connection</p>
+                        <p style={{ fontSize: '11px', color: '#9B9B9B' }}>Active connection</p>
                       </div>
 
                       {/* Actions column */}
@@ -598,13 +575,13 @@ export default function BrotherDashboard({
                         <div style={{ display: 'flex', gap: '5px' }}>
                           <button
                             onClick={() => router.push(`/dashboard/profile/${conn.sister_id}?context=connection&connectionId=${conn.id}`)}
-                            style={{ flex: 1, background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '999px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer' }}
+                            style={{ flex: 1, background: 'white', border: '1px solid #EDE8E3', color: '#5C5C5C', borderRadius: '999px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer' }}
                           >
                             Profile
                           </button>
                           <button
                             onClick={() => router.push(`/dashboard/meetings/${conn.id}`)}
-                            style={{ flex: 1, background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '999px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer' }}
+                            style={{ flex: 1, background: 'white', border: '1px solid #EDE8E3', color: '#5C5C5C', borderRadius: '999px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer' }}
                           >
                             Meeting
                           </button>
@@ -613,10 +590,10 @@ export default function BrotherDashboard({
                     </div>
 
                     {/* Close link */}
-                    <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '0.5px solid rgba(255,255,255,0.08)', marginTop: '8px' }}>
+                    <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '1px solid #EDE8E3', marginTop: '8px' }}>
                       <button
                         onClick={() => { setCloseError(null); setCloseModalConnection(conn) }}
-                        style={{ background: 'transparent', border: 'none', fontSize: '11px', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '2px 8px' }}
+                        style={{ background: 'transparent', border: 'none', fontSize: '11px', color: '#C0B8B0', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '2px 8px' }}
                       >
                         Close connection
                       </button>

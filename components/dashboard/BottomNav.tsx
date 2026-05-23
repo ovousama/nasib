@@ -83,8 +83,8 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
         bottom: 0,
         left: 0,
         right: 0,
-        background: '#1C1A1F',
-        borderTop: '0.5px solid rgba(255,255,255,0.08)',
+        background: 'white',
+        borderTop: '1px solid #EDE8E3',
         padding: '8px 0',
         zIndex: 40,
       }}
@@ -101,7 +101,7 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
               key={href}
               href={href}
               data-testid={testId}
-              style={{ color: active ? '#AF4D98' : 'rgba(255,255,255,0.4)' }}
+              style={{ color: active ? '#AF4D98' : '#9B9B9B' }}
               className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
             >
               <Icon active={active} />
@@ -116,7 +116,7 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
             <Link
               href={`/dashboard/nikah/${nikahConnectionId}`}
               data-testid="nav-nikah"
-              style={{ color: active ? '#AF4D98' : 'rgba(255,255,255,0.4)' }}
+              style={{ color: active ? '#AF4D98' : '#9B9B9B' }}
               className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
             >
               <NikahIcon active={active} />
@@ -131,7 +131,7 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
             <Link
               href="/dashboard/how-it-works"
               data-testid="nav-help"
-              style={{ color: active ? '#AF4D98' : 'rgba(255,255,255,0.4)' }}
+              style={{ color: active ? '#AF4D98' : '#9B9B9B' }}
               className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
             >
               <HelpIcon active={active} />
@@ -146,7 +146,7 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
             <Link
               href="/dashboard/notifications"
               data-testid="nav-notifications"
-              style={{ color: active ? '#AF4D98' : 'rgba(255,255,255,0.4)' }}
+              style={{ color: active ? '#AF4D98' : '#9B9B9B' }}
               className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors relative"
             >
               <div className="relative">
@@ -161,7 +161,7 @@ export default function BottomNav({ unreadCount, nikahConnectionId }: Props) {
                       height: '7px',
                       background: '#AF4D98',
                       borderRadius: '50%',
-                      border: '1.5px solid #1C1A1F',
+                      border: '1.5px solid white',
                     }}
                   />
                 )}
