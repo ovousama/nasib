@@ -183,26 +183,46 @@ export default function LandingPage() {
         style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5E6F2 100%)' }}
         className="px-6 pt-8 pb-[60px] lg:pt-10 lg:pb-[60px] lg:min-h-[90vh] lg:flex lg:flex-col lg:justify-center"
       >
-        {/* Logo + Sign in row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px' }}>
-          <span style={{ fontFamily: arabic, fontSize: '24px', color: '#AF4D98', opacity: 0.9 }}>
-            نصيب
-          </span>
-          <Link
-            href="/auth/login"
-            style={{
-              background: 'rgba(175,77,152,0.08)',
-              border: '0.5px solid rgba(175,77,152,0.25)',
-              color: '#AF4D98',
-              fontSize: '13px',
-              fontWeight: 500,
-              padding: '8px 18px',
-              borderRadius: '999px',
-              textDecoration: 'none',
-            }}
-          >
-            Sign in
-          </Link>
+        {/* Logo + nav row */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '48px',
+          width: '100%',
+        }}>
+          <NasibLogo size="sm" theme="light" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <a
+              href="/auth/login"
+              style={{
+                fontSize: '14px',
+                fontWeight: 400,
+                color: '#5C5C5C',
+                textDecoration: 'none',
+                padding: '8px 16px',
+                borderRadius: '999px',
+                border: '1px solid #EDE8E3',
+                background: 'white',
+              }}
+            >
+              Sign in
+            </a>
+            <a
+              href="/auth/signup"
+              style={{
+                fontSize: '14px',
+                fontWeight: 500,
+                color: 'white',
+                textDecoration: 'none',
+                padding: '8px 18px',
+                borderRadius: '999px',
+                background: '#AF4D98',
+              }}
+            >
+              Begin my profile →
+            </a>
+          </div>
         </div>
 
         <div className="max-w-[700px] mx-auto text-center">
