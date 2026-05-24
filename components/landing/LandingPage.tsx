@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import NasibLogo from '@/components/ui/NasibLogo'
 import AnimatedHero from './AnimatedHero'
@@ -169,62 +169,82 @@ const FAQS = [
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const howItWorksRef = useRef<HTMLElement>(null)
+  const [scrolled, setScrolled] = useState(false)
 
   function scrollToHowItWorks() {
     howItWorksRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 60)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <div className="min-h-screen bg-white">
+
+      {/* ── FIXED NAV ─────────────────────────────────────────────────────── */}
+      <div className="px-5 md:px-10" style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        paddingTop: '14px',
+        paddingBottom: '14px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        transition: 'background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease',
+        background: scrolled ? 'rgba(255,255,255,0.85)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
+        boxShadow: scrolled ? '0 1px 0 rgba(175,77,152,0.1)' : 'none',
+      }}>
+        <NasibLogo size="sm" theme="light" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <a
+            href="/auth/login"
+            style={{
+              fontSize: '14px',
+              fontWeight: 400,
+              color: '#5C5C5C',
+              textDecoration: 'none',
+              padding: '8px 16px',
+              borderRadius: '999px',
+              border: scrolled ? '1px solid #EDE8E3' : '1px solid rgba(175,77,152,0.25)',
+              background: scrolled ? 'white' : 'rgba(255,255,255,0.7)',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Sign in
+          </a>
+          <a
+            href="/auth/signup"
+            style={{
+              fontSize: '14px',
+              fontWeight: 500,
+              color: 'white',
+              textDecoration: 'none',
+              padding: '8px 18px',
+              borderRadius: '999px',
+              background: '#AF4D98',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Begin my profile →
+          </a>
+        </div>
+      </div>
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section
         data-testid="landing-hero"
-        style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5E6F2 100%)' }}
-        className="px-6 pt-8 pb-[60px] lg:pt-10 lg:pb-[60px] lg:min-h-[90vh] lg:flex lg:flex-col lg:justify-center"
+        style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5E6F2 100%)', paddingTop: '80px' }}
+        className="px-5 md:px-10 lg:px-16 pb-12 lg:pb-[60px] lg:min-h-[90vh] lg:flex lg:flex-col lg:justify-center"
       >
-        {/* Logo + nav row */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '48px',
-          width: '100%',
-        }}>
-          <NasibLogo size="sm" theme="light" />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <a
-              href="/auth/login"
-              style={{
-                fontSize: '14px',
-                fontWeight: 400,
-                color: '#5C5C5C',
-                textDecoration: 'none',
-                padding: '8px 16px',
-                borderRadius: '999px',
-                border: '1px solid #EDE8E3',
-                background: 'white',
-              }}
-            >
-              Sign in
-            </a>
-            <a
-              href="/auth/signup"
-              style={{
-                fontSize: '14px',
-                fontWeight: 500,
-                color: 'white',
-                textDecoration: 'none',
-                padding: '8px 18px',
-                borderRadius: '999px',
-                background: '#AF4D98',
-              }}
-            >
-              Begin my profile →
-            </a>
-          </div>
-        </div>
-
         <div className="max-w-[700px] mx-auto text-center">
           {/* Ar-Rum verse — first element */}
           <p
