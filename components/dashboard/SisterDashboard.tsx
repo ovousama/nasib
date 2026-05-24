@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 function toBrotherPhotoUrl(path: string | null | undefined): string | null {
@@ -122,6 +123,26 @@ export default function SisterDashboard({
 }: Props) {
   const router = useRouter()
   const firstName = sisterProfile?.full_name?.split(' ')[0] ?? 'there'
+  const initials = sisterProfile?.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
+
+  const [heroDropdownOpen, setHeroDropdownOpen] = useState(false)
+  const heroMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (heroMenuRef.current && !heroMenuRef.current.contains(e.target as Node)) {
+        setHeroDropdownOpen(false)
+      }
+    }
+    if (heroDropdownOpen) document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [heroDropdownOpen])
+
+  const handleHeroSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
+  }
 
   const [matches, setMatches] = useState<SisterMatch[]>(initialMatches ?? [])
   const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections ?? [])
@@ -313,10 +334,65 @@ export default function SisterDashboard({
           backgroundSize: '12px 12px', pointerEvents: 'none',
         }} />
 
+        {/* Top row: Logo + Bell + Avatar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px', position: 'relative' }}>
+          <Link href="/dashboard" style={{ textDecoration: 'none' }}>
+            <span style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '22px', color: 'white', opacity: 0.95 }}>نصيب</span>
+          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            {/* Bell */}
+            <Link href="/dashboard/notifications" style={{ color: 'rgba(255,255,255,0.85)', display: 'flex', position: 'relative' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} style={{ width: '20px', height: '20px' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              </svg>
+              {unreadCount > 0 && (
+                <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '7px', height: '7px', background: 'white', borderRadius: '50%' }} />
+              )}
+            </Link>
+            {/* Avatar */}
+            <div style={{ position: 'relative' }} ref={heroMenuRef}>
+              <button
+                onClick={() => setHeroDropdownOpen(v => !v)}
+                style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(255,255,255,0.3)', cursor: 'pointer' }}
+                aria-label="Profile menu"
+              >
+                {initials}
+              </button>
+              {heroDropdownOpen && (
+                <div style={{ position: 'absolute', right: 0, top: '42px', background: 'white', border: '1px solid #EDE8E3', borderRadius: '14px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', minWidth: '200px', padding: '4px 0', zIndex: 50 }}>
+                  <div style={{ padding: '12px 16px 10px', borderBottom: '1px solid #EDE8E3' }}>
+                    <p style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A1A', marginBottom: '8px' }}>{firstName}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ flex: 1, height: '4px', background: '#EDE8E3', borderRadius: '999px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', background: '#AF4D98', borderRadius: '999px', width: `${completionPercentage}%` }} />
+                      </div>
+                      <span style={{ fontSize: '11px', color: '#9B9B9B', flexShrink: 0 }}>{completionPercentage}%</span>
+                    </div>
+                  </div>
+                  <Link href="/dashboard/profile" onClick={() => setHeroDropdownOpen(false)} style={{ display: 'block', padding: '10px 16px', fontSize: '13px', color: '#1A1A1A', textDecoration: 'none' }}>My profile</Link>
+                  <Link href="/dashboard/how-it-works" onClick={() => setHeroDropdownOpen(false)} style={{ display: 'block', padding: '10px 16px', fontSize: '13px', color: '#1A1A1A', textDecoration: 'none' }}>How it works</Link>
+                  <div style={{ borderTop: '1px solid #EDE8E3', margin: '4px 0' }} />
+                  <button onClick={handleHeroSignOut} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: '13px', color: '#C13515', background: 'transparent', border: 'none', cursor: 'pointer' }}>Sign out</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Greeting */}
         <div style={{ position: 'relative', marginBottom: waliProfile ? '12px' : '20px' }}>
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}>Assalamu Alaikum,</p>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '30px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>{firstName}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '30px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>{firstName}</h1>
+            {profile.verification_badge && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)', fontSize: '11px', fontWeight: 500, padding: '3px 10px', borderRadius: '999px' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style={{ width: '11px', height: '11px' }}>
+                  <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.844-8.791a.75.75 0 00-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.15-.086l4.25-5.5-.001-.002z" clipRule="evenodd" />
+                </svg>
+                Verified
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Wali badge */}
@@ -330,10 +406,11 @@ export default function SisterDashboard({
         )}
 
         {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', position: 'relative' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', position: 'relative' }}>
           {[
             { num: matchCount, label: 'Matches', active: false },
             { num: connectionCount, label: 'Connected', active: connectionCount > 0 },
+            { num: visibleInterests.length, label: 'Interests', active: visibleInterests.length > 0 },
             { num: unreadCount, label: 'Unread', active: false },
           ].map(stat => (
             <div key={stat.label} style={{
@@ -349,13 +426,13 @@ export default function SisterDashboard({
       </div>
 
       {/* ── Body ────────────────────────────────────────────────── */}
-      <div className="px-4 pb-20 lg:px-8 lg:pb-10 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+      <div className="px-4 lg:px-8 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start" style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
         {/* Left column */}
         <div className="space-y-4 lg:col-span-2">
 
-          {/* Ayah card — mobile only (desktop shows verse in top nav) */}
-          <div className="block lg:hidden" style={{ background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px', padding: '18px 20px', marginTop: '16px', textAlign: 'center' }}>
+          {/* Ayah card */}
+          <div style={{ background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px', padding: '18px 20px', marginTop: '16px', textAlign: 'center' }}>
             <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '17px', color: '#AF4D98', marginBottom: '8px', lineHeight: 1.6, letterSpacing: '0.02em' }}>{todayAyah.arabic}</p>
             <p style={{ fontSize: '13px', color: '#5C5C5C', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '6px' }}>&ldquo;{todayAyah.translation}&rdquo;</p>
             <p style={{ fontSize: '10px', color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{todayAyah.reference}</p>
