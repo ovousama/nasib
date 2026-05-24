@@ -15,7 +15,7 @@ type Props = {
   rejectionReason: string | null
 }
 
-export default function VerifyClient({ userId, status, rejectionReason }: Props) {
+export default function VerifyClient({ status, rejectionReason }: Props) {
   const router = useRouter()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -26,49 +26,6 @@ export default function VerifyClient({ userId, status, rejectionReason }: Props)
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState<Step>(status === 'pending' ? 'submitted' : 'intro')
 
-  async function handleSubmit() {
-    if (!capturedImage) return
-    setUploading(true)
-    setError(null)
-    try {
-      const supabase = createClient()
-
-      const res = await fetch(capturedImage)
-      const blob = await res.blob()
-      const file = new File([blob], `selfie-${Date.now()}.jpg`, { type: 'image/jpeg' })
-
-      const path = `${userId}/${Date.now()}-selfie.jpg`
-      const { error: uploadError } = await supabase.storage
-        .from('verification-selfies')
-        .upload(path, file, { upsert: true })
-      if (uploadError) throw uploadError
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          verification_status: 'pending',
-          verification_selfie_path: path,
-          verification_submitted_at: new Date().toISOString(),
-        })
-        .eq('id', userId)
-      if (updateError) throw updateError
-
-      stream?.getTracks().forEach(t => t.stop())
-
-      await supabase.from('notifications').insert({
-        profile_id: userId,
-        type: 'verification_submitted',
-        title: 'Verification submitted',
-        body: 'Your identity verification is under review. We will notify you within 24 hours, in sha Allah.',
-      })
-
-      setStep('submitted')
-    } catch (err: unknown) {
-      setError((err as { message?: string }).message ?? 'Something went wrong.')
-    } finally {
-      setUploading(false)
-    }
-  }
 
   if (step === 'intro') {
     return (
@@ -172,7 +129,75 @@ export default function VerifyClient({ userId, status, rejectionReason }: Props)
         uploading={uploading}
         error={error}
         onRetake={() => { setCapturedImage(null); setStep('camera') }}
-        onSubmit={handleSubmit}
+        onSubmit={async () => {
+          setUploading(true)
+          setError(null)
+
+          try {
+            const supabase = createClient()
+
+            const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+            if (authError || !user) {
+              setError('Your session has expired. Please sign in again.')
+              setUploading(false)
+              return
+            }
+
+            const authenticatedUserId = user.id
+
+            const response = await fetch(capturedImage)
+            const blob = await response.blob()
+            const file = new File([blob], `selfie-${Date.now()}.jpg`, { type: 'image/jpeg' })
+
+            const fileName = `selfie-${Date.now()}.jpg`
+            const uploadPath = `${authenticatedUserId}/${fileName}`
+
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('verification-selfies')
+              .upload(uploadPath, file, { contentType: 'image/jpeg', upsert: true })
+
+            if (uploadError) {
+              console.error('Storage upload error:', uploadError)
+              setError(`Could not upload photo: ${uploadError.message}`)
+              setUploading(false)
+              return
+            }
+
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({
+                verification_status: 'pending',
+                verification_selfie_path: uploadData.path,
+                verification_submitted_at: new Date().toISOString(),
+              })
+              .eq('id', authenticatedUserId)
+
+            if (updateError) {
+              console.error('Profile update error:', updateError)
+              setError(`Could not save verification: ${updateError.message}`)
+              setUploading(false)
+              return
+            }
+
+            await supabase.from('notifications').insert({
+              profile_id: authenticatedUserId,
+              type: 'verification_submitted',
+              title: 'Verification submitted',
+              body: 'Your identity verification is under review. We will notify you within 24 hours, in sha Allah.',
+            })
+
+            stream?.getTracks().forEach(t => t.stop())
+
+            setStep('submitted')
+
+          } catch (err: unknown) {
+            console.error('Verification error:', err)
+            setError((err as { message?: string }).message ?? 'Something went wrong. Please try again.')
+          } finally {
+            setUploading(false)
+          }
+        }}
       />
     )
   }
