@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 function toBrotherPhotoUrl(path: string | null | undefined): string | null {
@@ -122,12 +123,23 @@ export default function SisterDashboard({
   const initials = sisterProfile?.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
 
   const [scrolled, setScrolled] = useState(false)
+  const [avatarOpen, setAvatarOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 80)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (avatarOpen && !(e.target as Element).closest('[data-avatar-menu]')) {
+        setAvatarOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [avatarOpen])
 
   const [matches, setMatches] = useState<SisterMatch[]>(initialMatches ?? [])
   const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections ?? [])
@@ -315,7 +327,7 @@ export default function SisterDashboard({
   }
 
   return (
-    <div style={{ background: 'linear-gradient(180deg, #F5E6F2 0%, #F4E4BA 40%, #FDF5E6 100%)', minHeight: '100vh' }}>
+    <div style={{ background: 'linear-gradient(135deg, #F5E6F2, #F4E4BA)', minHeight: '100vh' }}>
 
       {/* ── Fixed top bar ────────────────────────────────────────── */}
       <div style={{
@@ -347,24 +359,52 @@ export default function SisterDashboard({
               <div style={{ position: 'absolute', top: '6px', right: '6px', width: '6px', height: '6px', background: '#AF4D98', borderRadius: '50%', border: scrolled ? '1.5px solid white' : '1.5px solid #F5E6F2' }} />
             )}
           </button>
-          <button
-            onClick={() => router.push('/dashboard/profile')}
-            style={{
-              width: '34px', height: '34px', borderRadius: '50%',
-              background: '#AF4D98',
-              border: scrolled ? '2px solid rgba(175,77,152,0.3)' : '2px solid rgba(255,255,255,0.5)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '11px', fontWeight: 500, color: 'white',
-              cursor: 'pointer', transition: 'all 0.3s ease',
-            }}
-          >
-            {initials}
-          </button>
+          <div style={{ position: 'relative' }} data-avatar-menu>
+            <button
+              onClick={() => setAvatarOpen(v => !v)}
+              style={{
+                width: '34px', height: '34px', borderRadius: '50%',
+                background: '#AF4D98',
+                border: scrolled ? '2px solid rgba(175,77,152,0.3)' : '2px solid rgba(255,255,255,0.5)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '11px', fontWeight: 500, color: 'white',
+                cursor: 'pointer', transition: 'all 0.3s ease',
+              }}
+            >
+              {initials}
+            </button>
+            {avatarOpen && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', minWidth: '200px', padding: '8px', zIndex: 200 }}>
+                <div style={{ padding: '10px 12px 12px', borderBottom: '1px solid #EDE8E3', marginBottom: '4px' }}>
+                  <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>{firstName}</p>
+                  <p style={{ fontSize: '12px', color: '#9B9B9B' }}>{completionPercentage}% complete</p>
+                </div>
+                {[
+                  { label: 'My profile', href: '/dashboard/profile' },
+                  { label: 'How it works', href: '/dashboard/how-it-works' },
+                  { label: 'Verify identity', href: '/dashboard/verify' },
+                ].map(item => (
+                  <button key={item.href} onClick={() => { router.push(item.href); setAvatarOpen(false) }} style={{ display: 'block', width: '100%', padding: '9px 12px', fontSize: '14px', color: '#1A1A1A', background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', borderRadius: '10px' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#FDFAF7' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+                    {item.label}
+                  </button>
+                ))}
+                <div style={{ borderTop: '1px solid #EDE8E3', marginTop: '4px', paddingTop: '4px' }}>
+                  <button onClick={async () => { const supabase = createClient(); await supabase.auth.signOut(); router.push('/auth/login') }} style={{ display: 'block', width: '100%', padding: '9px 12px', fontSize: '14px', color: '#C13515', background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', borderRadius: '10px' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#FDECEA' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+                    Sign out
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* ── Hero Header ─────────────────────────────────────────── */}
-      <div style={{ background: 'linear-gradient(135deg, #F5E6F2 0%, #E8A0CC 40%, #D66BA0 100%)', padding: '76px 20px 28px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5E6F2 100%)', padding: '76px 20px 28px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)', backgroundSize: '12px 12px', pointerEvents: 'none' }} />
 
         {/* Greeting + verification pill */}
@@ -409,14 +449,14 @@ export default function SisterDashboard({
         {/* Stats — 4-column grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', position: 'relative' }}>
           {[
-            { num: matchCount, label: 'Matches' },
-            { num: connectionCount, label: 'Connected' },
-            { num: unreadCount, label: 'Unread' },
-            { num: `${completionPercentage}%`, label: 'Complete' },
+            { num: matchCount, label: 'Assigned Matches' },
+            { num: connectionCount, label: 'Active Connections' },
+            { num: unreadCount, label: 'Unread Notifications' },
+            { num: `${completionPercentage}%`, label: 'Profile Completion' },
           ].map(stat => (
             <div key={stat.label} style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(175,77,152,0.2)', borderRadius: '12px', padding: '14px 8px', textAlign: 'center' }}>
               <p style={{ fontSize: '28px', fontWeight: 500, color: '#1A1A1A', lineHeight: 1, marginBottom: '4px' }}>{stat.num}</p>
-              <p style={{ fontSize: '11px', color: '#9B7090' }}>{stat.label}</p>
+              <p style={{ fontSize: '9px', color: '#9B7090', whiteSpace: 'normal', lineHeight: 1.3, textAlign: 'center' }}>{stat.label}</p>
             </div>
           ))}
         </div>
