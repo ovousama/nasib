@@ -118,11 +118,13 @@ export default function DashboardShell({ userId, initialUnreadCount, nikahConnec
 
   return (
     <>
-      <main className={`flex-1 ${isChatPage ? '' : 'pb-20'}`}>
+      <main className={`flex-1 ${isChatPage ? '' : 'pb-20 lg:pb-10'}`}>
         {children}
       </main>
       {!isChatPage && (
-        <BottomNav unreadCount={unreadCount} nikahConnectionId={nikahConnectionId} />
+        <div className="lg:hidden">
+          <BottomNav unreadCount={unreadCount} nikahConnectionId={nikahConnectionId} />
+        </div>
       )}
 
       {/* Toast notifications */}
