@@ -386,20 +386,26 @@ export default function SisterDashboard({
           </div>
         </div>
 
-        {/* Greeting */}
-        <div style={{ position: 'relative', marginBottom: waliProfile ? '14px' : '20px' }}>
+        {/* Greeting + verification pill */}
+        <div style={{ position: 'relative' }}>
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '6px' }}>Assalamu Alaikum,</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '52px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>{firstName}</h1>
-            {profile.verification_badge && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)', fontSize: '11px', fontWeight: 500, padding: '3px 10px', borderRadius: '999px' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style={{ width: '11px', height: '11px' }}>
-                  <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.844-8.791a.75.75 0 00-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.15-.086l4.25-5.5-.001-.002z" clipRule="evenodd" />
-                </svg>
-                Verified
-              </span>
-            )}
-          </div>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '52px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1, marginBottom: '12px' }}>{firstName}</h1>
+          {profile.verification_status === 'verified' ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '999px', padding: '5px 14px', marginBottom: waliProfile ? '14px' : '20px', fontSize: '13px', background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)', color: 'white' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style={{ width: '13px', height: '13px', flexShrink: 0 }}>
+                <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.844-8.791a.75.75 0 00-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.15-.086l4.25-5.5-.001-.002z" clipRule="evenodd" />
+              </svg>
+              Verified member
+            </span>
+          ) : profile.verification_status === 'pending' ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '999px', padding: '5px 14px', marginBottom: waliProfile ? '14px' : '20px', fontSize: '13px', background: 'rgba(255,200,0,0.2)', border: '1px solid rgba(255,200,0,0.3)', color: 'white' }}>
+              Under review
+            </span>
+          ) : (
+            <button onClick={() => router.push('/dashboard/verify')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '999px', padding: '5px 14px', marginBottom: waliProfile ? '14px' : '20px', fontSize: '13px', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', cursor: 'pointer' }}>
+              Verify now →
+            </button>
+          )}
         </div>
 
         {/* Wali badge */}
@@ -446,48 +452,6 @@ export default function SisterDashboard({
 
         {/* Left column */}
         <div className="space-y-4 lg:col-span-2">
-
-          {/* Profile checklist */}
-          {!isInNikahPlanning && (
-            <ProfileChecklist
-              gender="sister"
-              profile={sisterProfile as unknown as Record<string, unknown>}
-              completionPercentage={completionPercentage}
-              referenceComplete={hasReference}
-            />
-          )}
-
-          {/* Verification card */}
-          {profile.verification_status !== 'verified' && completionPercentage >= 80 && (
-            <div style={{ ...glassCard, padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-              {/* Shield icon */}
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: profile.verification_status === 'pending' ? '#FFF7E6' : profile.verification_status === 'rejected' ? '#FDECEA' : '#F5E6F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={profile.verification_status === 'pending' ? '#B45309' : profile.verification_status === 'rejected' ? '#C13515' : '#AF4D98'} strokeWidth={1.5} style={{ width: '22px', height: '22px' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                </svg>
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ marginBottom: '4px' }}>
-                  {profile.verification_status === 'pending' ? (
-                    <span style={{ background: '#FFF7E6', color: '#B45309', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>Under review</span>
-                  ) : (
-                    <span style={{ background: '#FDECEA', color: '#C13515', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>Not verified</span>
-                  )}
-                </div>
-                <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>
-                  {profile.verification_status === 'pending' ? 'Verification under review' : profile.verification_status === 'rejected' ? 'Verification needs attention' : 'Verify your identity'}
-                </p>
-                <p style={{ fontSize: '13px', color: '#9B9B9B', lineHeight: 1.5 }}>
-                  {profile.verification_status === 'pending' ? 'We will notify you within 24 hours, in sha Allah.' : profile.verification_status === 'rejected' ? `Rejected: ${profile.verification_rejection_reason}` : 'A quick selfie to confirm your identity.'}
-                </p>
-              </div>
-              {profile.verification_status !== 'pending' && (
-                <button onClick={() => router.push('/dashboard/verify')} style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '10px 18px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  {profile.verification_status === 'rejected' ? 'Resubmit →' : 'Verify now →'}
-                </button>
-              )}
-            </div>
-          )}
 
           {/* ── Nikah Planning ──────────────────────────────────── */}
           {nikahConns.length > 0 && (
@@ -819,6 +783,16 @@ export default function SisterDashboard({
         {/* Right column */}
         <div className="space-y-4 lg:col-span-1 mt-4 lg:mt-0">
 
+          {/* Profile checklist — right column, only when incomplete */}
+          {!isInNikahPlanning && completionPercentage < 80 && (
+            <ProfileChecklist
+              gender="sister"
+              profile={sisterProfile as unknown as Record<string, unknown>}
+              completionPercentage={completionPercentage}
+              referenceComplete={hasReference}
+            />
+          )}
+
           {/* ── Notifications ────────────────────────────────────── */}
           <section id="notifications" data-testid="notifications-section">
             <p style={sectionLabel}>Notifications</p>
@@ -857,6 +831,35 @@ export default function SisterDashboard({
               </div>
             )}
           </section>
+
+          {/* Identity/verify card — always shown unless verified */}
+          {profile.verification_status !== 'verified' && (
+            <section>
+              <p style={{ fontSize: '11px', fontWeight: 500, color: '#6B6080', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px' }}>Identity</p>
+              <div style={{ ...glassCard, padding: '18px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: profile.verification_status !== 'pending' ? '14px' : '0' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: profile.verification_status === 'pending' ? '#FFF7E6' : profile.verification_status === 'rejected' ? '#FDECEA' : '#F5E6F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={profile.verification_status === 'pending' ? '#B45309' : profile.verification_status === 'rejected' ? '#C13515' : '#AF4D98'} strokeWidth={1.5} style={{ width: '20px', height: '20px' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>
+                      {profile.verification_status === 'pending' ? 'Verification under review' : profile.verification_status === 'rejected' ? 'Verification needs attention' : 'Verify your identity'}
+                    </p>
+                    <p style={{ fontSize: '12px', color: '#9B9B9B', lineHeight: 1.4 }}>
+                      {profile.verification_status === 'pending' ? 'We will notify you within 24 hours' : profile.verification_status === 'rejected' ? profile.verification_rejection_reason ?? 'Please resubmit' : 'Quick selfie · 2 minutes'}
+                    </p>
+                  </div>
+                </div>
+                {profile.verification_status !== 'pending' && (
+                  <button onClick={() => router.push('/dashboard/verify')} style={{ width: '100%', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '10px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                    {profile.verification_status === 'rejected' ? 'Resubmit →' : 'Verify now →'}
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
 
         </div>{/* end right column */}
 

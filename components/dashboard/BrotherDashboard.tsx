@@ -289,16 +289,13 @@ export default function BrotherDashboard({
     return !matchConn
   })
 
-  // Hero stats
   const matchCount = visibleMatches.length
   const connectionCount = activeConns.length
   const unreadCount = visibleNotifications.length
 
-  // Daily ayah (rotates by day)
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
   const todayAyah = AYAHS[dayOfYear % AYAHS.length]
 
-  // Shared styles
   const sectionLabel: React.CSSProperties = {
     fontSize: '11px',
     fontWeight: 500,
@@ -314,17 +311,23 @@ export default function BrotherDashboard({
     borderRadius: '16px',
   }
 
+  // Hero pill shared style
+  const heroPillBase: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    borderRadius: '999px',
+    padding: '5px 14px',
+    marginBottom: '20px',
+    fontSize: '13px',
+  }
+
   return (
     <div style={{ background: 'linear-gradient(180deg, #F5E6F2 0%, #F4E4BA 40%, #FDF5E6 100%)', minHeight: '100vh' }}>
 
       {/* ── Hero Header ─────────────────────────────────────────── */}
       <div style={{ background: 'linear-gradient(135deg, #C2477A 0%, #D4689A 40%, #E896B8 70%, #EFB8CC 100%)', padding: '24px 20px 32px', position: 'relative', overflow: 'hidden' }}>
-        {/* Subtle pattern overlay */}
-        <div style={{
-          position: 'absolute', inset: 0, opacity: 0.06,
-          backgroundImage: 'repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)',
-          backgroundSize: '12px 12px', pointerEvents: 'none',
-        }} />
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.06, backgroundImage: 'repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)', backgroundSize: '12px 12px', pointerEvents: 'none' }} />
 
         {/* Top row: Logo + Bell + Avatar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px', position: 'relative' }}>
@@ -332,22 +335,14 @@ export default function BrotherDashboard({
             <span style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '22px', color: 'white', opacity: 0.95 }}>نصيب</span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            {/* Bell */}
             <Link href="/dashboard/notifications" style={{ color: 'rgba(255,255,255,0.85)', display: 'flex', position: 'relative' }}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} style={{ width: '20px', height: '20px' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
-              {unreadCount > 0 && (
-                <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '7px', height: '7px', background: 'white', borderRadius: '50%' }} />
-              )}
+              {unreadCount > 0 && <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '7px', height: '7px', background: 'white', borderRadius: '50%' }} />}
             </Link>
-            {/* Avatar */}
             <div style={{ position: 'relative' }} ref={heroMenuRef}>
-              <button
-                onClick={() => setHeroDropdownOpen(v => !v)}
-                style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(255,255,255,0.3)', cursor: 'pointer' }}
-                aria-label="Profile menu"
-              >
+              <button onClick={() => setHeroDropdownOpen(v => !v)} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(255,255,255,0.3)', cursor: 'pointer' }} aria-label="Profile menu">
                 {initials}
               </button>
               {heroDropdownOpen && (
@@ -371,23 +366,30 @@ export default function BrotherDashboard({
           </div>
         </div>
 
-        {/* Greeting */}
-        <div style={{ position: 'relative', marginBottom: '20px' }}>
+        {/* Greeting + status pill */}
+        <div style={{ position: 'relative' }}>
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '6px' }}>Assalamu Alaikum,</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '52px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>{firstName}</h1>
-            {profile.verification_badge && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)', fontSize: '11px', fontWeight: 500, padding: '3px 10px', borderRadius: '999px' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style={{ width: '11px', height: '11px' }}>
-                  <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.844-8.791a.75.75 0 00-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.15-.086l4.25-5.5-.001-.002z" clipRule="evenodd" />
-                </svg>
-                Verified
-              </span>
-            )}
-          </div>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '52px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1, marginBottom: '12px' }}>{firstName}</h1>
+          {/* ISSUE 1: Verification status pill — always visible */}
+          {profile.verification_status === 'verified' ? (
+            <span style={{ ...heroPillBase, background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)', color: 'white' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style={{ width: '13px', height: '13px', flexShrink: 0 }}>
+                <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.844-8.791a.75.75 0 00-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.15-.086l4.25-5.5-.001-.002z" clipRule="evenodd" />
+              </svg>
+              Verified member
+            </span>
+          ) : profile.verification_status === 'pending' ? (
+            <span style={{ ...heroPillBase, background: 'rgba(255,200,0,0.2)', border: '1px solid rgba(255,200,0,0.3)', color: 'white' }}>
+              Under review
+            </span>
+          ) : (
+            <button onClick={() => router.push('/dashboard/verify')} style={{ ...heroPillBase, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', cursor: 'pointer' }}>
+              Verify now →
+            </button>
+          )}
         </div>
 
-        {/* Verse — inside hero */}
+        {/* Verse */}
         <div style={{ background: 'rgba(255,255,255,0.12)', border: '0.5px solid rgba(255,255,255,0.2)', borderRadius: '14px', padding: '14px 16px', marginBottom: '20px', position: 'relative' }}>
           <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '16px', color: 'white', marginBottom: '5px', letterSpacing: '0.02em', lineHeight: 1.5 }}>{todayAyah.arabic}</p>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '3px' }}>&ldquo;{todayAyah.translation}&rdquo;</p>
@@ -402,13 +404,7 @@ export default function BrotherDashboard({
             { num: unreadCount, label: 'Unread' },
             { num: `${completionPercentage}%`, label: 'Complete' },
           ].map(stat => (
-            <div key={stat.label} style={{
-              background: 'rgba(255,255,255,0.15)',
-              border: '0.5px solid rgba(255,255,255,0.25)',
-              borderRadius: '12px',
-              padding: '14px 8px',
-              textAlign: 'center',
-            }}>
+            <div key={stat.label} style={{ background: 'rgba(255,255,255,0.15)', border: '0.5px solid rgba(255,255,255,0.25)', borderRadius: '12px', padding: '14px 8px', textAlign: 'center' }}>
               <p style={{ fontSize: '28px', fontWeight: 500, color: 'white', lineHeight: 1, marginBottom: '4px' }}>{stat.num}</p>
               <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>{stat.label}</p>
             </div>
@@ -416,59 +412,16 @@ export default function BrotherDashboard({
         </div>
       </div>
 
-      {/* ── Body ────────────────────────────────────────────────── */}
-      <div className="px-4 lg:px-8 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start" style={{ maxWidth: '1100px', margin: '0 auto', paddingTop: '24px', paddingBottom: '24px' }}>
+      {/* ── Body — ISSUE 2: pure Tailwind for grid, no inline style ── */}
+      <div className="px-4 pt-6 pb-24 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start lg:max-w-6xl lg:mx-auto lg:px-8 lg:pt-8 lg:pb-16">
 
-        {/* Left column */}
-        <div className="space-y-4 lg:col-span-2">
-
-          {/* Profile checklist */}
-          {!isInNikahPlanning && (
-            <ProfileChecklist
-              gender="brother"
-              profile={brotherProfile as unknown as Record<string, unknown>}
-              completionPercentage={completionPercentage}
-              referenceComplete={hasReference}
-            />
-          )}
-
-          {/* Verification card */}
-          {profile.verification_status !== 'verified' && completionPercentage >= 80 && (
-            <div style={{ ...glassCard, padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-              {/* Shield icon */}
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: profile.verification_status === 'pending' ? '#FFF7E6' : profile.verification_status === 'rejected' ? '#FDECEA' : '#F5E6F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={profile.verification_status === 'pending' ? '#B45309' : profile.verification_status === 'rejected' ? '#C13515' : '#AF4D98'} strokeWidth={1.5} style={{ width: '22px', height: '22px' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                </svg>
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ marginBottom: '4px' }}>
-                  {profile.verification_status === 'pending' ? (
-                    <span style={{ background: '#FFF7E6', color: '#B45309', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>Under review</span>
-                  ) : (
-                    <span style={{ background: '#FDECEA', color: '#C13515', fontSize: '11px', fontWeight: 500, padding: '2px 8px', borderRadius: '999px' }}>Not verified</span>
-                  )}
-                </div>
-                <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>
-                  {profile.verification_status === 'pending' ? 'Verification under review' : profile.verification_status === 'rejected' ? 'Verification needs attention' : 'Verify your identity'}
-                </p>
-                <p style={{ fontSize: '13px', color: '#9B9B9B', lineHeight: 1.5 }}>
-                  {profile.verification_status === 'pending' ? 'We will notify you within 24 hours, in sha Allah.' : profile.verification_status === 'rejected' ? `Rejected: ${profile.verification_rejection_reason}` : 'A quick selfie to confirm your identity.'}
-                </p>
-              </div>
-              {profile.verification_status !== 'pending' && (
-                <button onClick={() => router.push('/dashboard/verify')} style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '10px 18px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  {profile.verification_status === 'rejected' ? 'Resubmit →' : 'Verify now →'}
-                </button>
-              )}
-            </div>
-          )}
+        {/* Left column — content sections only */}
+        <div className="space-y-5 lg:col-span-2">
 
           {/* ── Nikah Planning ──────────────────────────────────── */}
           {nikahConns.length > 0 && (
             <section id="nikah" data-testid="nikah-connections-section">
               <p style={sectionLabel}>Nikah Planning</p>
-              {/* Arabic blessing centered */}
               <div style={{ textAlign: 'center', marginBottom: '16px' }}>
                 <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '22px', color: '#AF4D98' }}>بَارَكَ اللَّهُ لَكُمَا</p>
                 <p style={{ fontSize: '13px', color: '#9B9B9B', marginTop: '4px' }}>May Allah bless your union.</p>
@@ -483,7 +436,7 @@ export default function BrotherDashboard({
                       ) : (
                         <span style={{ fontSize: '18px', marginRight: '2px' }}>🤍</span>
                       )}
-                      <span style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A1A', letterSpacing: '-0.01em' }}>{conn.other_name}</span>
+                      <span style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A1A' }}>{conn.other_name}</span>
                       <span style={{ marginLeft: 'auto', fontSize: '11px', fontWeight: 500, color: '#AF4D98', background: '#F5E6F2', padding: '3px 10px', borderRadius: '999px' }}>Nikah Planning</span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
@@ -507,7 +460,6 @@ export default function BrotherDashboard({
           {/* ── Matches ─────────────────────────────────────────── */}
           <section id="matches" data-testid="matches-section">
             <p style={sectionLabel}>Your Matches</p>
-
             {!profileComplete ? null : visibleMatches.length === 0 ? (
               <div style={{ ...glassCard, textAlign: 'center', padding: '48px 20px' }}>
                 <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '32px', color: '#AF4D98', marginBottom: '12px', opacity: 0.4 }}>نصيب</p>
@@ -522,77 +474,37 @@ export default function BrotherDashboard({
                   const isConnected = !!matchConn
                   const hasSent = localSentIds.includes(match.sister_id)
                   const incomingFromThis = matchConn ? null : incomingInterests.find(i => i.sister_id === match.sister_id && !localDeclinedIds.has(i.id))
-
                   return (
-                    <div
-                      data-testid="match-card"
-                      key={match.id}
-                      onClick={() => openMatchQuickView(match)}
-                      style={{
-                        ...glassCard,
-                        padding: '16px',
-                        cursor: 'pointer',
-                        border: isConnected ? '1.5px solid #AF4D98' : '1px solid rgba(175,77,152,0.12)',
-                        background: isConnected ? 'rgba(245,230,242,0.9)' : 'rgba(255,255,255,0.85)',
-                      }}
-                    >
-                      {/* 52px Avatar */}
+                    <div data-testid="match-card" key={match.id} onClick={() => openMatchQuickView(match)} style={{ ...glassCard, padding: '16px', cursor: 'pointer', border: isConnected ? '1.5px solid #AF4D98' : '1px solid rgba(175,77,152,0.12)', background: isConnected ? 'rgba(245,230,242,0.9)' : 'rgba(255,255,255,0.85)' }}>
                       <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: getAvatarGradient(match.sister?.full_name), display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', color: '#AF4D98', marginBottom: '12px' }}>
                         {match.sister?.full_name?.[0] ?? 'S'}
                       </div>
-
-                      {/* Name + verified */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', flexWrap: 'wrap' }}>
                         <p style={{ fontSize: '15px', fontWeight: 500, color: isConnected ? '#AF4D98' : '#1A1A1A' }}>{sisterFirstName}</p>
                         {match.sister?.verification_badge && <VerifiedBadge />}
                       </div>
-
-                      {/* Meta */}
                       <p style={{ fontSize: '11px', color: '#9B9B9B', lineHeight: 1.4, marginBottom: '12px' }}>
                         {[match.sister?.age ? `${match.sister.age} yrs` : null, match.sister?.location?.split(',')[0]].filter(Boolean).join(' · ')}
                       </p>
-
-                      {/* CTA — full width */}
                       {isConnected ? (
-                        <button
-                          onClick={e => { e.stopPropagation(); router.push(`/dashboard/chat/${matchConn!.id}`) }}
-                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '8px 12px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', width: '100%' }}
-                        >
+                        <button onClick={e => { e.stopPropagation(); router.push(`/dashboard/chat/${matchConn!.id}`) }} style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '8px 12px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', width: '100%' }}>
                           Open chat
                         </button>
                       ) : hasSent ? (
-                        <div style={{ background: '#F5E6F2', color: '#7B2F6E', fontSize: '11px', fontWeight: 500, padding: '8px 10px', borderRadius: '999px', textAlign: 'center', width: '100%' }}>
+                        <div style={{ background: '#F5E6F2', color: '#7B2F6E', fontSize: '12px', fontWeight: 500, padding: '8px 10px', borderRadius: '999px', textAlign: 'center' }}>
                           Awaiting response
                         </div>
                       ) : incomingFromThis ? (
-                        <div style={{ display: 'flex', gap: '5px' }}>
-                          <button
-                            onClick={e => {
-                              e.stopPropagation()
-                              if (connectionsFull) setActionError('Close an active connection before accepting.')
-                              else handleAccept(incomingFromThis.id)
-                            }}
-                            disabled={accepting === incomingFromThis.id}
-                            style={{ flex: 1, background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '7px 8px', fontSize: '11px', fontWeight: 500, cursor: 'pointer', opacity: accepting === incomingFromThis.id ? 0.6 : 1 }}
-                          >
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button onClick={e => { e.stopPropagation(); if (connectionsFull) setActionError('Close an active connection before accepting.'); else handleAccept(incomingFromThis.id) }} disabled={accepting === incomingFromThis.id} style={{ flex: 1, background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '8px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', opacity: accepting === incomingFromThis.id ? 0.6 : 1 }}>
                             {accepting === incomingFromThis.id ? '…' : 'Accept'}
                           </button>
-                          <button
-                            onClick={e => { e.stopPropagation(); handleDecline(incomingFromThis.id) }}
-                            disabled={declining === incomingFromThis.id}
-                            style={{ flex: 1, background: 'transparent', color: '#9B9B9B', border: '1px solid rgba(175,77,152,0.15)', borderRadius: '999px', padding: '7px 8px', fontSize: '11px', cursor: 'pointer', opacity: declining === incomingFromThis.id ? 0.6 : 1 }}
-                          >
+                          <button onClick={e => { e.stopPropagation(); handleDecline(incomingFromThis.id) }} disabled={declining === incomingFromThis.id} style={{ flex: 1, background: 'rgba(0,0,0,0.06)', color: '#9B9B9B', border: 'none', borderRadius: '999px', padding: '8px', fontSize: '12px', cursor: 'pointer', opacity: declining === incomingFromThis.id ? 0.6 : 1 }}>
                             {declining === incomingFromThis.id ? '…' : 'Decline'}
                           </button>
                         </div>
                       ) : (
-                        <button
-                          data-testid="express-interest-btn"
-                          onClick={e => { e.stopPropagation(); openInterestModal(profile.id, match.sister_id, sisterFirstName) }}
-                          disabled={connectionsFull}
-                          title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
-                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '8px 12px', fontSize: '12px', fontWeight: 500, cursor: connectionsFull ? 'not-allowed' : 'pointer', width: '100%', opacity: connectionsFull ? 0.5 : 1 }}
-                        >
+                        <button data-testid="express-interest-btn" onClick={e => { e.stopPropagation(); openInterestModal(profile.id, match.sister_id, sisterFirstName) }} disabled={connectionsFull} title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined} style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '8px 12px', fontSize: '13px', fontWeight: 500, cursor: connectionsFull ? 'not-allowed' : 'pointer', width: '100%', opacity: connectionsFull ? 0.5 : 1 }}>
                           Express interest
                         </button>
                       )}
@@ -601,7 +513,6 @@ export default function BrotherDashboard({
                 })}
               </div>
             )}
-
             {actionError && (
               <div style={{ marginTop: '10px', background: '#FDECEA', border: '1px solid rgba(193,53,21,0.2)', borderRadius: '12px', padding: '12px', fontSize: '13px', color: '#C13515' }}>{actionError}</div>
             )}
@@ -615,7 +526,6 @@ export default function BrotherDashboard({
           {/* ── Active Connections ───────────────────────────────── */}
           <section id="connections" data-testid="connections-section">
             <p style={sectionLabel}>Active Connections</p>
-
             {activeConns.length === 0 ? (
               <div style={{ ...glassCard, padding: '24px', textAlign: 'center' }}>
                 <p style={{ fontSize: '13px', color: '#9B9B9B', lineHeight: 1.5 }}>No active connections yet. Express interest in a match to begin.</p>
@@ -623,14 +533,8 @@ export default function BrotherDashboard({
             ) : (
               <div>
                 {activeConns.map(conn => (
-                  <div
-                    data-testid="connection-card"
-                    key={conn.id}
-                    style={{ ...glassCard, padding: '16px', marginBottom: '10px' }}
-                  >
-                    {/* Top row: avatar + info */}
+                  <div data-testid="connection-card" key={conn.id} style={{ ...glassCard, padding: '16px', marginBottom: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-                      {/* Avatar */}
                       <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #C2477A, #E896B8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: 'white', flexShrink: 0, overflow: 'hidden' }}>
                         {connPhotoUrls[conn.id] ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -639,44 +543,25 @@ export default function BrotherDashboard({
                           conn.other_name?.[0] ?? '?'
                         )}
                       </div>
-                      {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {conn.other_name?.split(' ')[0]}
-                        </p>
+                        <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{conn.other_name?.split(' ')[0]}</p>
                         <p style={{ fontSize: '11px', color: '#9B9B9B' }}>Active connection</p>
                       </div>
                     </div>
-
-                    {/* Action buttons — 2fr 1fr 1fr grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '6px', marginBottom: '10px' }}>
-                      <button
-                        data-testid="open-chat-btn"
-                        onClick={() => router.push(`/dashboard/chat/${conn.id}`)}
-                        style={{ padding: '9px', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
-                      >
+                    {/* ISSUE 7: Connection card buttons — explicit colors */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                      <button data-testid="open-chat-btn" onClick={() => router.push(`/dashboard/chat/${conn.id}`)} style={{ padding: '10px', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
                         Open chat
                       </button>
-                      <button
-                        onClick={() => router.push(`/dashboard/profile/${conn.sister_id}?context=connection&connectionId=${conn.id}`)}
-                        style={{ padding: '9px', background: 'rgba(175,77,152,0.1)', color: '#AF4D98', border: 'none', borderRadius: '999px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
-                      >
+                      <button onClick={() => router.push(`/dashboard/profile/${conn.sister_id}?context=connection&connectionId=${conn.id}`)} style={{ padding: '10px', background: 'rgba(175,77,152,0.1)', color: '#AF4D98', border: 'none', borderRadius: '999px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
                         Profile
                       </button>
-                      <button
-                        onClick={() => router.push(`/dashboard/meetings/${conn.id}`)}
-                        style={{ padding: '9px', background: 'rgba(175,77,152,0.1)', color: '#AF4D98', border: 'none', borderRadius: '999px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
-                      >
+                      <button onClick={() => router.push(`/dashboard/meetings/${conn.id}`)} style={{ padding: '10px', background: 'rgba(175,77,152,0.1)', color: '#AF4D98', border: 'none', borderRadius: '999px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
                         Meeting
                       </button>
                     </div>
-
-                    {/* Close link */}
                     <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '1px solid rgba(175,77,152,0.08)' }}>
-                      <button
-                        onClick={() => { setCloseError(null); setCloseModalConnection(conn) }}
-                        style={{ background: 'transparent', border: 'none', fontSize: '11px', color: '#C0B8B0', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '2px 8px' }}
-                      >
+                      <button onClick={() => { setCloseError(null); setCloseModalConnection(conn) }} style={{ background: 'transparent', border: 'none', fontSize: '11px', color: '#C0B8B0', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '2px 8px' }}>
                         Close connection
                       </button>
                     </div>
@@ -695,21 +580,7 @@ export default function BrotherDashboard({
                   const op = interest.other_profile
                   const sisterFirstName = op?.full_name?.split(' ')[0] ?? 'Sister'
                   return (
-                    <div
-                      data-testid="pending-interest-card"
-                      key={interest.id}
-                      onClick={() => openInterestQuickView(interest)}
-                      style={{
-                        background: 'rgba(255,255,255,0.85)',
-                        borderLeft: '3px solid #AF4D98',
-                        borderTop: '1px solid rgba(175,77,152,0.12)',
-                        borderRight: '1px solid rgba(175,77,152,0.12)',
-                        borderBottom: '1px solid rgba(175,77,152,0.12)',
-                        borderRadius: '0 16px 16px 0',
-                        padding: '16px',
-                        cursor: 'pointer',
-                      }}
-                    >
+                    <div data-testid="pending-interest-card" key={interest.id} onClick={() => openInterestQuickView(interest)} style={{ background: 'rgba(255,255,255,0.85)', borderLeft: '3px solid #AF4D98', borderTop: '1px solid rgba(175,77,152,0.12)', borderRight: '1px solid rgba(175,77,152,0.12)', borderBottom: '1px solid rgba(175,77,152,0.12)', borderRadius: '0 16px 16px 0', padding: '16px', cursor: 'pointer' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
                         <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: getAvatarGradient(op?.full_name), display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: '#AF4D98', flexShrink: 0 }}>
                           {sisterFirstName[0]}
@@ -723,34 +594,19 @@ export default function BrotherDashboard({
                         </div>
                         <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#AF4D98', fontWeight: 500, background: '#F5E6F2', padding: '3px 10px', borderRadius: '999px' }}>Interested</span>
                       </div>
-
                       {interest.intro_message && (
                         <div style={{ background: '#FDFAF7', borderRadius: '10px', padding: '10px 12px', marginBottom: '10px', border: '1px solid rgba(175,77,152,0.08)' }}>
                           <p style={{ fontSize: '11px', color: '#9B9B9B', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Her message</p>
                           <p style={{ fontSize: '13px', color: '#1A1A1A', fontStyle: 'italic' }}>&ldquo;{interest.intro_message}&rdquo;</p>
                         </div>
                       )}
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                        <button
-                          data-testid="decline-btn"
-                          onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
-                          disabled={declining === interest.id}
-                          style={{ background: 'transparent', color: '#9B9B9B', border: '1px solid rgba(175,77,152,0.15)', borderRadius: '999px', padding: '10px', fontSize: '13px', cursor: 'pointer', opacity: declining === interest.id ? 0.6 : 1 }}
-                        >
-                          {declining === interest.id ? '…' : 'Decline'}
-                        </button>
-                        <button
-                          data-testid="accept-btn"
-                          onClick={e => {
-                            e.stopPropagation()
-                            if (connectionsFull) setActionError('Close an active connection before accepting a new one.')
-                            else { setActionError(null); handleAccept(interest.id) }
-                          }}
-                          disabled={accepting === interest.id}
-                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '10px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', opacity: accepting === interest.id ? 0.6 : 1 }}
-                        >
+                      {/* ISSUE 4: Both Accept and Decline always present */}
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button data-testid="accept-btn" onClick={e => { e.stopPropagation(); if (connectionsFull) setActionError('Close an active connection before accepting a new one.'); else { setActionError(null); handleAccept(interest.id) } }} disabled={accepting === interest.id} style={{ flex: 1, padding: '8px 16px', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', opacity: accepting === interest.id ? 0.6 : 1 }}>
                           {accepting === interest.id ? '…' : 'Accept'}
+                        </button>
+                        <button data-testid="decline-btn" onClick={e => { e.stopPropagation(); handleDecline(interest.id) }} disabled={declining === interest.id} style={{ flex: 1, padding: '8px 16px', background: 'rgba(0,0,0,0.06)', color: '#9B9B9B', border: 'none', borderRadius: '999px', fontSize: '13px', cursor: 'pointer', opacity: declining === interest.id ? 0.6 : 1 }}>
+                          {declining === interest.id ? '…' : 'Decline'}
                         </button>
                       </div>
                     </div>
@@ -764,13 +620,22 @@ export default function BrotherDashboard({
 
         </div>{/* end left column */}
 
-        {/* Right column */}
-        <div className="space-y-4 lg:col-span-1 mt-4 lg:mt-0">
+        {/* Right column — checklist + notifications + verify card */}
+        <div className="space-y-5 lg:col-span-1 mt-6 lg:mt-0">
+
+          {/* Profile checklist — right column, only when incomplete */}
+          {!isInNikahPlanning && completionPercentage < 80 && (
+            <ProfileChecklist
+              gender="brother"
+              profile={brotherProfile as unknown as Record<string, unknown>}
+              completionPercentage={completionPercentage}
+              referenceComplete={hasReference}
+            />
+          )}
 
           {/* ── Notifications ────────────────────────────────────── */}
           <section id="notifications" data-testid="notifications-section">
             <p style={sectionLabel}>Notifications</p>
-
             {visibleNotifications.length === 0 ? (
               <div style={{ ...glassCard, padding: '24px', textAlign: 'center' }}>
                 <p style={{ fontSize: '13px', color: '#9B9B9B' }}>You&apos;re all caught up. May Allah bless your journey.</p>
@@ -778,22 +643,7 @@ export default function BrotherDashboard({
             ) : (
               <div style={{ ...glassCard, overflow: 'hidden' }}>
                 {visibleNotifications.slice(0, 8).map((notif, idx) => (
-                  <button
-                    key={notif.id}
-                    onClick={() => handleMarkRead(notif.id)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      background: 'transparent',
-                      border: 'none',
-                      borderTop: idx === 0 ? 'none' : '1px solid rgba(175,77,152,0.08)',
-                      padding: '14px 16px',
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: '10px',
-                      cursor: 'pointer',
-                    }}
-                  >
+                  <button key={notif.id} onClick={() => handleMarkRead(notif.id)} style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', borderTop: idx === 0 ? 'none' : '1px solid rgba(175,77,152,0.08)', padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: notif.read ? '#EDE8E3' : '#AF4D98', flexShrink: 0, marginTop: '4px' }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: '13px', fontWeight: notif.read ? 400 : 500, color: notif.read ? '#9B9B9B' : '#1A1A1A', marginBottom: '2px' }}>{notif.title}</p>
@@ -806,6 +656,35 @@ export default function BrotherDashboard({
             )}
           </section>
 
+          {/* ISSUE 5: Identity/verify card — right column, always shows unless verified */}
+          {profile.verification_status !== 'verified' && (
+            <section>
+              <p style={sectionLabel}>Identity</p>
+              <div style={{ ...glassCard, padding: '18px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: profile.verification_status !== 'pending' ? '14px' : '0' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: profile.verification_status === 'pending' ? '#FFF7E6' : profile.verification_status === 'rejected' ? '#FDECEA' : '#F5E6F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={profile.verification_status === 'pending' ? '#B45309' : profile.verification_status === 'rejected' ? '#C13515' : '#AF4D98'} strokeWidth={1.5} style={{ width: '20px', height: '20px' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>
+                      {profile.verification_status === 'pending' ? 'Verification under review' : profile.verification_status === 'rejected' ? 'Verification needs attention' : 'Verify your identity'}
+                    </p>
+                    <p style={{ fontSize: '12px', color: '#9B9B9B', lineHeight: 1.4 }}>
+                      {profile.verification_status === 'pending' ? 'We will notify you within 24 hours' : profile.verification_status === 'rejected' ? profile.verification_rejection_reason ?? 'Please resubmit' : 'Quick selfie · 2 minutes'}
+                    </p>
+                  </div>
+                </div>
+                {profile.verification_status !== 'pending' && (
+                  <button onClick={() => router.push('/dashboard/verify')} style={{ width: '100%', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '10px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                    {profile.verification_status === 'rejected' ? 'Resubmit →' : 'Verify now →'}
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
+
         </div>{/* end right column */}
 
       </div>{/* end grid */}
@@ -816,17 +695,8 @@ export default function BrotherDashboard({
         gender="sister"
         isOpen={!!quickView}
         onClose={() => setQuickView(null)}
-        onAccept={quickView?.showActions && quickView.pendingInterest ? () => {
-          const pi = quickView.pendingInterest!
-          setQuickView(null)
-          if (connectionsFull) setActionError('Close an active connection before accepting.')
-          else handleAccept(pi.id)
-        } : undefined}
-        onDecline={quickView?.showActions && quickView.pendingInterest ? () => {
-          const pi = quickView.pendingInterest!
-          setQuickView(null)
-          handleDecline(pi.id)
-        } : undefined}
+        onAccept={quickView?.showActions && quickView.pendingInterest ? () => { const pi = quickView.pendingInterest!; setQuickView(null); if (connectionsFull) setActionError('Close an active connection before accepting.'); else handleAccept(pi.id) } : undefined}
+        onDecline={quickView?.showActions && quickView.pendingInterest ? () => { const pi = quickView.pendingInterest!; setQuickView(null); handleDecline(pi.id) } : undefined}
         showActions={quickView?.showActions ?? false}
         introMessage={quickView?.introMessage}
         compatibilityNote={quickView?.compatibilityNote}
@@ -838,35 +708,16 @@ export default function BrotherDashboard({
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
           <div className="bg-white rounded-[24px] p-8 w-full max-w-sm shadow-[0_4px_8px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)]">
             <h3 className="text-xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-2">Close Connection</h3>
-            <p className="text-[#5C5C5C] text-sm leading-relaxed mb-3">
-              Are you sure you want to close your connection with{' '}
-              <strong className="text-[#1A1A1A] font-medium">{closeModalConnection.other_name}</strong>? This cannot be undone.
-            </p>
+            <p className="text-[#5C5C5C] text-sm leading-relaxed mb-3">Are you sure you want to close your connection with <strong className="text-[#1A1A1A] font-medium">{closeModalConnection.other_name}</strong>? This cannot be undone.</p>
             <div className="bg-[#F4E4BA]/40 border border-[#EDE8E3] rounded-[12px] px-4 py-3 mb-6">
-              <p className="text-xs text-[#5C5C5C] leading-relaxed">
-                Access to {closeModalConnection.other_name}&apos;s photos will be revoked immediately.
-              </p>
+              <p className="text-xs text-[#5C5C5C] leading-relaxed">Access to {closeModalConnection.other_name}&apos;s photos will be revoked immediately.</p>
             </div>
-            {closeError && (
-              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{closeError}</div>
-            )}
+            {closeError && <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{closeError}</div>}
             <div className="space-y-3">
-              <button
-                onClick={async () => {
-                  if (!closeModalConnection) return
-                  setClosing(true)
-                  setCloseError(null)
-                  await handleCloseConnection(closeModalConnection.id)
-                  setClosing(false)
-                }}
-                disabled={closing}
-                className="w-full bg-[#C13515] text-white font-medium py-3 rounded-full hover:bg-[#a02d10] disabled:opacity-50 transition-colors text-sm"
-              >
+              <button onClick={async () => { if (!closeModalConnection) return; setClosing(true); setCloseError(null); await handleCloseConnection(closeModalConnection.id); setClosing(false) }} disabled={closing} className="w-full bg-[#C13515] text-white font-medium py-3 rounded-full hover:bg-[#a02d10] disabled:opacity-50 transition-colors text-sm">
                 {closing ? 'Closing…' : 'Close Connection'}
               </button>
-              <button onClick={() => { setCloseModalConnection(null); setCloseError(null) }} className="w-full text-[#9B9B9B] text-sm py-2 hover:text-[#1A1A1A] transition-colors">
-                Cancel
-              </button>
+              <button onClick={() => { setCloseModalConnection(null); setCloseError(null) }} className="w-full text-[#9B9B9B] text-sm py-2 hover:text-[#1A1A1A] transition-colors">Cancel</button>
             </div>
           </div>
         </div>
@@ -882,9 +733,7 @@ export default function BrotherDashboard({
             <div style={{ background: '#FDFAF7', border: '1px solid #EDE8E3', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px' }}>
               <p style={{ fontSize: '12px', fontWeight: 500, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>What happens when you close:</p>
               {['The connection is permanently closed', 'Both parties are notified respectfully', 'Chat history is no longer accessible', 'Your profile returns to active status', 'You may receive new matches in time'].map((item, i) => (
-                <p key={i} style={{ fontSize: '13px', color: '#5C5C5C', margin: '0 0 4px', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: 1.5 }}>
-                  <span style={{ color: '#9B9B9B' }}>·</span>{item}
-                </p>
+                <p key={i} style={{ fontSize: '13px', color: '#5C5C5C', margin: '0 0 4px', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: 1.5 }}><span style={{ color: '#9B9B9B' }}>·</span>{item}</p>
               ))}
             </div>
             <p style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>Please select a reason:</p>
@@ -895,18 +744,7 @@ export default function BrotherDashboard({
             ))}
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
               <button onClick={() => { setNikahCloseModal(null); setNikahCloseReason('') }} style={{ flex: 1, background: 'white', border: '1px solid #EDE8E3', borderRadius: '999px', padding: '12px', fontSize: '14px', color: '#5C5C5C', cursor: 'pointer' }}>Keep going</button>
-              <button
-                onClick={async () => {
-                  if (!nikahCloseReason || !nikahCloseModal) return
-                  setNikahClosing(true)
-                  await handleCloseConnection(nikahCloseModal.id, nikahCloseReason)
-                  setNikahCloseModal(null)
-                  setNikahCloseReason('')
-                  setNikahClosing(false)
-                }}
-                disabled={!nikahCloseReason || nikahClosing}
-                style={{ flex: 1, background: nikahCloseReason ? '#C13515' : '#EDE8E3', color: nikahCloseReason ? 'white' : '#9B9B9B', border: 'none', borderRadius: '999px', padding: '12px', fontSize: '14px', fontWeight: 500, cursor: nikahCloseReason && !nikahClosing ? 'pointer' : 'not-allowed', opacity: nikahClosing ? 0.7 : 1 }}
-              >
+              <button onClick={async () => { if (!nikahCloseReason || !nikahCloseModal) return; setNikahClosing(true); await handleCloseConnection(nikahCloseModal.id, nikahCloseReason); setNikahCloseModal(null); setNikahCloseReason(''); setNikahClosing(false) }} disabled={!nikahCloseReason || nikahClosing} style={{ flex: 1, background: nikahCloseReason ? '#C13515' : '#EDE8E3', color: nikahCloseReason ? 'white' : '#9B9B9B', border: 'none', borderRadius: '999px', padding: '12px', fontSize: '14px', fontWeight: 500, cursor: nikahCloseReason && !nikahClosing ? 'pointer' : 'not-allowed', opacity: nikahClosing ? 0.7 : 1 }}>
                 {nikahClosing ? 'Closing...' : 'Close connection'}
               </button>
             </div>
@@ -921,29 +759,15 @@ export default function BrotherDashboard({
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-medium text-[#1A1A1A] tracking-[-0.02em]">Express Interest in {interestModal.firstName}</h3>
               <button onClick={() => setInterestModal(null)} className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors p-1" aria-label="Close">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                  <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
               </button>
             </div>
             <p className="text-sm text-[#5C5C5C] mb-4 leading-relaxed">Write a short message to introduce yourself. This is optional but encouraged.</p>
-            <textarea
-              data-testid="intro-message-input"
-              value={introMessage}
-              onChange={e => setIntroMessage(e.target.value)}
-              placeholder="Assalamu Alaikum, I came across your profile and felt it aligned well with what I am looking for…"
-              rows={4}
-              maxLength={300}
-              className="w-full border border-[#EDE8E3] rounded-[12px] px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#9B9B9B] focus:outline-none focus:ring-2 focus:ring-[#AF4D98]/8 focus:border-[#AF4D98] resize-none transition-all duration-150"
-            />
+            <textarea data-testid="intro-message-input" value={introMessage} onChange={e => setIntroMessage(e.target.value)} placeholder="Assalamu Alaikum, I came across your profile and felt it aligned well with what I am looking for…" rows={4} maxLength={300} className="w-full border border-[#EDE8E3] rounded-[12px] px-4 py-3 text-sm text-[#1A1A1A] placeholder:text-[#9B9B9B] focus:outline-none focus:ring-2 focus:ring-[#AF4D98]/8 focus:border-[#AF4D98] resize-none transition-all duration-150" />
             <p className="text-xs text-[#9B9B9B] text-right mt-1 mb-5">{introMessage.length}/300</p>
-            {interestError && (
-              <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{interestError}</div>
-            )}
+            {interestError && <div className="mb-4 bg-[#FDECEA] border border-[#C13515]/20 rounded-[12px] p-3 text-sm text-[#C13515]">{interestError}</div>}
             <div className="space-y-2">
-              <button data-testid="send-interest-btn" onClick={handleSendInterest} disabled={interestLoading} className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-3 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors text-sm">
-                {interestLoading ? 'Sending…' : 'Send Interest'}
-              </button>
+              <button data-testid="send-interest-btn" onClick={handleSendInterest} disabled={interestLoading} className="w-full rounded-full bg-[#AF4D98] text-white font-medium py-3 hover:bg-[#9B3D85] disabled:opacity-50 transition-colors text-sm">{interestLoading ? 'Sending…' : 'Send Interest'}</button>
               <button onClick={() => setInterestModal(null)} className="w-full text-[#9B9B9B] text-sm py-2 hover:text-[#1A1A1A] transition-colors">Cancel</button>
             </div>
           </div>
