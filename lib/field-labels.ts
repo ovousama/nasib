@@ -272,6 +272,15 @@ export const SLIDER_FIELDS = [
   'family_traditional_vs_modern',
 ]
 
+export const SLIDER_LABELS: Record<string, { left: string; right: string }> = {
+  traditional_vs_reformist: { left: 'Traditional', right: 'Reformist' },
+  emotional_availability: { left: 'Reserved', right: 'Open' },
+  cultural_background_importance: { left: 'Not important', right: 'Very important' },
+  home_organisation: { left: 'Relaxed', right: 'Organised' },
+  career_identity_importance: { left: 'Not important', right: 'Core identity' },
+  family_traditional_vs_modern: { left: 'Traditional', right: 'Modern' },
+}
+
 export const VALUE_LABELS: Record<string, Record<string, string>> = {
   religiosity_level: {
     practicing: 'Practicing',
@@ -337,12 +346,6 @@ export const VALUE_LABELS: Record<string, Record<string, string>> = {
     rarely: 'Rarely',
     depends: 'Depends on situation',
   },
-  spouse_religiosity_preference: {
-    practicing: 'Practicing',
-    moderately_practicing: 'Moderately practicing',
-    spiritually_inclined: 'Spiritually inclined',
-    open: 'Open to any level',
-  },
   introvert_extrovert: {
     introvert: 'Introvert',
     extrovert: 'Extrovert',
@@ -356,6 +359,64 @@ export const VALUE_LABELS: Record<string, Record<string, string>> = {
     '100_150k': '$100,000–$150,000',
     over_150k: 'Over $150,000',
     prefer_not_to_say: 'Prefer not to say',
+  },
+  savings_plan: {
+    actively_saving: 'Actively saving',
+    occasional_saving: 'Occasional saving',
+    not_saving: 'Not currently saving',
+    no_plan: 'No savings plan',
+  },
+  plan_to_work_after_marriage: {
+    yes_full_time: 'Yes — full time',
+    yes_part_time: 'Yes — part time',
+    part_time_after_children: 'Part-time after children',
+    flexible: 'Flexible',
+    no: 'No, prefer not to',
+    undecided: 'Undecided',
+  },
+  primary_caregiver_comfort: {
+    happy_to_be_primary: 'Happy to be primary caregiver',
+    shared: 'Prefer shared caregiving',
+    not_primary: 'Prefer not to be primary',
+    undecided: 'Undecided',
+  },
+  career_pause_for_children: {
+    yes: 'Yes, would pause',
+    no: 'No, would not pause',
+    partial: 'Partial pause',
+    depends: 'Depends on circumstances',
+  },
+  hajj_status: {
+    completed: 'Completed Hajj',
+    saving: 'Saving for Hajj',
+    planning: 'Planning to perform Hajj',
+    not_yet: 'Not yet planned',
+  },
+  willing_to_relocate: {
+    yes: 'Yes, willing',
+    no: 'Not willing',
+    depends: 'Depends on the situation',
+  },
+  spouse_age_min: {},
+  spouse_age_max: {},
+  spouse_religiosity_preference: {
+    practicing: 'Practicing',
+    moderately_practicing: 'Moderately practicing',
+    slightly_more_practicing: 'Slightly more practicing',
+    similarly_practicing: 'Similarly practicing',
+    spiritually_inclined: 'Spiritually inclined',
+    open: 'Open to any level',
+  },
+  ethnicity: {
+    arab: 'Arab',
+    south_asian: 'South Asian',
+    african: 'African',
+    east_asian: 'East Asian',
+    european: 'European',
+    caribbean: 'Caribbean',
+    latin_american: 'Latin American',
+    mixed: 'Mixed heritage',
+    other: 'Other',
   },
 }
 

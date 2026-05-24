@@ -125,3 +125,8 @@ input[type="range"]::-moz-range-track {
   border-radius: 2px;
   background: #EDE8E3;
 }
+
+/* Profile view: remove border-bottom from last row in each section card */
+.profile-section-rows > div:last-child {
+  border-bottom: none !important;
+}
