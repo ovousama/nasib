@@ -405,21 +405,32 @@ export default function SisterDashboard({
           </div>
         )}
 
-        {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', position: 'relative' }}>
+        {/* Verse — inside hero */}
+        <div style={{ background: 'rgba(255,255,255,0.12)', border: '0.5px solid rgba(255,255,255,0.2)', borderRadius: '14px', padding: '14px 16px', marginBottom: '20px', position: 'relative' }}>
+          <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '16px', color: 'white', marginBottom: '5px', letterSpacing: '0.02em', lineHeight: 1.5 }}>{todayAyah.arabic}</p>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '3px' }}>&ldquo;{todayAyah.translation}&rdquo;</p>
+          <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.07em', textTransform: 'uppercase' }}>{todayAyah.reference}</p>
+        </div>
+
+        {/* Stats pills */}
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', position: 'relative' }}>
           {[
-            { num: matchCount, label: 'Matches', active: false },
-            { num: connectionCount, label: 'Connected', active: connectionCount > 0 },
-            { num: visibleInterests.length, label: 'Interests', active: visibleInterests.length > 0 },
-            { num: unreadCount, label: 'Unread', active: false },
+            { num: matchCount, label: 'Matches', highlight: false },
+            { num: connectionCount, label: 'Connected', highlight: connectionCount > 0 },
+            { num: unreadCount, label: 'Unread', highlight: false },
+            { num: `${completionPercentage}%`, label: 'Complete', highlight: false },
           ].map(stat => (
             <div key={stat.label} style={{
-              background: stat.active ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
-              border: `1px solid ${stat.active ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.15)'}`,
-              borderRadius: '10px', padding: '12px 10px', textAlign: 'center',
+              background: stat.highlight ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.15)',
+              border: `0.5px solid ${stat.highlight ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.2)'}`,
+              borderRadius: '10px',
+              padding: '8px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
             }}>
-              <div style={{ fontSize: '22px', fontWeight: 500, color: 'white', lineHeight: 1, marginBottom: '3px' }}>{stat.num}</div>
-              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{stat.label}</div>
+              <span style={{ fontSize: '16px', fontWeight: 500, color: 'white', lineHeight: 1 }}>{stat.num}</span>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>{stat.label}</span>
             </div>
           ))}
         </div>
@@ -430,13 +441,6 @@ export default function SisterDashboard({
 
         {/* Left column */}
         <div className="space-y-4 lg:col-span-2">
-
-          {/* Ayah card */}
-          <div style={{ background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px', padding: '18px 20px', marginTop: '16px', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '17px', color: '#AF4D98', marginBottom: '8px', lineHeight: 1.6, letterSpacing: '0.02em' }}>{todayAyah.arabic}</p>
-            <p style={{ fontSize: '13px', color: '#5C5C5C', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '6px' }}>&ldquo;{todayAyah.translation}&rdquo;</p>
-            <p style={{ fontSize: '10px', color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{todayAyah.reference}</p>
-          </div>
 
           {/* Profile checklist */}
           {!isInNikahPlanning && (
@@ -669,34 +673,33 @@ export default function SisterDashboard({
                         <p style={{ fontSize: '11px', color: '#9B9B9B' }}>Active connection</p>
                       </div>
 
-                      {/* Actions column */}
-                      <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        <button
-                          data-testid="open-chat-btn"
-                          onClick={() => router.push(`/dashboard/chat/${conn.id}`)}
-                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '7px 14px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
-                        >
-                          Chat
-                        </button>
-                        <div style={{ display: 'flex', gap: '5px' }}>
-                          <button
-                            onClick={() => router.push(`/dashboard/profile/${conn.brother_id}?context=connection&connectionId=${conn.id}`)}
-                            style={{ flex: 1, background: 'white', border: '1px solid #EDE8E3', color: '#5C5C5C', borderRadius: '999px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer' }}
-                          >
-                            Profile
-                          </button>
-                          <button
-                            onClick={() => router.push(`/dashboard/meetings/${conn.id}`)}
-                            style={{ flex: 1, background: 'white', border: '1px solid #EDE8E3', color: '#5C5C5C', borderRadius: '999px', padding: '6px 10px', fontSize: '11px', cursor: 'pointer' }}
-                          >
-                            Meeting
-                          </button>
-                        </div>
-                      </div>
+                    </div>
+
+                    {/* Action buttons — 2fr 1fr 1fr grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '6px', marginBottom: '10px', marginTop: '12px' }}>
+                      <button
+                        data-testid="open-chat-btn"
+                        onClick={() => router.push(`/dashboard/chat/${conn.id}`)}
+                        style={{ padding: '9px', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
+                      >
+                        Open chat
+                      </button>
+                      <button
+                        onClick={() => router.push(`/dashboard/profile/${conn.brother_id}?context=connection&connectionId=${conn.id}`)}
+                        style={{ padding: '9px', background: 'rgba(175,77,152,0.1)', color: '#AF4D98', border: 'none', borderRadius: '999px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
+                      >
+                        Profile
+                      </button>
+                      <button
+                        onClick={() => router.push(`/dashboard/meetings/${conn.id}`)}
+                        style={{ padding: '9px', background: 'rgba(175,77,152,0.1)', color: '#AF4D98', border: 'none', borderRadius: '999px', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
+                      >
+                        Meeting
+                      </button>
                     </div>
 
                     {/* Close link */}
-                    <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '1px solid #EDE8E3', marginTop: '8px' }}>
+                    <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '0.5px solid rgba(175,77,152,0.08)' }}>
                       <button
                         onClick={() => { setActionError(null); setCloseModalConnection(conn) }}
                         style={{ background: 'transparent', border: 'none', fontSize: '11px', color: '#C0B8B0', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '2px 8px' }}
