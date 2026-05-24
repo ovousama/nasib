@@ -1,11 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
 import ProfileQuickView from '@/components/dashboard/ProfileQuickView'
-import ProfileChecklist from '@/components/dashboard/ProfileChecklist'
 import {
   expressInterest,
   acceptInterest,
@@ -95,7 +93,6 @@ type Props = {
   notifications: Notification[]
   profileComplete: boolean
   completionPercentage: number
-  hasReference: boolean
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -110,30 +107,18 @@ export default function BrotherDashboard({
   notifications,
   profileComplete,
   completionPercentage,
-  hasReference,
 }: Props) {
   const router = useRouter()
   const firstName = brotherProfile?.full_name?.split(' ')[0] ?? 'there'
   const initials = brotherProfile?.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() ?? '?'
 
-  const [heroDropdownOpen, setHeroDropdownOpen] = useState(false)
-  const heroMenuRef = useRef<HTMLDivElement>(null)
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    function handleOutside(e: MouseEvent) {
-      if (heroMenuRef.current && !heroMenuRef.current.contains(e.target as Node)) {
-        setHeroDropdownOpen(false)
-      }
-    }
-    if (heroDropdownOpen) document.addEventListener('mousedown', handleOutside)
-    return () => document.removeEventListener('mousedown', handleOutside)
-  }, [heroDropdownOpen])
-
-  const handleHeroSignOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/')
-  }
+    const handleScroll = () => setScrolled(window.scrollY > 80)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const [matches, setMatches] = useState<BrotherMatch[]>(initialMatches ?? [])
   const [connections, setConnections] = useState<ConnectionWithProfile[]>(initialConnections ?? [])
@@ -325,75 +310,83 @@ export default function BrotherDashboard({
   return (
     <div style={{ background: 'linear-gradient(180deg, #F5E6F2 0%, #F4E4BA 40%, #FDF5E6 100%)', minHeight: '100vh' }}>
 
-      {/* ── Hero Header ─────────────────────────────────────────── */}
-      <div style={{ background: 'linear-gradient(135deg, #C2477A 0%, #D4689A 40%, #E896B8 70%, #EFB8CC 100%)', padding: '24px 20px 32px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.06, backgroundImage: 'repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)', backgroundSize: '12px 12px', pointerEvents: 'none' }} />
-
-        {/* Top row: Logo + Bell + Avatar */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px', position: 'relative' }}>
-          <Link href="/dashboard" style={{ textDecoration: 'none' }}>
-            <span style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '22px', color: 'white', opacity: 0.95 }}>نصيب</span>
-          </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <Link href="/dashboard/notifications" style={{ color: 'rgba(255,255,255,0.85)', display: 'flex', position: 'relative' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} style={{ width: '20px', height: '20px' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-              </svg>
-              {unreadCount > 0 && <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '7px', height: '7px', background: 'white', borderRadius: '50%' }} />}
-            </Link>
-            <div style={{ position: 'relative' }} ref={heroMenuRef}>
-              <button onClick={() => setHeroDropdownOpen(v => !v)} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(255,255,255,0.3)', cursor: 'pointer' }} aria-label="Profile menu">
-                {initials}
-              </button>
-              {heroDropdownOpen && (
-                <div style={{ position: 'absolute', right: 0, top: '42px', background: 'white', border: '1px solid #EDE8E3', borderRadius: '14px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', minWidth: '200px', padding: '4px 0', zIndex: 50 }}>
-                  <div style={{ padding: '12px 16px 10px', borderBottom: '1px solid #EDE8E3' }}>
-                    <p style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A1A', marginBottom: '8px' }}>{firstName}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ flex: 1, height: '4px', background: '#EDE8E3', borderRadius: '999px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', background: '#AF4D98', borderRadius: '999px', width: `${completionPercentage}%` }} />
-                      </div>
-                      <span style={{ fontSize: '11px', color: '#9B9B9B', flexShrink: 0 }}>{completionPercentage}%</span>
-                    </div>
-                  </div>
-                  <Link href="/dashboard/profile" onClick={() => setHeroDropdownOpen(false)} style={{ display: 'block', padding: '10px 16px', fontSize: '13px', color: '#1A1A1A', textDecoration: 'none' }}>My profile</Link>
-                  <Link href="/dashboard/how-it-works" onClick={() => setHeroDropdownOpen(false)} style={{ display: 'block', padding: '10px 16px', fontSize: '13px', color: '#1A1A1A', textDecoration: 'none' }}>How it works</Link>
-                  <div style={{ borderTop: '1px solid #EDE8E3', margin: '4px 0' }} />
-                  <button onClick={handleHeroSignOut} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: '13px', color: '#C13515', background: 'transparent', border: 'none', cursor: 'pointer' }}>Sign out</button>
-                </div>
-              )}
-            </div>
-          </div>
+      {/* ── Fixed top bar ────────────────────────────────────────── */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        height: '56px', display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', padding: '0 20px',
+        transition: 'background 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease',
+        background: scrolled ? 'rgba(255,255,255,0.85)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
+        boxShadow: scrolled ? '0 1px 0 rgba(175,77,152,0.1)' : 'none',
+      }}>
+        <span style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '22px', color: '#AF4D98' }}>نصيب</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            onClick={() => router.push('/dashboard/notifications')}
+            style={{
+              width: '34px', height: '34px', borderRadius: '50%',
+              background: scrolled ? 'rgba(175,77,152,0.08)' : 'rgba(255,255,255,0.3)',
+              border: scrolled ? '1px solid rgba(175,77,152,0.2)' : '1px solid rgba(255,255,255,0.4)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', position: 'relative', transition: 'all 0.3s ease',
+            }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#AF4D98" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            {unreadCount > 0 && (
+              <div style={{ position: 'absolute', top: '6px', right: '6px', width: '6px', height: '6px', background: '#AF4D98', borderRadius: '50%', border: scrolled ? '1.5px solid white' : '1.5px solid #F5E6F2' }} />
+            )}
+          </button>
+          <button
+            onClick={() => router.push('/dashboard/profile')}
+            style={{
+              width: '34px', height: '34px', borderRadius: '50%',
+              background: '#AF4D98',
+              border: scrolled ? '2px solid rgba(175,77,152,0.3)' : '2px solid rgba(255,255,255,0.5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '11px', fontWeight: 500, color: 'white',
+              cursor: 'pointer', transition: 'all 0.3s ease',
+            }}
+          >
+            {initials}
+          </button>
         </div>
+      </div>
+
+      {/* ── Hero Header ─────────────────────────────────────────── */}
+      <div style={{ background: 'linear-gradient(135deg, #F5E6F2 0%, #E8A0CC 40%, #D66BA0 100%)', padding: '76px 20px 28px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)', backgroundSize: '12px 12px', pointerEvents: 'none' }} />
 
         {/* Greeting + status pill */}
         <div style={{ position: 'relative' }}>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '6px' }}>Assalamu Alaikum,</p>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '52px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1, marginBottom: '12px' }}>{firstName}</h1>
-          {/* ISSUE 1: Verification status pill — always visible */}
+          <p style={{ fontSize: '13px', color: '#7B4F6E', marginBottom: '6px' }}>Assalamu Alaikum,</p>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '52px', fontWeight: 400, color: '#1A1A1A', letterSpacing: '-0.02em', lineHeight: 1, marginBottom: '12px' }}>{firstName}</h1>
           {profile.verification_status === 'verified' ? (
-            <span style={{ ...heroPillBase, background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)', color: 'white' }}>
+            <span style={{ ...heroPillBase, background: 'rgba(175,77,152,0.15)', border: '1px solid rgba(175,77,152,0.3)', color: '#AF4D98' }}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style={{ width: '13px', height: '13px', flexShrink: 0 }}>
                 <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.844-8.791a.75.75 0 00-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.15-.086l4.25-5.5-.001-.002z" clipRule="evenodd" />
               </svg>
               Verified member
             </span>
           ) : profile.verification_status === 'pending' ? (
-            <span style={{ ...heroPillBase, background: 'rgba(255,200,0,0.2)', border: '1px solid rgba(255,200,0,0.3)', color: 'white' }}>
+            <span style={{ ...heroPillBase, background: 'rgba(255,200,0,0.15)', border: '1px solid rgba(255,200,0,0.3)', color: '#7B4F6E' }}>
               Under review
             </span>
           ) : (
-            <button onClick={() => router.push('/dashboard/verify')} style={{ ...heroPillBase, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', cursor: 'pointer' }}>
+            <button onClick={() => router.push('/dashboard/verify')} style={{ ...heroPillBase, background: 'rgba(175,77,152,0.12)', border: '1px solid rgba(175,77,152,0.25)', color: '#AF4D98', cursor: 'pointer' }}>
               Verify now →
             </button>
           )}
         </div>
 
         {/* Verse */}
-        <div style={{ background: 'rgba(255,255,255,0.12)', border: '0.5px solid rgba(255,255,255,0.2)', borderRadius: '14px', padding: '14px 16px', marginBottom: '20px', position: 'relative' }}>
-          <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '16px', color: 'white', marginBottom: '5px', letterSpacing: '0.02em', lineHeight: 1.5 }}>{todayAyah.arabic}</p>
-          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '3px' }}>&ldquo;{todayAyah.translation}&rdquo;</p>
-          <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.07em', textTransform: 'uppercase' }}>{todayAyah.reference}</p>
+        <div style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(175,77,152,0.2)', borderRadius: '14px', padding: '14px 16px', marginBottom: '20px', position: 'relative' }}>
+          <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '16px', color: '#AF4D98', marginBottom: '5px', letterSpacing: '0.02em', lineHeight: 1.5 }}>{todayAyah.arabic}</p>
+          <p style={{ fontSize: '12px', color: '#5C5C5C', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '3px' }}>&ldquo;{todayAyah.translation}&rdquo;</p>
+          <p style={{ fontSize: '10px', color: '#9B7090', letterSpacing: '0.07em', textTransform: 'uppercase' }}>{todayAyah.reference}</p>
         </div>
 
         {/* Stats — 4-column grid */}
@@ -404,9 +397,9 @@ export default function BrotherDashboard({
             { num: unreadCount, label: 'Unread' },
             { num: `${completionPercentage}%`, label: 'Complete' },
           ].map(stat => (
-            <div key={stat.label} style={{ background: 'rgba(255,255,255,0.15)', border: '0.5px solid rgba(255,255,255,0.25)', borderRadius: '12px', padding: '14px 8px', textAlign: 'center' }}>
-              <p style={{ fontSize: '28px', fontWeight: 500, color: 'white', lineHeight: 1, marginBottom: '4px' }}>{stat.num}</p>
-              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>{stat.label}</p>
+            <div key={stat.label} style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(175,77,152,0.2)', borderRadius: '12px', padding: '14px 8px', textAlign: 'center' }}>
+              <p style={{ fontSize: '28px', fontWeight: 500, color: '#1A1A1A', lineHeight: 1, marginBottom: '4px' }}>{stat.num}</p>
+              <p style={{ fontSize: '11px', color: '#9B7090' }}>{stat.label}</p>
             </div>
           ))}
         </div>
@@ -417,6 +410,33 @@ export default function BrotherDashboard({
 
         {/* Left column — content sections only */}
         <div className="space-y-5 lg:col-span-2">
+
+          {/* ── Identity card — top of left column, always shows unless verified ── */}
+          {profile.verification_status !== 'verified' && (
+            <div style={{ marginBottom: '4px' }}>
+              <p style={{ fontSize: '11px', fontWeight: 600, color: '#9B7090', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '10px' }}>Identity</p>
+              <div style={{ background: 'rgba(255,255,255,0.85)', border: profile.verification_status === 'rejected' ? '1px solid #F5C6C6' : '1px solid rgba(175,77,152,0.12)', borderRadius: '16px', padding: '16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: profile.verification_status === 'rejected' ? '#FDECEA' : '#F5E6F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={profile.verification_status === 'rejected' ? '#C13515' : '#AF4D98'} strokeWidth="1.5" strokeLinecap="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '3px' }}>
+                    {profile.verification_status === 'pending' ? 'Verification under review' : profile.verification_status === 'rejected' ? 'Verification needs attention' : 'Verify your identity'}
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#9B9B9B', lineHeight: 1.4 }}>
+                    {profile.verification_status === 'pending' ? 'Our team will review within 24 hours, in sha Allah.' : profile.verification_status === 'rejected' ? `Reason: ${profile.verification_rejection_reason}` : 'A quick selfie to confirm your identity.'}
+                  </p>
+                </div>
+                {profile.verification_status !== 'pending' && (
+                  <button onClick={() => router.push('/dashboard/verify')} style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '8px 16px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', flexShrink: 0 }}>
+                    {profile.verification_status === 'rejected' ? 'Resubmit →' : 'Verify now →'}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* ── Nikah Planning ──────────────────────────────────── */}
           {nikahConns.length > 0 && (
@@ -623,14 +643,39 @@ export default function BrotherDashboard({
         {/* Right column — checklist + notifications + verify card */}
         <div className="space-y-5 lg:col-span-1 mt-6 lg:mt-0">
 
-          {/* Profile checklist — right column, only when incomplete */}
+          {/* Profile checklist — simplified inline card */}
           {!isInNikahPlanning && completionPercentage < 80 && (
-            <ProfileChecklist
-              gender="brother"
-              profile={brotherProfile as unknown as Record<string, unknown>}
-              completionPercentage={completionPercentage}
-              referenceComplete={hasReference}
-            />
+            <div style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(175,77,152,0.12)', borderRadius: '16px', padding: '20px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A1A' }}>Profile completion</p>
+                <span style={{ fontSize: '24px', fontWeight: 500, color: '#AF4D98', lineHeight: 1 }}>{completionPercentage}%</span>
+              </div>
+              <div style={{ height: '6px', background: 'rgba(175,77,152,0.12)', borderRadius: '3px', overflow: 'hidden', marginBottom: '14px' }}>
+                <div style={{ height: '100%', width: `${completionPercentage}%`, background: 'linear-gradient(90deg, #AF4D98, #D66BA0)', borderRadius: '3px', transition: 'width 0.5s ease' }} />
+              </div>
+              <div style={{ background: 'rgba(175,77,152,0.06)', border: '1px solid rgba(175,77,152,0.15)', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#AF4D98" strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0, marginTop: '1px' }}>
+                  <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <p style={{ fontSize: '13px', color: '#7B4F6E', lineHeight: 1.5, margin: 0 }}>
+                  Matches are only unlocked once your profile reaches <strong>80%</strong>. You are {80 - completionPercentage}% away.
+                </p>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button
+                  onClick={() => router.push('/onboarding')}
+                  style={{ padding: '11px', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                >
+                  Guided completion
+                </button>
+                <button
+                  onClick={() => router.push('/dashboard/profile')}
+                  style={{ padding: '11px', background: 'transparent', color: '#AF4D98', border: '1px solid #AF4D98', borderRadius: '999px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                >
+                  Edit by section
+                </button>
+              </div>
+            </div>
           )}
 
           {/* ── Notifications ────────────────────────────────────── */}
@@ -655,35 +700,6 @@ export default function BrotherDashboard({
               </div>
             )}
           </section>
-
-          {/* ISSUE 5: Identity/verify card — right column, always shows unless verified */}
-          {profile.verification_status !== 'verified' && (
-            <section>
-              <p style={sectionLabel}>Identity</p>
-              <div style={{ ...glassCard, padding: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: profile.verification_status !== 'pending' ? '14px' : '0' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: profile.verification_status === 'pending' ? '#FFF7E6' : profile.verification_status === 'rejected' ? '#FDECEA' : '#F5E6F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={profile.verification_status === 'pending' ? '#B45309' : profile.verification_status === 'rejected' ? '#C13515' : '#AF4D98'} strokeWidth={1.5} style={{ width: '20px', height: '20px' }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                    </svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>
-                      {profile.verification_status === 'pending' ? 'Verification under review' : profile.verification_status === 'rejected' ? 'Verification needs attention' : 'Verify your identity'}
-                    </p>
-                    <p style={{ fontSize: '12px', color: '#9B9B9B', lineHeight: 1.4 }}>
-                      {profile.verification_status === 'pending' ? 'We will notify you within 24 hours' : profile.verification_status === 'rejected' ? profile.verification_rejection_reason ?? 'Please resubmit' : 'Quick selfie · 2 minutes'}
-                    </p>
-                  </div>
-                </div>
-                {profile.verification_status !== 'pending' && (
-                  <button onClick={() => router.push('/dashboard/verify')} style={{ width: '100%', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '10px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
-                    {profile.verification_status === 'rejected' ? 'Resubmit →' : 'Verify now →'}
-                  </button>
-                )}
-              </div>
-            </section>
-          )}
 
         </div>{/* end right column */}
 

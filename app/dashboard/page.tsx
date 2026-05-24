@@ -30,14 +30,13 @@ export default async function DashboardPage() {
   }
 
   if (profile.gender === 'brother') {
-    const [brotherProfile, matches, connections, sentInterestOtherIds, incomingInterests, notifications, { data: refRow }, { data: fullBrotherProfile }] = await Promise.all([
+    const [brotherProfile, matches, connections, sentInterestOtherIds, incomingInterests, notifications, { data: fullBrotherProfile }] = await Promise.all([
       getBrotherProfile(user.id),
       getBrotherMatches(user.id),
       getActiveConnections(user.id, 'brother'),
       getSentPendingInterestOtherIds(user.id, 'brother'),
       getIncomingPendingInterests(user.id, 'brother'),
       getNotifications(user.id),
-      supabase.from('references').select('profile_id').eq('profile_id', user.id).maybeSingle(),
       supabase.from('brother_profiles').select('*').eq('id', user.id).single(),
     ])
 
@@ -66,19 +65,17 @@ export default async function DashboardPage() {
         notifications={notifications}
         profileComplete={profile.profile_complete || isComplete}
         completionPercentage={livePercentage}
-        hasReference={!!refRow}
       />
     )
   }
 
   if (profile.gender === 'sister') {
-    const [sisterProfile, matches, connections, incomingInterests, notifications, { data: refRow }, { data: fullSisterProfile }] = await Promise.all([
+    const [sisterProfile, matches, connections, incomingInterests, notifications, { data: fullSisterProfile }] = await Promise.all([
       getSisterProfile(user.id),
       getSisterMatches(user.id),
       getActiveConnections(user.id, 'sister'),
       getIncomingPendingInterests(user.id, 'sister'),
       getNotifications(user.id),
-      supabase.from('references').select('profile_id').eq('profile_id', user.id).maybeSingle(),
       supabase.from('sister_profiles').select('*').eq('id', user.id).single(),
     ])
 
@@ -109,7 +106,6 @@ export default async function DashboardPage() {
         notifications={notifications}
         profileComplete={profile.profile_complete || isComplete}
         completionPercentage={livePercentage}
-        hasReference={!!refRow}
       />
     )
   }
