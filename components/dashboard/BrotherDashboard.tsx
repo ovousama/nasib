@@ -31,7 +31,7 @@ function getAvatarGradient(name?: string): string {
     'linear-gradient(135deg, #F4E4BA, #E5A9A9)',
     'linear-gradient(135deg, #E5A9A9, #F5E6F2)',
     'linear-gradient(135deg, #F5E6F2, #9DF7E5)',
-    'linear-gradient(135deg, #F4E4BA, #F5E6F2)',
+    'linear-gradient(135deg, #F5E6F2, #D4E4F4)',
   ]
   const index = (name?.charCodeAt(0) ?? 0) % gradients.length
   return gradients[index]
@@ -74,8 +74,8 @@ const AYAHS = [
 
 function VerifiedBadge() {
   return (
-    <span className="inline-flex items-center gap-1 bg-[#E6F9F7] text-[#00A699] text-xs font-medium px-2 py-0.5 rounded-full">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: '#E6F9F7', color: '#00A699', fontSize: '11px', fontWeight: 500, padding: '2px 7px', borderRadius: '999px' }}>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style={{ width: '11px', height: '11px' }}>
         <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.844-8.791a.75.75 0 00-1.188-.918l-3.7 4.79-1.649-1.833a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.15-.086l4.25-5.5-.001-.002z" clipRule="evenodd" />
       </svg>
       Verified
@@ -298,7 +298,7 @@ export default function BrotherDashboard({
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
   const todayAyah = AYAHS[dayOfYear % AYAHS.length]
 
-  // Section label style
+  // Shared styles
   const sectionLabel: React.CSSProperties = {
     fontSize: '11px',
     fontWeight: 500,
@@ -308,11 +308,17 @@ export default function BrotherDashboard({
     marginBottom: '10px',
   }
 
+  const glassCard: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.85)',
+    border: '1px solid rgba(175,77,152,0.12)',
+    borderRadius: '16px',
+  }
+
   return (
-    <div style={{ background: '#F5F0FB', minHeight: '100vh' }}>
+    <div style={{ background: 'linear-gradient(180deg, #F5E6F2 0%, #F4E4BA 40%, #FDF5E6 100%)', minHeight: '100vh' }}>
 
       {/* ── Hero Header ─────────────────────────────────────────── */}
-      <div style={{ background: 'linear-gradient(135deg, #AF4D98, #D66BA0)', padding: '24px 20px 28px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(135deg, #C2477A 0%, #D4689A 40%, #E896B8 70%, #EFB8CC 100%)', padding: '24px 20px 32px', position: 'relative', overflow: 'hidden' }}>
         {/* Subtle pattern overlay */}
         <div style={{
           position: 'absolute', inset: 0, opacity: 0.06,
@@ -367,9 +373,9 @@ export default function BrotherDashboard({
 
         {/* Greeting */}
         <div style={{ position: 'relative', marginBottom: '20px' }}>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}>Assalamu Alaikum,</p>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '6px' }}>Assalamu Alaikum,</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '30px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>{firstName}</h1>
+            <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '52px', fontWeight: 400, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>{firstName}</h1>
             {profile.verification_badge && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)', fontSize: '11px', fontWeight: 500, padding: '3px 10px', borderRadius: '999px' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style={{ width: '11px', height: '11px' }}>
@@ -388,32 +394,30 @@ export default function BrotherDashboard({
           <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.07em', textTransform: 'uppercase' }}>{todayAyah.reference}</p>
         </div>
 
-        {/* Stats pills */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', position: 'relative' }}>
+        {/* Stats — 4-column grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', position: 'relative' }}>
           {[
-            { num: matchCount, label: 'Matches', highlight: false },
-            { num: connectionCount, label: 'Connected', highlight: connectionCount > 0 },
-            { num: unreadCount, label: 'Unread', highlight: false },
-            { num: `${completionPercentage}%`, label: 'Complete', highlight: false },
+            { num: matchCount, label: 'Matches' },
+            { num: connectionCount, label: 'Connected' },
+            { num: unreadCount, label: 'Unread' },
+            { num: `${completionPercentage}%`, label: 'Complete' },
           ].map(stat => (
             <div key={stat.label} style={{
-              background: stat.highlight ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.15)',
-              border: `0.5px solid ${stat.highlight ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.2)'}`,
-              borderRadius: '10px',
-              padding: '8px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
+              background: 'rgba(255,255,255,0.15)',
+              border: '0.5px solid rgba(255,255,255,0.25)',
+              borderRadius: '12px',
+              padding: '14px 8px',
+              textAlign: 'center',
             }}>
-              <span style={{ fontSize: '16px', fontWeight: 500, color: 'white', lineHeight: 1 }}>{stat.num}</span>
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>{stat.label}</span>
+              <p style={{ fontSize: '28px', fontWeight: 500, color: 'white', lineHeight: 1, marginBottom: '4px' }}>{stat.num}</p>
+              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>{stat.label}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── Body ────────────────────────────────────────────────── */}
-      <div className="px-4 lg:px-8 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+      <div className="px-4 lg:px-8 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start" style={{ maxWidth: '1100px', margin: '0 auto', paddingTop: '24px', paddingBottom: '24px' }}>
 
         {/* Left column */}
         <div className="space-y-4 lg:col-span-2">
@@ -428,9 +432,15 @@ export default function BrotherDashboard({
             />
           )}
 
-          {/* Verification prompt */}
+          {/* Verification card */}
           {profile.verification_status !== 'verified' && completionPercentage >= 80 && (
-            <div style={{ background: 'white', border: '0.5px solid #EDE8E3', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+            <div style={{ ...glassCard, padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {/* Shield icon */}
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: profile.verification_status === 'pending' ? '#FFF7E6' : profile.verification_status === 'rejected' ? '#FDECEA' : '#F5E6F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={profile.verification_status === 'pending' ? '#B45309' : profile.verification_status === 'rejected' ? '#C13515' : '#AF4D98'} strokeWidth={1.5} style={{ width: '22px', height: '22px' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+              </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ marginBottom: '4px' }}>
                   {profile.verification_status === 'pending' ? (
@@ -458,43 +468,38 @@ export default function BrotherDashboard({
           {nikahConns.length > 0 && (
             <section id="nikah" data-testid="nikah-connections-section">
               <p style={sectionLabel}>Nikah Planning</p>
-              <div className="space-y-3">
+              {/* Arabic blessing centered */}
+              <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '22px', color: '#AF4D98' }}>بَارَكَ اللَّهُ لَكُمَا</p>
+                <p style={{ fontSize: '13px', color: '#9B9B9B', marginTop: '4px' }}>May Allah bless your union.</p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {nikahConns.map(conn => (
-                  <div data-testid="nikah-connection-card" key={conn.id} className="bg-white rounded-[16px] p-5 border border-[#AF4D98]/30 shadow-[0_1px_3px_rgba(175,77,152,0.12)]">
-                    <div className="flex items-center gap-2 mb-4">
+                  <div data-testid="nikah-connection-card" key={conn.id} style={{ ...glassCard, padding: '20px', border: '1px solid rgba(175,77,152,0.25)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
                       {connPhotoUrls[conn.id] ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={connPhotoUrls[conn.id]} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                        <img src={connPhotoUrls[conn.id]} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                       ) : (
-                        <span className="text-base mr-1">🤍</span>
+                        <span style={{ fontSize: '18px', marginRight: '2px' }}>🤍</span>
                       )}
-                      <span className="text-base font-medium text-[#1A1A1A] tracking-[-0.02em]">{conn.other_name}</span>
-                      <span className="ml-auto text-xs font-medium text-[#AF4D98] bg-[#F5E6F2] px-2.5 py-1 rounded-full">Nikah Planning</span>
+                      <span style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A1A', letterSpacing: '-0.01em' }}>{conn.other_name}</span>
+                      <span style={{ marginLeft: 'auto', fontSize: '11px', fontWeight: 500, color: '#AF4D98', background: '#F5E6F2', padding: '3px 10px', borderRadius: '999px' }}>Nikah Planning</span>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <div className="grid grid-cols-3 gap-2">
-                        <Link href={`/dashboard/chat/${conn.id}`} className="text-center text-sm font-medium text-[#AF4D98] py-2">Chat</Link>
-                        <Link href={`/dashboard/profile/${conn.sister_id}?context=connection&connectionId=${conn.id}`} className="text-center text-sm font-medium text-[#5C5C5C] py-2">Profile</Link>
-                        <Link data-testid="view-nikah-plan-btn" href={`/dashboard/nikah/${conn.id}`} className="text-center text-sm font-medium rounded-full bg-[#AF4D98] text-white px-4 py-2 hover:bg-[#9B3D85] transition-colors">View Plan</Link>
-                      </div>
-                      <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '1px solid #EDE8E3' }}>
-                        <button onClick={() => { setNikahCloseReason(''); setNikahCloseModal(conn) }} style={{ background: 'transparent', border: 'none', fontSize: '12px', color: '#C0B8B0', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '4px 8px' }}>
-                          Close this connection
-                        </button>
-                      </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                      <Link href={`/dashboard/chat/${conn.id}`} style={{ textAlign: 'center', fontSize: '13px', fontWeight: 500, color: '#AF4D98', padding: '9px', textDecoration: 'none', background: 'rgba(175,77,152,0.08)', borderRadius: '999px' }}>Chat</Link>
+                      <Link href={`/dashboard/profile/${conn.sister_id}?context=connection&connectionId=${conn.id}`} style={{ textAlign: 'center', fontSize: '13px', fontWeight: 500, color: '#5C5C5C', padding: '9px', textDecoration: 'none', background: 'rgba(175,77,152,0.06)', borderRadius: '999px' }}>Profile</Link>
+                      <Link data-testid="view-nikah-plan-btn" href={`/dashboard/nikah/${conn.id}`} style={{ textAlign: 'center', fontSize: '13px', fontWeight: 500, color: 'white', padding: '9px', textDecoration: 'none', background: '#AF4D98', borderRadius: '999px' }}>View Plan</Link>
+                    </div>
+                    <div style={{ textAlign: 'center', paddingTop: '10px', borderTop: '1px solid rgba(175,77,152,0.1)' }}>
+                      <button onClick={() => { setNikahCloseReason(''); setNikahCloseModal(conn) }} style={{ background: 'transparent', border: 'none', fontSize: '12px', color: '#C0B8B0', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '4px 8px' }}>
+                        Close this connection
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             </section>
-          )}
-
-          {/* Dua card during nikah planning */}
-          {isInNikahPlanning && (
-            <div style={{ textAlign: 'center', padding: '32px 20px', background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px' }}>
-              <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '20px', color: '#AF4D98', marginBottom: '8px' }}>بَارَكَ اللَّهُ لَكُمَا</p>
-              <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '280px', margin: '0 auto' }}>May Allah bless your union and make it a source of peace and taqwa.</p>
-            </div>
           )}
 
           {!isInNikahPlanning && (<>
@@ -504,7 +509,7 @@ export default function BrotherDashboard({
             <p style={sectionLabel}>Your Matches</p>
 
             {!profileComplete ? null : visibleMatches.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 20px', background: 'white', border: '1px solid #EDE8E3', borderRadius: '14px' }}>
+              <div style={{ ...glassCard, textAlign: 'center', padding: '48px 20px' }}>
                 <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '32px', color: '#AF4D98', marginBottom: '12px', opacity: 0.4 }}>نصيب</p>
                 <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 400, color: '#AF4D98', marginBottom: '8px' }}>Your matches are being prepared</p>
                 <p style={{ fontSize: '14px', color: '#9B9B9B', lineHeight: 1.6, maxWidth: '260px', margin: '0 auto' }}>We will notify you when they are ready, in sha Allah.</p>
@@ -524,42 +529,41 @@ export default function BrotherDashboard({
                       key={match.id}
                       onClick={() => openMatchQuickView(match)}
                       style={{
-                        background: isConnected ? '#F5E6F2' : 'white',
-                        border: isConnected ? '1.5px solid #AF4D98' : '0.5px solid #EDE8E3',
-                        borderRadius: '14px',
-                        padding: '14px',
-                        transition: 'all 0.15s ease',
+                        ...glassCard,
+                        padding: '16px',
                         cursor: 'pointer',
+                        border: isConnected ? '1.5px solid #AF4D98' : '1px solid rgba(175,77,152,0.12)',
+                        background: isConnected ? 'rgba(245,230,242,0.9)' : 'rgba(255,255,255,0.85)',
                       }}
                     >
-                      {/* Avatar */}
-                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: getAvatarGradient(match.sister?.full_name), display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: '#AF4D98', marginBottom: '10px' }}>
+                      {/* 52px Avatar */}
+                      <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: getAvatarGradient(match.sister?.full_name), display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', color: '#AF4D98', marginBottom: '12px' }}>
                         {match.sister?.full_name?.[0] ?? 'S'}
                       </div>
 
                       {/* Name + verified */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
-                        <p style={{ fontSize: '14px', fontWeight: 500, color: isConnected ? '#AF4D98' : '#1A1A1A' }}>{sisterFirstName}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', flexWrap: 'wrap' }}>
+                        <p style={{ fontSize: '15px', fontWeight: 500, color: isConnected ? '#AF4D98' : '#1A1A1A' }}>{sisterFirstName}</p>
                         {match.sister?.verification_badge && <VerifiedBadge />}
                       </div>
 
                       {/* Meta */}
-                      <p style={{ fontSize: '11px', color: '#9B9B9B', lineHeight: 1.4, marginBottom: '10px' }}>
+                      <p style={{ fontSize: '11px', color: '#9B9B9B', lineHeight: 1.4, marginBottom: '12px' }}>
                         {[match.sister?.age ? `${match.sister.age} yrs` : null, match.sister?.location?.split(',')[0]].filter(Boolean).join(' · ')}
                       </p>
 
-                      {/* CTA */}
+                      {/* CTA — full width */}
                       {isConnected ? (
                         <button
                           onClick={e => { e.stopPropagation(); router.push(`/dashboard/chat/${matchConn!.id}`) }}
-                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '6px 12px', fontSize: '11px', fontWeight: 500, cursor: 'pointer', width: '100%' }}
+                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '8px 12px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', width: '100%' }}
                         >
                           Open chat
                         </button>
                       ) : hasSent ? (
-                        <span style={{ display: 'inline-block', background: '#F5E6F2', color: '#7B2F6E', fontSize: '10px', fontWeight: 500, padding: '4px 10px', borderRadius: '999px' }}>
+                        <div style={{ background: '#F5E6F2', color: '#7B2F6E', fontSize: '11px', fontWeight: 500, padding: '8px 10px', borderRadius: '999px', textAlign: 'center', width: '100%' }}>
                           Awaiting response
-                        </span>
+                        </div>
                       ) : incomingFromThis ? (
                         <div style={{ display: 'flex', gap: '5px' }}>
                           <button
@@ -569,14 +573,14 @@ export default function BrotherDashboard({
                               else handleAccept(incomingFromThis.id)
                             }}
                             disabled={accepting === incomingFromThis.id}
-                            style={{ flex: 1, background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '6px 8px', fontSize: '11px', fontWeight: 500, cursor: 'pointer', opacity: accepting === incomingFromThis.id ? 0.6 : 1 }}
+                            style={{ flex: 1, background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '7px 8px', fontSize: '11px', fontWeight: 500, cursor: 'pointer', opacity: accepting === incomingFromThis.id ? 0.6 : 1 }}
                           >
                             {accepting === incomingFromThis.id ? '…' : 'Accept'}
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); handleDecline(incomingFromThis.id) }}
                             disabled={declining === incomingFromThis.id}
-                            style={{ flex: 1, background: 'transparent', color: '#9B9B9B', border: '0.5px solid #EDE8E3', borderRadius: '999px', padding: '6px 8px', fontSize: '11px', cursor: 'pointer', opacity: declining === incomingFromThis.id ? 0.6 : 1 }}
+                            style={{ flex: 1, background: 'transparent', color: '#9B9B9B', border: '1px solid rgba(175,77,152,0.15)', borderRadius: '999px', padding: '7px 8px', fontSize: '11px', cursor: 'pointer', opacity: declining === incomingFromThis.id ? 0.6 : 1 }}
                           >
                             {declining === incomingFromThis.id ? '…' : 'Decline'}
                           </button>
@@ -587,7 +591,7 @@ export default function BrotherDashboard({
                           onClick={e => { e.stopPropagation(); openInterestModal(profile.id, match.sister_id, sisterFirstName) }}
                           disabled={connectionsFull}
                           title={connectionsFull ? 'Close an active connection before expressing new interest' : undefined}
-                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '6px 12px', fontSize: '11px', fontWeight: 500, cursor: connectionsFull ? 'not-allowed' : 'pointer', width: '100%', opacity: connectionsFull ? 0.5 : 1 }}
+                          style={{ background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '8px 12px', fontSize: '12px', fontWeight: 500, cursor: connectionsFull ? 'not-allowed' : 'pointer', width: '100%', opacity: connectionsFull ? 0.5 : 1 }}
                         >
                           Express interest
                         </button>
@@ -613,7 +617,7 @@ export default function BrotherDashboard({
             <p style={sectionLabel}>Active Connections</p>
 
             {activeConns.length === 0 ? (
-              <div style={{ background: 'white', border: '0.5px solid #EDE8E3', borderRadius: '14px', padding: '24px', textAlign: 'center' }}>
+              <div style={{ ...glassCard, padding: '24px', textAlign: 'center' }}>
                 <p style={{ fontSize: '13px', color: '#9B9B9B', lineHeight: 1.5 }}>No active connections yet. Express interest in a match to begin.</p>
               </div>
             ) : (
@@ -622,12 +626,12 @@ export default function BrotherDashboard({
                   <div
                     data-testid="connection-card"
                     key={conn.id}
-                    style={{ background: 'white', border: '1px solid #EDE8E3', borderRadius: '14px', padding: '14px 16px', marginBottom: '10px' }}
+                    style={{ ...glassCard, padding: '16px', marginBottom: '10px' }}
                   >
-                    {/* Top row: avatar + info + actions */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Top row: avatar + info */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
                       {/* Avatar */}
-                      <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(135deg, #AF4D98, #D66BA0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '18px', color: 'white', flexShrink: 0, overflow: 'hidden' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #C2477A, #E896B8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: 'white', flexShrink: 0, overflow: 'hidden' }}>
                         {connPhotoUrls[conn.id] ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={connPhotoUrls[conn.id]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
@@ -635,19 +639,17 @@ export default function BrotherDashboard({
                           conn.other_name?.[0] ?? '?'
                         )}
                       </div>
-
                       {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {conn.other_name?.split(' ')[0]}
                         </p>
                         <p style={{ fontSize: '11px', color: '#9B9B9B' }}>Active connection</p>
                       </div>
-
                     </div>
 
                     {/* Action buttons — 2fr 1fr 1fr grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '6px', marginBottom: '10px', marginTop: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '6px', marginBottom: '10px' }}>
                       <button
                         data-testid="open-chat-btn"
                         onClick={() => router.push(`/dashboard/chat/${conn.id}`)}
@@ -670,7 +672,7 @@ export default function BrotherDashboard({
                     </div>
 
                     {/* Close link */}
-                    <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '0.5px solid rgba(175,77,152,0.08)' }}>
+                    <div style={{ textAlign: 'center', paddingTop: '8px', borderTop: '1px solid rgba(175,77,152,0.08)' }}>
                       <button
                         onClick={() => { setCloseError(null); setCloseModalConnection(conn) }}
                         style={{ background: 'transparent', border: 'none', fontSize: '11px', color: '#C0B8B0', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '2px 8px' }}
@@ -688,7 +690,7 @@ export default function BrotherDashboard({
           {visibleIncoming.length > 0 && (
             <section id="interests" data-testid="pending-interests-section">
               <p style={sectionLabel}>Pending Interests</p>
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {visibleIncoming.map(interest => {
                   const op = interest.other_profile
                   const sisterFirstName = op?.full_name?.split(' ')[0] ?? 'Sister'
@@ -697,15 +699,24 @@ export default function BrotherDashboard({
                       data-testid="pending-interest-card"
                       key={interest.id}
                       onClick={() => openInterestQuickView(interest)}
-                      style={{ background: 'white', border: '0.5px solid #EDE8E3', borderRadius: '14px', padding: '16px', cursor: 'pointer' }}
+                      style={{
+                        background: 'rgba(255,255,255,0.85)',
+                        borderLeft: '3px solid #AF4D98',
+                        borderTop: '1px solid rgba(175,77,152,0.12)',
+                        borderRight: '1px solid rgba(175,77,152,0.12)',
+                        borderBottom: '1px solid rgba(175,77,152,0.12)',
+                        borderRadius: '0 16px 16px 0',
+                        padding: '16px',
+                        cursor: 'pointer',
+                      }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
-                        <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: getAvatarGradient(op?.full_name), display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '18px', color: '#AF4D98', flexShrink: 0 }}>
+                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: getAvatarGradient(op?.full_name), display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: '#AF4D98', flexShrink: 0 }}>
                           {sisterFirstName[0]}
                         </div>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                            <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A' }}>{sisterFirstName}</p>
+                            <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A1A' }}>{sisterFirstName}</p>
                             {op?.verification_badge && <VerifiedBadge />}
                           </div>
                           <p style={{ fontSize: '12px', color: '#9B9B9B' }}>{[op?.age ? `${op.age} yrs` : null, op?.location].filter(Boolean).join(' · ')}</p>
@@ -714,7 +725,7 @@ export default function BrotherDashboard({
                       </div>
 
                       {interest.intro_message && (
-                        <div style={{ background: '#FDFAF7', borderRadius: '10px', padding: '10px 12px', marginBottom: '10px', border: '0.5px solid #EDE8E3' }}>
+                        <div style={{ background: '#FDFAF7', borderRadius: '10px', padding: '10px 12px', marginBottom: '10px', border: '1px solid rgba(175,77,152,0.08)' }}>
                           <p style={{ fontSize: '11px', color: '#9B9B9B', marginBottom: '3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Her message</p>
                           <p style={{ fontSize: '13px', color: '#1A1A1A', fontStyle: 'italic' }}>&ldquo;{interest.intro_message}&rdquo;</p>
                         </div>
@@ -725,7 +736,7 @@ export default function BrotherDashboard({
                           data-testid="decline-btn"
                           onClick={e => { e.stopPropagation(); handleDecline(interest.id) }}
                           disabled={declining === interest.id}
-                          style={{ background: 'transparent', color: '#9B9B9B', border: '0.5px solid #EDE8E3', borderRadius: '999px', padding: '10px', fontSize: '13px', cursor: 'pointer', opacity: declining === interest.id ? 0.6 : 1 }}
+                          style={{ background: 'transparent', color: '#9B9B9B', border: '1px solid rgba(175,77,152,0.15)', borderRadius: '999px', padding: '10px', fontSize: '13px', cursor: 'pointer', opacity: declining === interest.id ? 0.6 : 1 }}
                         >
                           {declining === interest.id ? '…' : 'Decline'}
                         </button>
@@ -754,33 +765,29 @@ export default function BrotherDashboard({
         </div>{/* end left column */}
 
         {/* Right column */}
-        <div className="space-y-4 lg:col-span-1 mt-4 lg:mt-4">
+        <div className="space-y-4 lg:col-span-1 mt-4 lg:mt-0">
 
           {/* ── Notifications ────────────────────────────────────── */}
           <section id="notifications" data-testid="notifications-section">
             <p style={sectionLabel}>Notifications</p>
 
             {visibleNotifications.length === 0 ? (
-              <div style={{ background: 'white', border: '0.5px solid #EDE8E3', borderRadius: '14px', padding: '24px', textAlign: 'center' }}>
+              <div style={{ ...glassCard, padding: '24px', textAlign: 'center' }}>
                 <p style={{ fontSize: '13px', color: '#9B9B9B' }}>You&apos;re all caught up. May Allah bless your journey.</p>
               </div>
             ) : (
-              <div>
-                {visibleNotifications.slice(0, 8).map(notif => (
+              <div style={{ ...glassCard, overflow: 'hidden' }}>
+                {visibleNotifications.slice(0, 8).map((notif, idx) => (
                   <button
                     key={notif.id}
                     onClick={() => handleMarkRead(notif.id)}
                     style={{
                       width: '100%',
                       textAlign: 'left',
-                      background: 'white',
-                      borderLeft: `3px solid ${notif.read ? '#EDE8E3' : '#AF4D98'}`,
-                      borderTop: '0.5px solid #F0EDE8',
-                      borderRight: '0.5px solid #F0EDE8',
-                      borderBottom: '0.5px solid #F0EDE8',
-                      borderRadius: '0 14px 14px 0',
+                      background: 'transparent',
+                      border: 'none',
+                      borderTop: idx === 0 ? 'none' : '1px solid rgba(175,77,152,0.08)',
                       padding: '14px 16px',
-                      marginBottom: '8px',
                       display: 'flex',
                       alignItems: 'flex-start',
                       gap: '10px',
