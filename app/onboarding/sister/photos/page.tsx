@@ -276,12 +276,33 @@ export default function SisterPhotosPage() {
     <div className="min-h-screen bg-[#FDF8F3]">
       <div className="max-w-[480px] mx-auto px-5 py-8 pb-32">
         <h2 className="text-2xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-1">Your photos</h2>
-        <p className="text-[14px] text-[#9B9B9B] mb-2">
+        <p className="text-[14px] text-[#9B9B9B] mb-5">
           Upload at least 3 photos so brothers can get a genuine sense of who you are. You can add up to 5.
         </p>
-        <p className="text-xs text-[#9B9B9B] mb-6">
-          🔒 Your photos are <strong>completely private</strong> — only shared with brothers whose interest you accept.
-        </p>
+
+        {/* Privacy card */}
+        <div style={{ background: 'linear-gradient(135deg, #F5E6F2 0%, #FDF8F3 100%)', border: '1px solid rgba(175,77,152,0.2)', borderRadius: '16px', padding: '18px 20px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#AF4D98', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+            </div>
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A1A', marginBottom: '4px' }}>Your photos are completely private</p>
+              <p style={{ fontSize: '13px', color: '#5C5C5C', lineHeight: 1.6, margin: 0 }}>
+                Photos are only revealed to a brother when <strong>you personally accept his interest</strong>. They are never shown to random visitors, other matches, or publicly.
+              </p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(175,77,152,0.12)' }}>
+            {['You control who sees them', 'Required for identity verification', 'Never shown publicly'].map(item => (
+              <span key={item} style={{ fontSize: '11px', background: 'white', color: '#AF4D98', padding: '3px 10px', borderRadius: '999px', fontWeight: 500, border: '1px solid rgba(175,77,152,0.2)' }}>
+                ✓ {item}
+              </span>
+            ))}
+          </div>
+        </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '8px' }}>
           {[0, 1, 2, 3, 4].map(index => (

@@ -276,10 +276,28 @@ export default function EditPhotosPage() {
           <h1 className="text-base font-medium text-[#1A1A1A]">My Photos</h1>
         </div>
 
-        <div className="bg-amber-50 border border-amber-100 rounded-[12px] px-4 py-3 mb-5">
-          <p className="text-xs text-amber-700 leading-relaxed">
-            🔒 <strong>Your photos are private.</strong> They are only shared with a brother when you accept his interest — never visible publicly or to other matches.
-          </p>
+        {/* Privacy card */}
+        <div style={{ background: 'linear-gradient(135deg, #F5E6F2 0%, #FDF8F3 100%)', border: '1px solid rgba(175,77,152,0.2)', borderRadius: '16px', padding: '18px 20px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#AF4D98', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+            </div>
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A1A', marginBottom: '4px' }}>Your photos are completely private</p>
+              <p style={{ fontSize: '13px', color: '#5C5C5C', lineHeight: 1.6, margin: 0 }}>
+                Photos are only revealed to a brother when <strong>you personally accept his interest</strong>. They are never shown to random visitors, other matches, or publicly.
+              </p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(175,77,152,0.12)' }}>
+            {['You control who sees them', 'Required for identity verification', 'Never shown publicly'].map(item => (
+              <span key={item} style={{ fontSize: '11px', background: 'white', color: '#AF4D98', padding: '3px 10px', borderRadius: '999px', fontWeight: 500, border: '1px solid rgba(175,77,152,0.2)' }}>
+                ✓ {item}
+              </span>
+            ))}
+          </div>
         </div>
 
         {error && (

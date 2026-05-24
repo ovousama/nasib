@@ -10,12 +10,13 @@ type Step = 'intro' | 'camera' | 'preview' | 'submitted'
 
 type Props = {
   userId: string
+  gender: string
   status: string
   submittedAt: string | null
   rejectionReason: string | null
 }
 
-export default function VerifyClient({ status, rejectionReason }: Props) {
+export default function VerifyClient({ gender, status, rejectionReason }: Props) {
   const router = useRouter()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -44,11 +45,29 @@ export default function VerifyClient({ status, rejectionReason }: Props) {
           Verify your identity
         </h1>
 
-        <p style={{ fontSize: '15px', color: '#5C5C5C', lineHeight: 1.7, marginBottom: '32px' }}>
+        <p style={{ fontSize: '15px', color: '#5C5C5C', lineHeight: 1.7, marginBottom: gender === 'sister' ? '20px' : '32px' }}>
           To keep Naseeb trustworthy and safe for everyone, we ask every member to complete a simple photo verification.
           <br /><br />
           You will take a live selfie using your camera. Our team will compare it to your profile photos and verify your account within 24 hours, in sha Allah.
         </p>
+
+        {gender === 'sister' && (
+          <div style={{ background: 'linear-gradient(135deg, #F5E6F2 0%, #FDF8F3 100%)', border: '1px solid rgba(175,77,152,0.2)', borderRadius: '16px', padding: '18px 20px', marginBottom: '24px', textAlign: 'left' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#AF4D98', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+                </svg>
+              </div>
+              <div>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A1A', marginBottom: '4px' }}>Why identity verification matters for sisters</p>
+                <p style={{ fontSize: '13px', color: '#5C5C5C', lineHeight: 1.6, margin: 0 }}>
+                  Your selfie is only used by our admin team to confirm your identity — it is <strong>never</strong> shared with brothers or shown publicly. Completing verification also unlocks your profile photos, which are shared only when <strong>you accept a brother&apos;s interest</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div style={{ background: '#FDFAF7', border: '1px solid #EDE8E3', borderRadius: '16px', padding: '20px', marginBottom: '32px', textAlign: 'left' }}>
           <p style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A1A', marginBottom: '12px' }}>What to expect:</p>

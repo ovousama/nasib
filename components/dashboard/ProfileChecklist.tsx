@@ -7,6 +7,7 @@ type Section = {
   label: string
   complete: boolean
   editPath: string
+  sublabel?: string
 }
 
 type Props = {
@@ -171,9 +172,10 @@ export default function ProfileChecklist({ gender, profile: p, completionPercent
     },
     {
       key: 'photos',
-      label: `Profile photos (${(p?.photo_urls as string[])?.length ?? 0}/3 minimum)`,
+      label: 'Profile photos (private & secure)',
       complete: ((p?.photo_urls as string[])?.length ?? 0) >= 3,
       editPath: '/dashboard/profile/edit/photos',
+      sublabel: 'Required for identity verification · Never shared without your consent',
     },
     {
       key: 'reference',
@@ -226,7 +228,7 @@ export default function ProfileChecklist({ gender, profile: p, completionPercent
             key={section.key}
             style={{
               display: 'flex',
-              alignItems: 'center',
+              alignItems: section.sublabel && !section.complete ? 'flex-start' : 'center',
               justifyContent: 'space-between',
               padding: '10px 12px',
               borderRadius: '10px',
@@ -235,7 +237,7 @@ export default function ProfileChecklist({ gender, profile: p, completionPercent
             }}
             onClick={() => !section.complete && router.push(section.editPath)}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
               <div style={{
                 width: '20px',
                 height: '20px',
@@ -253,17 +255,31 @@ export default function ProfileChecklist({ gender, profile: p, completionPercent
                   </svg>
                 )}
               </div>
-              <span style={{
-                fontSize: '14px',
-                color: section.complete ? '#9B9B9B' : '#1A1A1A',
-                textDecoration: section.complete ? 'line-through' : 'none',
-              }}>
-                {section.label}
-              </span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  {!section.complete && section.sublabel && (
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#AF4D98" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+                    </svg>
+                  )}
+                  <span style={{
+                    fontSize: '14px',
+                    color: section.complete ? '#9B9B9B' : '#1A1A1A',
+                    textDecoration: section.complete ? 'line-through' : 'none',
+                  }}>
+                    {section.label}
+                  </span>
+                </div>
+                {!section.complete && section.sublabel && (
+                  <p style={{ fontSize: '11px', color: '#9B7090', margin: '2px 0 0', lineHeight: 1.4 }}>
+                    {section.sublabel}
+                  </p>
+                )}
+              </div>
             </div>
             {!section.complete && (
-              <span style={{ fontSize: '13px', color: '#AF4D98', fontWeight: 500 }}>
-                Complete →
+              <span style={{ fontSize: '13px', color: '#AF4D98', fontWeight: 500, flexShrink: 0 }}>
+                {section.key === 'photos' ? 'Add →' : 'Complete →'}
               </span>
             )}
           </div>

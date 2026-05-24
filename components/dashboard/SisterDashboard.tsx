@@ -161,7 +161,6 @@ export default function SisterDashboard({
   const [localSentIds, setLocalSentIds] = useState<string[]>([])
 
   const [acceptModalInterest, setAcceptModalInterest] = useState<InterestWithProfile | null>(null)
-  const [needsPhotosInterest, setNeedsPhotosInterest] = useState<InterestWithProfile | null>(null)
 
   const [closeModalConnection, setCloseModalConnection] = useState<ConnectionWithProfile | null>(null)
   const [accepting, setAccepting] = useState(false)
@@ -209,7 +208,7 @@ export default function SisterDashboard({
   function openAcceptOrPromptPhotos(interest: InterestWithProfile) {
     setActionError(null)
     if (sisterPhotoCount < 3) {
-      setNeedsPhotosInterest(interest)
+      router.push('/dashboard/profile/edit/photos')
     } else {
       setAcceptModalInterest(interest)
     }
@@ -925,46 +924,6 @@ export default function SisterDashboard({
         compatibilityNote={quickView?.compatibilityNote}
         interestId={quickView?.interestId}
       />
-
-      {/* ── Needs Photos Modal ──────────────────────────────────── */}
-      {needsPhotosInterest && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-          <div style={{ background: 'white', borderRadius: '20px 20px 0 0', padding: '28px 24px', width: '100%', maxWidth: '480px' }}>
-            <p style={{ fontFamily: 'Noto Naskh Arabic, serif', fontSize: '24px', color: '#AF4D98', textAlign: 'center', marginBottom: '4px' }}>نصيب</p>
-            <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 400, textAlign: 'center', color: '#1A1A1A', marginBottom: '12px' }}>Add your photos first</h2>
-            <p style={{ fontSize: '14px', color: '#9B9B9B', textAlign: 'center', lineHeight: 1.6, marginBottom: '8px' }}>
-              To accept this interest you need at least 3 photos on your profile. You currently have{' '}
-              <strong style={{ color: '#AF4D98' }}>{sisterPhotoCount} photo{sisterPhotoCount !== 1 ? 's' : ''}</strong>.
-            </p>
-            <p style={{ fontSize: '13px', color: '#9B9B9B', textAlign: 'center', lineHeight: 1.6, marginBottom: '24px' }}>
-              Your photos are only shared with brothers whose interest you accept — they remain completely private otherwise.
-            </p>
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
-              {[0, 1, 2].map(i => (
-                <div key={i} style={{ width: '72px', height: '90px', borderRadius: '10px', border: `1.5px dashed ${i < sisterPhotoCount ? '#AF4D98' : '#EDE8E3'}`, overflow: 'hidden', background: '#FDFAF7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {i < sisterPhotoCount ? (
-                    <span style={{ fontSize: '20px', color: '#AF4D98' }}>✓</span>
-                  ) : (
-                    <span style={{ fontSize: '20px', color: '#EDE8E3' }}>+</span>
-                  )}
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => { setNeedsPhotosInterest(null); router.push('/dashboard/profile/edit/photos') }}
-              style={{ width: '100%', background: '#AF4D98', color: 'white', border: 'none', borderRadius: '999px', padding: '14px', fontSize: '15px', fontWeight: 500, cursor: 'pointer', marginBottom: '12px' }}
-            >
-              Add photos now →
-            </button>
-            <button
-              onClick={() => setNeedsPhotosInterest(null)}
-              style={{ width: '100%', background: 'transparent', border: 'none', color: '#9B9B9B', fontSize: '14px', cursor: 'pointer', padding: '8px' }}
-            >
-              Not now
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ── Nikah Planning Close Modal ───────────────────────────── */}
       {nikahCloseModal && (

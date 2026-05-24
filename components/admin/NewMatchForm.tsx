@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { adminAssignMatch, checkPreviousMatch } from '@/app/admin/actions'
 
-type Person = { id: string; full_name: string; profile_complete: boolean; profile_completion_percentage: number }
+type Person = { id: string; full_name: string; profile_complete: boolean; profile_completion_percentage: number; verification_status?: string | null }
 
 type Props = {
   brothers: Person[]
@@ -135,6 +135,17 @@ export default function NewMatchForm({ brothers, sisters, defaultBrotherId = '',
 
       <SearchSelect label="Brother" people={brothers} value={brotherId} onChange={setBrotherId} />
       <SearchSelect label="Sister" people={sisters} value={sisterId} onChange={setSisterId} />
+
+      {sisterId && (() => {
+        const s = sisters.find(p => p.id === sisterId)
+        if (!s || s.verification_status === 'verified') return null
+        const msg = s.verification_status === 'pending'
+          ? `${s.full_name}'s identity verification is under review. She can still be assigned matches, but photos won't unlock for her until verified.`
+          : `${s.full_name} has not submitted identity verification yet. Consider reminding her before assigning matches.`
+        return (
+          <div className="bg-amber-50 border border-amber-200 rounded-[10px] p-3 text-sm text-amber-800">{msg}</div>
+        )
+      })()}
 
       <div>
         <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">

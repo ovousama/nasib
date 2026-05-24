@@ -122,6 +122,8 @@ export default async function UsersPage({ searchParams }: Props) {
                   <td className="px-4 py-3">
                     {user.verification_badge ? (
                       <span className="text-[#AF4D98] text-[11px] font-medium">Yes</span>
+                    ) : user.verification_status === 'pending' ? (
+                      <span className="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#FEF9EC] text-[#8A6A00]">Under review</span>
                     ) : (
                       <span className="text-[#9B9B9B] text-[11px]">No</span>
                     )}
