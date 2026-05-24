@@ -5,13 +5,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getFieldLabel } from '@/lib/field-labels'
+import { getFieldLabel, formatFieldValue, SLIDER_FIELDS } from '@/lib/field-labels'
 
 type FieldDef = {
   label: string
   value: any
   type?: 'text' | 'slider' | 'array' | 'longtext'
   fullWidth?: boolean
+  fieldKey?: string
 }
 
 type Props = {
@@ -21,16 +22,20 @@ type Props = {
   connectionId: string | null
   verificationBadge: boolean
   isInterestContext: boolean
+  photosVisible?: boolean
+  matchReason?: string | null
 }
 
 // ─── FieldRow ─────────────────────────────────────────────────────────────────
 
-function FieldRow({ label, value, type = 'text', fullWidth = false }: FieldDef) {
+function FieldRow({ label, value, type = 'text', fullWidth = false, fieldKey }: FieldDef) {
   if (value === null || value === undefined || value === '') return null
   if (Array.isArray(value) && value.length === 0) return null
 
+  const isSlider = type === 'slider' || (fieldKey ? SLIDER_FIELDS.includes(fieldKey) : false)
+
   const renderValue = () => {
-    if (type === 'slider') {
+    if (isSlider) {
       const pct = Number(value)
       return (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -47,7 +52,7 @@ function FieldRow({ label, value, type = 'text', fullWidth = false }: FieldDef) 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
           {value.map((v: string, i: number) => (
             <span key={i} style={{ background: '#F5E6F2', color: '#7B2F6E', borderRadius: '999px', padding: '2px 10px', fontSize: '12px', fontWeight: 500 }}>
-              {v}
+              {formatFieldValue(v, fieldKey)}
             </span>
           ))}
         </div>
@@ -62,15 +67,17 @@ function FieldRow({ label, value, type = 'text', fullWidth = false }: FieldDef) 
       )
     }
 
+    const formatted = formatFieldValue(value, fieldKey)
+
     if (type === 'longtext' || (typeof value === 'string' && value.length > 80)) {
       return (
         <p style={{ fontSize: '14px', color: '#5C5C5C', lineHeight: 1.7, margin: 0, background: '#FDFAF7', border: '1px solid #EDE8E3', borderRadius: '8px', padding: '10px 12px' }}>
-          {value}
+          {typeof value === 'string' ? value : formatted}
         </p>
       )
     }
 
-    return <span style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A1A' }}>{String(value)}</span>
+    return <span style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A1A' }}>{formatted}</span>
   }
 
   if (fullWidth) {
@@ -124,6 +131,8 @@ export default function ViewProfileClient({
   connectionId,
   verificationBadge,
   isInterestContext,
+  photosVisible = true,
+  matchReason = null,
 }: Props) {
   const router = useRouter()
   const [activePhotoIndex, setActivePhotoIndex] = useState(0)
@@ -131,23 +140,35 @@ export default function ViewProfileClient({
   const lbl = (key: string) => getFieldLabel(key, gender)
   const isBrother = gender === 'brother'
   const firstName = String(p.full_name ?? '').split(' ')[0] || 'Profile'
+  const showPhotos = photosVisible && photoUrls.length > 0
 
   // ── Header stat pills ──────────────────────────────────────────────────────
   const statPills = [
-    p.religiosity_level,
-    p.prayer_frequency,
+    formatFieldValue(p.religiosity_level, 'religiosity_level'),
+    formatFieldValue(p.prayer_frequency, 'prayer_frequency'),
     gender === 'sister'
       ? (p.wears_hijab ? 'Wears hijab' : null)
       : (p.has_beard ? 'Has beard' : null),
-    p.madhab,
+    formatFieldValue(p.madhab, 'madhab'),
   ].filter(Boolean) as string[]
 
   // ── Quick facts (top 3 cards) ──────────────────────────────────────────────
   const quickFacts = [
-    { label: 'Occupation', value: p.occupation },
-    { label: 'Education', value: p.education_level },
-    { label: 'Lives', value: p.living_situation },
+    { label: 'Occupation', value: formatFieldValue(p.occupation, 'occupation') },
+    { label: 'Education', value: formatFieldValue(p.education_level, 'education_level') },
+    { label: 'Lives', value: formatFieldValue(p.living_situation, 'living_situation') },
   ].filter(item => item.value)
+
+  // ── Combined children display ───────────────────────────────────────────────
+  const childrenDisplay = (() => {
+    const has = p.has_children
+    const wants = p.wants_children
+    if (has) return 'Has children'
+    if (wants === true) return 'Wants children'
+    if (wants === false) return 'Does not want children'
+    if (wants === undefined || wants === null) return null
+    return 'Open to children'
+  })()
 
   const ageRange =
     p.spouse_age_min && p.spouse_age_max
@@ -157,10 +178,10 @@ export default function ViewProfileClient({
   // ── Section field arrays ───────────────────────────────────────────────────
 
   const deenFields: FieldDef[] = [
-    { label: lbl('religiosity_level'), value: p.religiosity_level },
-    { label: lbl('prayer_frequency'), value: p.prayer_frequency },
-    { label: lbl('madhab'), value: p.madhab },
-    { label: lbl('islamic_knowledge_level'), value: p.islamic_knowledge_level },
+    { label: lbl('religiosity_level'), value: p.religiosity_level, fieldKey: 'religiosity_level' },
+    { label: lbl('prayer_frequency'), value: p.prayer_frequency, fieldKey: 'prayer_frequency' },
+    { label: lbl('madhab'), value: p.madhab, fieldKey: 'madhab' },
+    { label: lbl('islamic_knowledge_level'), value: p.islamic_knowledge_level, fieldKey: 'islamic_knowledge_level' },
     isBrother
       ? { label: lbl('has_beard'), value: p.has_beard }
       : { label: lbl('wears_hijab'), value: p.wears_hijab },
@@ -186,14 +207,14 @@ export default function ViewProfileClient({
       { label: lbl('family_balance_after_marriage'), value: p.family_balance_after_marriage },
       { label: lbl('inlaws_comfort'), value: p.inlaws_comfort },
       { label: lbl('husband_family_relationship'), value: p.husband_family_relationship },
-      { label: lbl('family_traditional_vs_modern'), value: p.family_traditional_vs_modern, type: 'slider' as const },
+      { label: lbl('family_traditional_vs_modern'), value: p.family_traditional_vs_modern, type: 'slider' as const, fieldKey: 'family_traditional_vs_modern' },
     ]),
   ]
 
   const lifestyleFields: FieldDef[] = [
-    { label: lbl('occupation'), value: p.occupation },
-    { label: lbl('education_level'), value: p.education_level },
-    { label: lbl('living_situation'), value: p.living_situation },
+    { label: lbl('occupation'), value: p.occupation, fieldKey: 'occupation' },
+    { label: lbl('education_level'), value: p.education_level, fieldKey: 'education_level' },
+    { label: lbl('living_situation'), value: p.living_situation, fieldKey: 'living_situation' },
     { label: lbl('willing_to_relocate'), value: p.willing_to_relocate },
     { label: lbl('strict_halal_diet'), value: p.strict_halal_diet },
     { label: lbl('smoking'), value: p.smoking },
@@ -206,26 +227,25 @@ export default function ViewProfileClient({
   ]
 
   const marriageFields: FieldDef[] = [
-    { label: lbl('timeline_to_marry'), value: p.timeline_to_marry },
-    { label: lbl('wants_children'), value: p.wants_children },
+    { label: lbl('timeline_to_marry'), value: p.timeline_to_marry, fieldKey: 'timeline_to_marry' },
+    { label: 'Children', value: childrenDisplay },
     { label: lbl('number_of_children_wanted'), value: p.number_of_children_wanted },
     { label: lbl('previously_married'), value: p.previously_married },
-    { label: lbl('has_children'), value: p.has_children },
     { label: lbl('islamic_schooling_importance'), value: p.islamic_schooling_importance },
     { label: lbl('inlaws_living_together'), value: p.inlaws_living_together },
     ...(isBrother ? [{ label: lbl('polygamy_openness'), value: p.polygamy_openness }] : []),
   ]
 
   const spouseFields: FieldDef[] = [
-    { label: lbl('spouse_religiosity_preference'), value: p.spouse_religiosity_preference },
+    { label: lbl('spouse_religiosity_preference'), value: p.spouse_religiosity_preference, fieldKey: 'spouse_religiosity_preference' },
     { label: 'Preferred Age Range', value: ageRange },
     { label: lbl('dealbreakers'), value: p.dealbreakers, type: 'array' as const, fullWidth: true },
-    { label: lbl('cultural_background_importance'), value: p.cultural_background_importance, type: 'slider' as const },
+    { label: lbl('cultural_background_importance'), value: p.cultural_background_importance, type: 'slider' as const, fieldKey: 'cultural_background_importance' },
   ]
 
   const financialFields: FieldDef[] = isBrother ? [
     { label: lbl('financial_readiness'), value: p.financial_readiness },
-    { label: lbl('annual_income_range'), value: p.annual_income_range },
+    { label: lbl('annual_income_range'), value: p.annual_income_range, fieldKey: 'annual_income_range' },
     { label: lbl('own_or_rent'), value: p.own_or_rent },
     { label: lbl('has_significant_debt'), value: p.has_significant_debt },
     { label: lbl('supporting_family_financially'), value: p.supporting_family_financially },
@@ -252,16 +272,16 @@ export default function ViewProfileClient({
     { label: lbl('couples_therapy_view'), value: p.couples_therapy_view },
     { label: lbl('mental_health_challenges'), value: p.mental_health_challenges },
     { label: lbl('emotional_support_style'), value: p.emotional_support_style, fullWidth: true, type: 'longtext' as const },
-    { label: lbl('emotional_availability'), value: p.emotional_availability, type: 'slider' as const },
+    { label: lbl('emotional_availability'), value: p.emotional_availability, type: 'slider' as const, fieldKey: 'emotional_availability' },
     { label: lbl('significant_hardship'), value: p.significant_hardship, fullWidth: true, type: 'longtext' as const },
     { label: lbl('emotional_expression_view'), value: p.emotional_expression_view },
   ]
 
   const conflictFields: FieldDef[] = [
     { label: lbl('healthy_argument_view'), value: p.healthy_argument_view, fullWidth: true, type: 'longtext' as const },
-    { label: lbl('apology_speed'), value: p.apology_speed },
+    { label: lbl('apology_speed'), value: p.apology_speed, fieldKey: 'apology_speed' },
     { label: lbl('communication_when_upset'), value: p.communication_when_upset },
-    { label: lbl('introvert_extrovert'), value: p.introvert_extrovert },
+    { label: lbl('introvert_extrovert'), value: p.introvert_extrovert, fieldKey: 'introvert_extrovert' },
     { label: lbl('love_language'), value: p.love_language, type: 'array' as const },
     ...(isBrother ? [
       { label: lbl('husband_final_say'), value: p.husband_final_say },
@@ -274,11 +294,11 @@ export default function ViewProfileClient({
 
   const householdCareerFields: FieldDef[] = isBrother ? [
     { label: lbl('household_management'), value: p.household_management },
-    { label: lbl('home_organisation'), value: p.home_organisation, type: 'slider' as const },
+    { label: lbl('home_organisation'), value: p.home_organisation, type: 'slider' as const, fieldKey: 'home_organisation' },
     { label: lbl('household_responsibilities_vision'), value: p.household_responsibilities_vision, fullWidth: true, type: 'longtext' as const },
   ] : [
     { label: lbl('career_five_years'), value: p.career_five_years, fullWidth: true, type: 'longtext' as const },
-    { label: lbl('career_identity_importance'), value: p.career_identity_importance, type: 'slider' as const },
+    { label: lbl('career_identity_importance'), value: p.career_identity_importance, type: 'slider' as const, fieldKey: 'career_identity_importance' },
     { label: lbl('career_pause_for_children'), value: p.career_pause_for_children },
   ]
 
@@ -297,7 +317,7 @@ export default function ViewProfileClient({
     { label: lbl('deen_growth'), value: p.deen_growth, fullWidth: true, type: 'longtext' as const },
     { label: lbl('quran_listening'), value: p.quran_listening },
     { label: lbl('quran_memorisation'), value: p.quran_memorisation },
-    { label: lbl('traditional_vs_reformist'), value: p.traditional_vs_reformist, type: 'slider' as const },
+    { label: lbl('traditional_vs_reformist'), value: p.traditional_vs_reformist, type: 'slider' as const, fieldKey: 'traditional_vs_reformist' },
     { label: lbl('zakah_sadaqah'), value: p.zakah_sadaqah },
     { label: lbl('mawlid_view'), value: p.mawlid_view },
     { label: lbl('madhab_consistency'), value: p.madhab_consistency },
@@ -363,17 +383,35 @@ export default function ViewProfileClient({
 
         {/* ── Photo gallery ────────────────────────────────────────────────── */}
         <div style={{ textAlign: 'center', marginBottom: '4px' }}>
-          {photoUrls.length === 0 ? (
-            <div style={{
-              width: '100px', height: '100px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #F5E6F2, #F4E4BA)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto', border: '3px solid white', boxShadow: '0 0 0 2px #AF4D98'
-            }}>
-              <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '38px', fontWeight: 400, color: '#AF4D98' }}>
-                {String(p.full_name ?? 'N')[0]?.toUpperCase() ?? 'N'}
-              </span>
-            </div>
+          {!showPhotos ? (
+            <>
+              <div style={{
+                width: '120px', height: '120px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, #F5E6F2, #F4E4BA)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto', border: '3px solid white', boxShadow: '0 0 0 2px #AF4D98',
+                position: 'relative',
+              }}>
+                <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '44px', fontWeight: 400, color: '#AF4D98' }}>
+                  {String(p.full_name ?? 'N')[0]?.toUpperCase() ?? 'N'}
+                </span>
+                <div style={{
+                  position: 'absolute', bottom: '-4px', right: '-4px',
+                  width: '32px', height: '32px', borderRadius: '50%',
+                  background: '#1A1A1A',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: '2px solid white',
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                </div>
+              </div>
+              <p style={{ textAlign: 'center', fontSize: '12px', color: '#9B7090', marginTop: '12px', fontStyle: 'italic' }}>
+                🔒 Photos remain private until your interest is accepted
+              </p>
+            </>
           ) : (
             <>
               <div style={{
@@ -455,6 +493,24 @@ export default function ViewProfileClient({
           </p>
         )}
 
+        {/* ── Match reason ─────────────────────────────────────────────────── */}
+        {matchReason !== undefined && (matchReason && matchReason.trim().length > 10 ? (
+          <div style={{ marginTop: '20px', marginBottom: '16px' }}>
+            <p style={{ fontSize: '11px', fontWeight: 600, color: '#9B7090', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>
+              Why you matched
+            </p>
+            <div style={{ background: 'rgba(175,77,152,0.06)', borderLeft: '3px solid #AF4D98', borderRadius: '0 10px 10px 0', padding: '12px 14px' }}>
+              <p style={{ fontSize: '13px', color: '#5C5C5C', lineHeight: 1.6, fontStyle: 'italic', margin: 0 }}>
+                &ldquo;{matchReason}&rdquo;
+              </p>
+            </div>
+          </div>
+        ) : matchReason !== null ? (
+          <p style={{ fontSize: '13px', color: '#9B9B9B', fontStyle: 'italic', margin: '20px 0 16px', textAlign: 'center' }}>
+            Our team carefully selected this match based on your shared values and compatibility.
+          </p>
+        ) : null)}
+
         {/* ── Character quote card ─────────────────────────────────────────── */}
         {p.character_description && (
           <div style={{ background: '#FDFAF7', border: '1px solid #EDE8E3', borderRadius: '16px', padding: '16px 20px', margin: '24px 0 16px' }}>
@@ -494,50 +550,36 @@ export default function ViewProfileClient({
         <SectionCard title="Faith & Deen" fields={faithFields} />
         <SectionCard title="Character & Goals" fields={characterFields} />
 
-        {/* ── Character Reference ───────────────────────────────────────────── */}
-        <div style={{ background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px', marginBottom: '12px', overflow: 'hidden' }}>
-          <div style={{ padding: '14px 16px', borderBottom: '1px solid #EDE8E3' }}>
-            <p style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9B9B9B', margin: 0 }}>
-              Character Reference
-            </p>
-          </div>
-          {!hasRef ? (
-            <div style={{ padding: '16px' }}>
-              <p style={{ fontSize: '14px', color: '#9B9B9B', margin: 0 }}>
-                Reference questionnaire has been sent and is awaiting response.
+        {/* ── Character Reference (only shown when verified) ───────────────── */}
+        {hasRef && ref.status === 'completed' && (
+          <div style={{ background: 'white', border: '1px solid #EDE8E3', borderRadius: '16px', marginBottom: '12px', overflow: 'hidden' }}>
+            <div style={{ padding: '14px 16px', borderBottom: '1px solid #EDE8E3' }}>
+              <p style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9B9B9B', margin: 0 }}>
+                Character Reference
               </p>
             </div>
-          ) : ref.status === 'pending' ? (
-            <div style={{ padding: '16px' }}>
-              <span style={{ background: '#FFF8E6', color: '#92600A', fontSize: '12px', fontWeight: 500, padding: '4px 12px', borderRadius: '999px' }}>
-                Reference pending verification
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid #F5F5F5' }}>
+              <span style={{ background: '#E6F7F5', color: '#0A8A7A', fontSize: '12px', fontWeight: 500, padding: '4px 12px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <circle cx="6" cy="6" r="6" fill="#0A8A7A" />
+                  <path d="M3 6L5 8L9 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                Verified reference
               </span>
             </div>
-          ) : (
-            <>
-              <div style={{ padding: '12px 16px', borderBottom: '1px solid #F5F5F5' }}>
-                <span style={{ background: '#E6F7F5', color: '#0A8A7A', fontSize: '12px', fontWeight: 500, padding: '4px 12px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <circle cx="6" cy="6" r="6" fill="#0A8A7A" />
-                    <path d="M3 6L5 8L9 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                  Verified reference
-                </span>
-              </div>
-              <FieldRow label="Referee" value={ref.referee_name} />
-              <FieldRow label="Relationship" value={ref.referee_relationship} />
-              <FieldRow label="How Long Known" value={ref.how_long_known} />
-              <FieldRow label="Ready for Marriage" value={ref.ready_for_marriage} />
-              <FieldRow label="Would Recommend" value={ref.would_recommend} />
-              {ref.character_description && (
-                <FieldRow label="Character" value={ref.character_description} fullWidth type="longtext" />
-              )}
-              {ref.islamic_practice_description && (
-                <FieldRow label="Islamic Practice" value={ref.islamic_practice_description} fullWidth type="longtext" />
-              )}
-            </>
-          )}
-        </div>
+            <FieldRow label="Referee" value={ref.referee_name} />
+            <FieldRow label="Relationship" value={ref.referee_relationship} />
+            <FieldRow label="How Long Known" value={ref.how_long_known} />
+            <FieldRow label="Ready for Marriage" value={ref.ready_for_marriage} />
+            <FieldRow label="Would Recommend" value={ref.would_recommend} />
+            {ref.character_description && (
+              <FieldRow label="Character" value={ref.character_description} fullWidth type="longtext" />
+            )}
+            {ref.islamic_practice_description && (
+              <FieldRow label="Islamic Practice" value={ref.islamic_practice_description} fullWidth type="longtext" />
+            )}
+          </div>
+        )}
 
       </div>
     </div>

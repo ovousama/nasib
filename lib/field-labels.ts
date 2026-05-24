@@ -260,3 +260,128 @@ export function getFieldLabel(field: string, gender: 'brother' | 'sister'): stri
     .replace(/_/g, ' ')
     .replace(/\b\w/g, l => l.toUpperCase())
 }
+
+// ─── Value formatting ────────────────────────────────────────────────────────
+
+export const SLIDER_FIELDS = [
+  'traditional_vs_reformist',
+  'emotional_availability',
+  'cultural_background_importance',
+  'home_organisation',
+  'career_identity_importance',
+  'family_traditional_vs_modern',
+]
+
+export const VALUE_LABELS: Record<string, Record<string, string>> = {
+  religiosity_level: {
+    practicing: 'Practicing',
+    moderately_practicing: 'Moderately practicing',
+    spiritually_inclined: 'Spiritually inclined',
+    still_growing: 'Still growing in faith',
+  },
+  prayer_frequency: {
+    five_times_daily: 'Five times daily',
+    most_prayers: 'Most prayers',
+    some_prayers: 'Some prayers',
+    jummah_only: 'Jummah only',
+    not_currently: 'Not currently',
+  },
+  madhab: {
+    hanafi: 'Hanafi',
+    shafi: "Shafi'i",
+    maliki: 'Maliki',
+    hanbali: 'Hanbali',
+    no_specific_madhab: 'No specific madhab',
+  },
+  marriage_timeline: {
+    within_3_months: 'Within 3 months',
+    within_6_months: 'Within 6 months',
+    within_a_year: 'Within a year',
+    flexible: 'Flexible',
+  },
+  timeline_to_marry: {
+    within_3_months: 'Within 3 months',
+    within_6_months: 'Within 6 months',
+    within_a_year: 'Within a year',
+    flexible: 'Flexible',
+  },
+  education_level: {
+    high_school: 'High school',
+    some_college: 'Some college',
+    bachelors: "Bachelor's degree",
+    masters: "Master's degree",
+    doctorate: 'Doctorate',
+    professional: 'Professional degree',
+    trade: 'Trade qualification',
+  },
+  living_situation: {
+    with_family: 'With family',
+    independent: 'Independent',
+    with_roommates: 'With roommates',
+  },
+  islamic_knowledge_level: {
+    basic: 'Basic',
+    intermediate: 'Intermediate',
+    advanced: 'Advanced',
+    scholar: 'Scholar-level',
+  },
+  conflict_style: {
+    avoidant: 'Avoidant',
+    direct: 'Direct',
+    collaborative: 'Collaborative',
+    emotional: 'Emotional',
+  },
+  apology_speed: {
+    quickly: 'Quickly',
+    after_reflection: 'After reflection',
+    rarely: 'Rarely',
+    depends: 'Depends on situation',
+  },
+  spouse_religiosity_preference: {
+    practicing: 'Practicing',
+    moderately_practicing: 'Moderately practicing',
+    spiritually_inclined: 'Spiritually inclined',
+    open: 'Open to any level',
+  },
+  introvert_extrovert: {
+    introvert: 'Introvert',
+    extrovert: 'Extrovert',
+    ambivert: 'Ambivert',
+  },
+  annual_income_range: {
+    under_25k: 'Under $25,000',
+    '25_50k': '$25,000–$50,000',
+    '50_75k': '$50,000–$75,000',
+    '75_100k': '$75,000–$100,000',
+    '100_150k': '$100,000–$150,000',
+    over_150k: 'Over $150,000',
+    prefer_not_to_say: 'Prefer not to say',
+  },
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function formatFieldValue(value: any, fieldKey?: string): string {
+  if (value === null || value === undefined || value === '') return ''
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+
+  if (Array.isArray(value)) {
+    return value.map(v => formatFieldValue(v, fieldKey)).filter(Boolean).join(', ')
+  }
+
+  if (fieldKey && typeof value === 'string' && VALUE_LABELS[fieldKey]?.[value]) {
+    return VALUE_LABELS[fieldKey][value]
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase())
+  }
+
+  if (typeof value === 'number') {
+    if (fieldKey && SLIDER_FIELDS.includes(fieldKey)) return `${value}%`
+    return value.toString()
+  }
+
+  return String(value)
+}

@@ -198,11 +198,7 @@ export default function SisterDashboard({
   }
 
   function openMatchQuickView(match: SisterMatch) {
-    setQuickView({
-      profileId: match.brother_id,
-      showActions: false,
-      compatibilityNote: match.compatibility_note,
-    })
+    router.push(`/dashboard/profile/${match.brother_id}?context=match`)
   }
 
   function openAcceptOrPromptPhotos(interest: InterestWithProfile) {

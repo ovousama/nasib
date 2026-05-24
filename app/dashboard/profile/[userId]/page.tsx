@@ -5,6 +5,7 @@ import { createStorageClient } from '@/lib/supabase'
 import { getProfile, getProfileForViewing } from '@/lib/database'
 import { getConnectionBetween } from '@/lib/connections'
 import ProfileInterestActions from '@/components/dashboard/ProfileInterestActions'
+import ProfileMatchActions from '@/components/dashboard/ProfileMatchActions'
 import ViewProfileClient from '@/components/profile/ViewProfileClient'
 
 type Props = {
@@ -23,12 +24,13 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
   if (userId === user.id) redirect('/dashboard/profile')
 
   const isInterestContext = context === 'interest' && !!interestId
+  const isMatchContext = context === 'match'
 
   const activeConnectionId = await getConnectionBetween(user.id, userId)
 
-  if (!isInterestContext && !activeConnectionId) {
-    redirect('/dashboard')
-  }
+  // Lookup viewer to figure out match column
+  const viewerProfile = await getProfile(user.id)
+  if (!viewerProfile) redirect('/auth/login')
 
   const [targetProfile, profileData] = await Promise.all([
     getProfile(userId),
@@ -36,6 +38,44 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
   ])
 
   if (!targetProfile) notFound()
+
+  const isTargetBrother = targetProfile.gender === 'brother'
+  const gender: 'brother' | 'sister' = isTargetBrother ? 'brother' : 'sister'
+
+  // Allow viewing if: active connection, interest context, OR active match
+  let matchReason: string | null | undefined = undefined
+  let hasMatch = false
+  let hasSentInterest = false
+
+  if (isMatchContext || (!activeConnectionId && !isInterestContext)) {
+    const brotherId = viewerProfile.gender === 'brother' ? user.id : userId
+    const sisterId = viewerProfile.gender === 'sister' ? user.id : userId
+    const { data: match } = await supabase
+      .from('matches')
+      .select('compatibility_note, status')
+      .eq('brother_id', brotherId)
+      .eq('sister_id', sisterId)
+      .eq('status', 'active')
+      .maybeSingle()
+
+    if (match) {
+      hasMatch = true
+      matchReason = match.compatibility_note ?? ''
+      // Check if viewer already expressed interest
+      const { data: existing } = await supabase
+        .from('interests')
+        .select('id, initiated_by, status')
+        .eq('brother_id', brotherId)
+        .eq('sister_id', sisterId)
+        .eq('status', 'pending')
+        .maybeSingle()
+      hasSentInterest = !!(existing && existing.initiated_by === user.id)
+    }
+  }
+
+  if (!isInterestContext && !activeConnectionId && !hasMatch) {
+    redirect('/dashboard')
+  }
 
   if (!profileData) {
     return (
@@ -46,16 +86,14 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     )
   }
 
-  const isBrother = targetProfile.gender === 'brother'
-  const gender: 'brother' | 'sister' = isBrother ? 'brother' : 'sister'
   const backConnectionId = connectionIdParam ?? activeConnectionId
 
   // Photo resolution:
   // - Brother → public bucket (no auth needed)
   // - Sister + active connection → signed URLs via service role client
-  // - Sister + interest only → no photos shown
+  // - Sister + interest/match only → no photos shown
   const photoUrls: string[] = []
-  if (isBrother) {
+  if (isTargetBrother) {
     const paths: string[] =
       (profileData.photo_urls as string[] | null)?.length
         ? (profileData.photo_urls as string[])
@@ -68,7 +106,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
         : supabase.storage.from('brother-photos').getPublicUrl(path).data.publicUrl
       photoUrls.push(url)
     }
-  } else if (!isBrother && activeConnectionId) {
+  } else if (!isTargetBrother && activeConnectionId) {
     const { data: sp } = await supabase
       .from('sister_profiles')
       .select('photo_urls')
@@ -77,13 +115,23 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     const paths: string[] = (sp?.photo_urls as string[]) ?? []
     const storageClient = createStorageClient()
     for (const path of paths) {
-      const { data: signed, error } = await storageClient.storage
+      const { data: signed } = await storageClient.storage
         .from('sister-photos')
         .createSignedUrl(path, 3600)
-      console.log('Signed URL:', signed?.signedUrl, 'Error:', error)
       if (signed?.signedUrl) photoUrls.push(signed.signedUrl)
     }
   }
+
+  // photosVisible: brother photos are public so always visible;
+  // sister photos only visible when there's an active connection.
+  const photosVisible = isTargetBrother || !!activeConnectionId
+
+  // Determine brother/sister IDs for match-context actions
+  const brotherId = viewerProfile.gender === 'brother' ? user.id : userId
+  const sisterId = viewerProfile.gender === 'sister' ? user.id : userId
+  const targetFirstName = String(profileData.full_name ?? '').split(' ')[0] || 'them'
+
+  const showMatchActions = hasMatch && !activeConnectionId && !isInterestContext
 
   return (
     <>
@@ -93,10 +141,20 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
         photoUrls={photoUrls}
         connectionId={backConnectionId ?? null}
         verificationBadge={targetProfile.verification_badge}
-        isInterestContext={isInterestContext}
+        isInterestContext={isInterestContext || showMatchActions}
+        photosVisible={photosVisible}
+        matchReason={matchReason}
       />
       {isInterestContext && interestId && (
         <ProfileInterestActions interestId={interestId} />
+      )}
+      {showMatchActions && (
+        <ProfileMatchActions
+          brotherId={brotherId}
+          sisterId={sisterId}
+          targetFirstName={targetFirstName}
+          hasSentInterest={hasSentInterest}
+        />
       )}
     </>
   )

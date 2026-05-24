@@ -197,11 +197,7 @@ export default function BrotherDashboard({
   }
 
   function openMatchQuickView(match: BrotherMatch) {
-    setQuickView({
-      profileId: match.sister_id,
-      showActions: false,
-      compatibilityNote: match.compatibility_note,
-    })
+    router.push(`/dashboard/profile/${match.sister_id}?context=match`)
   }
 
   const openInterestModal = (brotherId: string, sisterId: string, sisterFirstName: string) => {
