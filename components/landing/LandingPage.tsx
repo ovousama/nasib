@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import NasibLogo from '@/components/ui/NasibLogo'
 import AnimatedHero from './AnimatedHero'
@@ -168,14 +168,7 @@ const FAQS = [
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const [scrolled, setScrolled] = useState(false)
   const howItWorksRef = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   function scrollToHowItWorks() {
     howItWorksRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -184,36 +177,34 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
 
-      {/* ── NAVBAR ────────────────────────────────────────────────────────── */}
-      <header className={`sticky top-0 z-50 bg-white border-b border-[#EDE8E3] transition-shadow ${scrolled ? 'shadow-sm' : ''}`} data-testid="landing-nav">
-        <div className="max-w-[1100px] mx-auto px-6 h-[60px] flex items-center justify-between">
-          <Link href="/">
-            <NasibLogo size="sm" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/auth/login"
-              className="hidden sm:inline-flex text-sm text-[#5C5C5C] px-4 py-2 rounded-full border border-[#EDE8E3] hover:border-[#AF4D98] hover:text-[#AF4D98] transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/auth/signup"
-              className="inline-flex text-sm font-medium text-white bg-[#AF4D98] px-4 py-2 rounded-full hover:bg-[#9B3D85] transition-colors"
-            >
-              <span className="sm:hidden">Get started</span>
-              <span className="hidden sm:inline">Begin my profile</span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section
         data-testid="landing-hero"
         style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5E6F2 100%)' }}
-        className="px-6 pt-[80px] pb-[60px] lg:pt-[120px] lg:pb-[60px] lg:min-h-[90vh] lg:flex lg:flex-col lg:justify-center"
+        className="px-6 pt-8 pb-[60px] lg:pt-10 lg:pb-[60px] lg:min-h-[90vh] lg:flex lg:flex-col lg:justify-center"
       >
+        {/* Logo + Sign in row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px' }}>
+          <span style={{ fontFamily: arabic, fontSize: '24px', color: '#AF4D98', opacity: 0.9 }}>
+            نصيب
+          </span>
+          <Link
+            href="/auth/login"
+            style={{
+              background: 'rgba(175,77,152,0.08)',
+              border: '0.5px solid rgba(175,77,152,0.25)',
+              color: '#AF4D98',
+              fontSize: '13px',
+              fontWeight: 500,
+              padding: '8px 18px',
+              borderRadius: '999px',
+              textDecoration: 'none',
+            }}
+          >
+            Sign in
+          </Link>
+        </div>
+
         <div className="max-w-[700px] mx-auto text-center">
           {/* Ar-Rum verse — first element */}
           <p
