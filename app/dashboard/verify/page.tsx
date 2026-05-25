@@ -18,12 +18,14 @@ export default async function VerifyPage() {
   if (profile.verification_status === 'verified') redirect('/dashboard')
 
   return (
-    <VerifyClient
-      userId={user.id}
-      gender={profile.gender ?? 'brother'}
-      status={profile.verification_status ?? 'unverified'}
-      submittedAt={profile.verification_submitted_at ?? null}
-      rejectionReason={profile.verification_rejection_reason ?? null}
-    />
+    <div className="pt-[72px] lg:pt-[76px]">
+      <VerifyClient
+        userId={user.id}
+        gender={profile.gender ?? 'brother'}
+        status={profile.verification_status ?? 'unverified'}
+        submittedAt={profile.verification_submitted_at ?? null}
+        rejectionReason={profile.verification_rejection_reason ?? null}
+      />
+    </div>
   )
 }

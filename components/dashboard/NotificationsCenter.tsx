@@ -76,7 +76,7 @@ export default function NotificationsCenter({ notifications }: Props) {
   }
 
   return (
-    <div className="bg-[#FDF8F3] min-h-screen px-6 py-6">
+    <div className="bg-[#FDF8F3] min-h-screen px-6 pt-[72px] pb-6 lg:pt-[76px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>

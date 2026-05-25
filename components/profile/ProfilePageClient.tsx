@@ -116,7 +116,7 @@ export default function ProfilePageClient({
   const photoEditHref = isBrother ? '/dashboard/profile/edit/photo' : '/dashboard/profile/edit/photos'
 
   return (
-    <div style={{ background: PAGE_BG, minHeight: '100vh' }} data-testid="profile-page">
+    <div className="pt-[72px] lg:pt-[76px]" style={{ background: PAGE_BG, minHeight: '100vh' }} data-testid="profile-page">
       <div style={{ maxWidth: '720px', margin: '0 auto', padding: '24px 20px 60px' }}>
 
         <ProfileHeader

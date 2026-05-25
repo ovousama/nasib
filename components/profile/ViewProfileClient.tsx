@@ -45,11 +45,9 @@ export default function ViewProfileClient({
   const hasVerifiedRef = ref && typeof ref === 'object' && ref.status === 'completed'
 
   return (
-    <div style={{ background: PAGE_BG, minHeight: '100vh' }}>
+    <div className="pt-14 lg:pt-[60px]" style={{ background: PAGE_BG, minHeight: '100vh' }}>
       {/* ── Sticky back nav ───────────────────────────────────────────────── */}
-      <div style={{
-        position: 'sticky',
-        top: 0,
+      <div className="sticky top-14 lg:top-[60px]" style={{
         background: 'rgba(255,255,255,0.85)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',

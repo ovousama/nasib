@@ -706,7 +706,7 @@ export default function NikahPlanningClient({
   const done = ALL_KEYS.filter(k => checklistMap[k]?.completed).length
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3] pb-24 lg:pb-8">
+    <div className="min-h-screen bg-[#FDF8F3] pt-[72px] pb-24 lg:pt-[76px] lg:pb-8">
       <div className="max-w-[640px] mx-auto px-5 pt-4 pb-2 lg:max-w-[1100px] lg:px-8">
         <Link
           href="/dashboard"
