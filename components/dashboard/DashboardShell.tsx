@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import BottomNav from './BottomNav'
+import TopNav from './TopNav'
 
 type ToastItem = {
   id: string
@@ -23,7 +24,9 @@ type RealtimeNotif = {
 type Props = {
   userId: string
   initialUnreadCount: number
-  nikahConnectionId: string | null
+  firstName: string
+  initials: string
+  completionPercentage: number
   children: React.ReactNode
 }
 
@@ -54,7 +57,7 @@ export function getNotificationRoute(type: string, metadata: Record<string, stri
   }
 }
 
-export default function DashboardShell({ userId, initialUnreadCount, nikahConnectionId, children }: Props) {
+export default function DashboardShell({ userId, initialUnreadCount, firstName, initials, completionPercentage, children }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const isChatPage = pathname?.includes('/chat/')
@@ -118,12 +121,20 @@ export default function DashboardShell({ userId, initialUnreadCount, nikahConnec
 
   return (
     <>
+      {!isChatPage && (
+        <TopNav
+          unreadCount={unreadCount}
+          firstName={firstName}
+          initials={initials}
+          completionPercentage={completionPercentage}
+        />
+      )}
       <main className={`flex-1 ${isChatPage ? '' : 'pb-20 lg:pb-10'}`}>
         {children}
       </main>
       {!isChatPage && (
         <div className="lg:hidden">
-          <BottomNav unreadCount={unreadCount} nikahConnectionId={nikahConnectionId} />
+          <BottomNav />
         </div>
       )}
 
