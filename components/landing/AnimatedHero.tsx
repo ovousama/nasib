@@ -77,6 +77,15 @@ export default function AnimatedHero() {
   }, [])
 
   return (
+    <>
+      <style>{`
+        @media (max-width: 1023px) {
+          .hero-find-your {
+            text-align: center;
+            width: 100%;
+          }
+        }
+      `}</style>
     <h1
       style={{
         fontFamily: 'var(--font-cormorant, "Cormorant Garamond", serif)',
@@ -95,7 +104,7 @@ export default function AnimatedHero() {
         whiteSpace: 'nowrap',
       }}
     >
-      <span>Find your</span>
+      <span className="hero-find-your">Find your</span>
       <span
         style={{
           fontFamily: isArabic
@@ -114,5 +123,6 @@ export default function AnimatedHero() {
         {displayText}
       </span>
     </h1>
+    </>
   )
 }
