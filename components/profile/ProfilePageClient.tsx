@@ -228,6 +228,46 @@ export default function ProfilePageClient({
           )}
         </SectionCard>
 
+        {/* ── Verse card ─────────────────────────────────────────────────── */}
+        <div style={{
+          marginTop: '8px',
+          background: 'linear-gradient(135deg, rgba(175,77,152,0.08) 0%, rgba(244,228,186,0.4) 100%)',
+          border: '1px solid rgba(175,77,152,0.12)',
+          borderRadius: '16px',
+          padding: '28px 24px',
+          textAlign: 'center',
+        }}>
+          <p style={{
+            fontFamily: 'Noto Naskh Arabic, serif',
+            fontSize: '20px',
+            color: '#AF4D98',
+            lineHeight: 1.8,
+            marginBottom: '12px',
+            letterSpacing: '0.02em',
+          }}>
+            وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً
+          </p>
+          <p style={{
+            fontFamily: 'Cormorant Garamond, serif',
+            fontSize: '16px',
+            fontStyle: 'italic',
+            color: '#5C5C5C',
+            lineHeight: 1.7,
+            marginBottom: '10px',
+          }}>
+            &ldquo;And of His signs is that He created for you from yourselves mates that you may find tranquillity in them, and He placed between you affection and mercy.&rdquo;
+          </p>
+          <p style={{
+            fontSize: '11px',
+            color: '#9B7090',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            margin: 0,
+          }}>
+            Ar-Rum 30:21
+          </p>
+        </div>
+
       </div>
     </div>
   )
