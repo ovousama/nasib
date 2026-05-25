@@ -5,7 +5,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import ProfileHeader from './ProfileHeader'
 import { SectionCard, FieldRow, buildProfileSections } from './shared'
@@ -78,7 +77,6 @@ export default function ProfilePageClient({
   userEmail,
   memberSince,
 }: Props) {
-  const router = useRouter()
   const isBrother = gender === 'brother'
   const [sisterSignedUrls, setSisterSignedUrls] = useState<string[]>([])
 
@@ -99,12 +97,6 @@ export default function ProfilePageClient({
     ).then(urls => setSisterSignedUrls(urls.filter(Boolean) as string[]))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/')
-  }
 
   const photoUrls: string[] = isBrother
     ? ((Array.isArray(p?.photo_urls) && p.photo_urls.length > 0)
@@ -236,53 +228,6 @@ export default function ProfilePageClient({
           )}
         </SectionCard>
 
-        {/* ── Footer ─────────────────────────────────────────────────────── */}
-        <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <Link href="/dashboard/how-it-works" style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: 'rgba(255,255,255,0.6)',
-            border: '1px solid rgba(175,77,152,0.12)',
-            borderRadius: '14px',
-            padding: '14px 18px',
-            fontSize: '14px',
-            color: '#5C5C5C',
-            textDecoration: 'none',
-          }}>
-            How does Naseeb work? →
-          </Link>
-          <Link href="/privacy" style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: 'rgba(255,255,255,0.6)',
-            border: '1px solid rgba(175,77,152,0.12)',
-            borderRadius: '14px',
-            padding: '14px 18px',
-            fontSize: '14px',
-            color: '#5C5C5C',
-            textDecoration: 'none',
-          }}>
-            Privacy & data →
-          </Link>
-          <button onClick={handleSignOut} style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
-            background: 'rgba(255,255,255,0.6)',
-            border: '1px solid rgba(193,53,21,0.15)',
-            borderRadius: '14px',
-            padding: '14px 18px',
-            fontSize: '14px',
-            color: '#C13515',
-            cursor: 'pointer',
-            textAlign: 'left',
-          }}>
-            Sign out
-          </button>
-        </div>
       </div>
     </div>
   )
