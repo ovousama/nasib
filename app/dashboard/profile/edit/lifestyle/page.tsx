@@ -1,15 +1,17 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
 import Slider from '@/components/ui/Slider'
+import {
+  PAGE_BG, EditSpinner, EditPageHeader, ErrorAlert,
+  PillGroup, YesNo, TA, SimpleDropdown, SaveButton, EditToast,
+} from '../EditHelpers'
 
 const EDUCATION_OPTIONS = ['high school', 'bachelors', 'masters', 'phd', 'trade', 'other']
 const LIVING_OPTIONS = ['alone', 'with family', 'with roommates']
 const FINANCIAL_OPTIONS = ['fully ready', 'almost ready', 'working towards it']
-
 const EXERCISE_FREQ = ['Daily', 'Several times a week', 'Weekly', 'Occasionally', 'Rarely']
 const HALAL_DIET = ['Always strictly halal', 'Halal but flexible on source', 'Vegetarian/vegan', 'Not strict']
 const SMOKING = ['Never', 'Occasionally', 'Regularly', 'Trying to quit']
@@ -25,74 +27,20 @@ const TRAVEL_FREQ_OPTS = ['Rarely', 'A few times a year', 'Monthly', 'Frequently
 const TRAVEL_IMPORTANCE_OPTS = ['Very important — frequent travel', 'A few times a year', 'Occasionally', 'Not important']
 const NON_ISLAMIC_HOLIDAYS_OPTS = ['Yes', 'No', 'Birthdays only', 'Rarely']
 
-function Pill({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick}
-      className={`px-4 py-2 rounded-full text-sm font-medium border transition-all cursor-pointer ${
-        selected ? 'bg-[#AF4D98] text-white border-[#AF4D98]' : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#AF4D98]'
-      }`}>
-      {label}
-    </button>
-  )
-}
-
-function PillGroup({ label, options, value, onChange, optional }: { label: string; options: string[]; value: string; onChange: (v: string) => void; optional?: boolean }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-[#1A1A1A] mb-2">{label}{optional && <span className="text-[#9B9B9B] font-normal"> (optional)</span>}</label>
-      <div className="flex flex-wrap gap-2">
-        {options.map(o => <Pill key={o} label={o} selected={value === o} onClick={() => onChange(o)} />)}
-      </div>
-    </div>
-  )
-}
-
-function TA({ label, value, onChange, placeholder, optional }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; optional?: boolean }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">{label}{optional && <span className="text-[#9B9B9B] font-normal"> (optional)</span>}</label>
-      <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} placeholder={placeholder}
-        className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 resize-none" />
-    </div>
-  )
-}
-
-function YesNo({ label, value, onChange }: { label: string; value: boolean | null; onChange: (v: boolean) => void }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-[#1A1A1A] mb-2">{label}</label>
-      <div className="flex gap-3">
-        {([true, false] as const).map(v => (
-          <button key={String(v)} type="button" onClick={() => onChange(v)}
-            className={`flex-1 py-3 rounded-xl border-2 font-medium text-sm transition-all ${
-              value === v ? 'border-[#AF4D98] bg-[#AF4D98] text-white' : 'border-[#EDE8E3] text-[#5C5C5C] hover:border-[#AF4D98]'
-            }`}>
-            {v ? 'Yes' : 'No'}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 export default function EditLifestylePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState<'success' | 'error' | null>(null)
-
   const [userId, setUserId] = useState<string>('')
   const [gender, setGender] = useState<string>('')
 
-  // Core fields
   const [occupation, setOccupation] = useState('')
   const [educationLevel, setEducationLevel] = useState('')
   const [livingSituation, setLivingSituation] = useState('')
   const [willingToRelocate, setWillingToRelocate] = useState<boolean | null>(null)
   const [financialReadiness, setFinancialReadiness] = useState('')
-
-  // Deepdive lifestyle fields
   const [exerciseFrequency, setExerciseFrequency] = useState('')
   const [strictHalalDiet, setStrictHalalDiet] = useState('')
   const [smoking, setSmoking] = useState('')
@@ -156,41 +104,31 @@ export default function EditLifestylePage() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    setSaving(true)
-    setError(null)
+    setSaving(true); setError(null)
     try {
       const supabase = createClient()
       const shared = {
-        occupation: occupation.trim() || null,
-        education_level: educationLevel || null,
-        living_situation: livingSituation || null,
-        willing_to_relocate: willingToRelocate,
-        exercise_frequency: exerciseFrequency || null,
-        strict_halal_diet: strictHalalDiet || null,
-        smoking: smoking || null,
-        pets_view: petsView || null,
+        occupation: occupation.trim() || null, education_level: educationLevel || null,
+        living_situation: livingSituation || null, willing_to_relocate: willingToRelocate,
+        exercise_frequency: exerciseFrequency || null, strict_halal_diet: strictHalalDiet || null,
+        smoking: smoking || null, pets_view: petsView || null,
         healthy_eating_importance: healthyEatingImportance || null,
-        social_media_view: socialMediaView || null,
-        home_organisation: homeOrganisation || null,
-        political_views: politicalViews || null,
-        cultural_background_importance: culturalBackgroundImportance,
-        weekend_lifestyle: weekendLifestyle || null,
-        mixed_gender_social_circle: mixedGenderSocialCircle || null,
+        social_media_view: socialMediaView || null, home_organisation: homeOrganisation || null,
+        political_views: politicalViews || null, cultural_background_importance: culturalBackgroundImportance,
+        weekend_lifestyle: weekendLifestyle || null, mixed_gender_social_circle: mixedGenderSocialCircle || null,
         do_you_listen_to_music: doYouListenToMusic || null,
         celebrate_non_islamic_holidays: celebrateNonIslamicHolidays || null,
         ramadan_routine: ramadanRoutine || null,
       }
       if (gender === 'brother') {
         const { error: e2 } = await supabase.from('brother_profiles').update({
-          ...shared,
-          financial_readiness: financialReadiness || null,
+          ...shared, financial_readiness: financialReadiness || null,
           travel_frequency: travelFrequency || null,
         }).eq('id', userId)
         if (e2) throw e2
       } else {
         const { error: e2 } = await supabase.from('sister_profiles').update({
-          ...shared,
-          travel_importance: travelImportance || null,
+          ...shared, travel_importance: travelImportance || null,
         }).eq('id', userId)
         if (e2) throw e2
       }
@@ -199,62 +137,42 @@ export default function EditLifestylePage() {
       setTimeout(() => router.push('/dashboard/profile'), 1200)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
-    } finally {
-      setSaving(false)
-    }
+    } finally { setSaving(false) }
   }
 
-  if (loading) return <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" /></div>
+  if (loading) return <EditSpinner />
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3]">
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard/profile" className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" /></svg>
-          </Link>
-          <h1 className="text-base font-medium text-[#1A1A1A]">Edit Lifestyle</h1>
-        </div>
+    <div className="min-h-screen pt-[72px] lg:pt-[76px]" style={{ background: PAGE_BG }}>
+      <div style={{ maxWidth: '560px', margin: '0 auto', padding: '24px 20px 80px' }}>
+        <EditPageHeader title="Edit Lifestyle" />
 
-        {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">{error}</div>}
+        {error && <ErrorAlert message={error} />}
 
-        <form onSubmit={handleSave} className="flex flex-col gap-5">
+        <form onSubmit={handleSave} className="flex flex-col gap-6">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Occupation <span className="text-[#9B9B9B] font-normal">(optional)</span></label>
-            <input type="text" value={occupation} onChange={e => setOccupation(e.target.value)}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-              placeholder="e.g. Software Engineer, Teacher, Doctor..." />
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>
+              Occupation <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span>
+            </label>
+            <input
+              type="text" value={occupation} onChange={e => setOccupation(e.target.value)}
+              placeholder="e.g. Software Engineer, Teacher, Doctor..."
+              style={{
+                width: '100%', padding: '12px 14px', border: '1px solid #EDE8E3',
+                borderRadius: '12px', fontSize: '14px', color: '#1A1A1A',
+                background: 'white', outline: 'none', boxSizing: 'border-box',
+              }}
+              onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
+              onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
+            />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Education Level</label>
-            <select value={educationLevel} onChange={e => setEducationLevel(e.target.value)}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white">
-              <option value="">Select...</option>
-              {EDUCATION_OPTIONS.map(opt => <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Living Situation</label>
-            <select value={livingSituation} onChange={e => setLivingSituation(e.target.value)}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white">
-              <option value="">Select...</option>
-              {LIVING_OPTIONS.map(opt => <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
-            </select>
-          </div>
-
+          <SimpleDropdown label="Education Level" value={educationLevel} onChange={setEducationLevel} options={EDUCATION_OPTIONS} />
+          <SimpleDropdown label="Living Situation" value={livingSituation} onChange={setLivingSituation} options={LIVING_OPTIONS} />
           <YesNo label="Willing to relocate?" value={willingToRelocate} onChange={setWillingToRelocate} />
 
           {gender === 'brother' && (
-            <div>
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Financial Readiness for Marriage</label>
-              <select value={financialReadiness} onChange={e => setFinancialReadiness(e.target.value)}
-                className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white">
-                <option value="">Select...</option>
-                {FINANCIAL_OPTIONS.map(opt => <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
-              </select>
-            </div>
+            <SimpleDropdown label="Financial Readiness for Marriage" value={financialReadiness} onChange={setFinancialReadiness} options={FINANCIAL_OPTIONS} />
           )}
 
           <PillGroup label="How often do you exercise?" options={EXERCISE_FREQ} value={exerciseFrequency} onChange={setExerciseFrequency} optional />
@@ -284,18 +202,10 @@ export default function EditLifestylePage() {
 
           <TA label="Describe your Ramadan routine" value={ramadanRoutine} onChange={setRamadanRoutine} placeholder="How do you spend Ramadan? Daily habits, routines, community..." optional />
 
-          <button type="submit" disabled={saving} className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60 transition-opacity">
-            {saving ? 'Saving...' : 'Save changes'}
-          </button>
-          <Link href="/dashboard/profile" className="text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">Cancel</Link>
+          <SaveButton saving={saving} />
         </form>
       </div>
-
-      {toast && (
-        <div className={`fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center ${toast === 'success' ? 'bg-[#AF4D98] text-white' : 'bg-red-600 text-white'}`}>
-          {toast === 'success' ? 'Changes saved' : 'Something went wrong'}
-        </div>
-      )}
+      <EditToast toast={toast} />
     </div>
   )
 }
