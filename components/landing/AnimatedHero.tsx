@@ -80,13 +80,14 @@ export default function AnimatedHero() {
     <>
       <style>{`
         @media (max-width: 1023px) {
-          .hero-find-your {
-            text-align: center;
-            width: 100%;
+          .hero-heading {
+            flex-direction: column !important;
+            align-items: center !important;
           }
         }
       `}</style>
     <h1
+      className="hero-heading"
       style={{
         fontFamily: 'var(--font-cormorant, "Cormorant Garamond", serif)',
         fontSize: 'clamp(52px, 8vw, 110px)',
@@ -104,7 +105,7 @@ export default function AnimatedHero() {
         whiteSpace: 'nowrap',
       }}
     >
-      <span className="hero-find-your">Find your</span>
+      <span>Find your</span>
       <span
         style={{
           fontFamily: isArabic
