@@ -18,7 +18,7 @@ export default async function VerifyPage() {
   if (profile.verification_status === 'verified') redirect('/dashboard')
 
   return (
-    <div className="pt-[72px] lg:pt-[76px]">
+    <div className="pt-[72px] lg:pt-[76px] min-h-screen" style={{ background: 'linear-gradient(160deg, #F5E6F2 0%, #F4E4BA 60%, #FDF8F3 100%)' }}>
       <VerifyClient
         userId={user.id}
         gender={profile.gender ?? 'brother'}

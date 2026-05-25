@@ -295,10 +295,10 @@ export default function BrotherDashboard({
   }
 
   return (
-    <div style={{ background: 'linear-gradient(135deg, #F5E6F2, #F4E4BA)', minHeight: '100vh' }}>
+    <div style={{ background: 'linear-gradient(160deg, #F5E6F2 0%, #F4E4BA 60%, #FDF8F3 100%)', minHeight: '100vh' }}>
 
       {/* ── Hero Header ─────────────────────────────────────────── */}
-      <div style={{ background: 'linear-gradient(160deg, #FDF8F3 0%, #F5E6F2 100%)', padding: '76px 20px 28px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(160deg, #F5E6F2 0%, #F4E4BA 60%, #FDF8F3 100%)', padding: '76px 20px 28px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)', backgroundSize: '12px 12px', pointerEvents: 'none' }} />
 
         {/* Greeting + status pill */}

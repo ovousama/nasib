@@ -20,7 +20,7 @@ export default async function MeetingsPage({ params }: Props) {
   if (!connection) notFound()
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3] pt-[72px] lg:pt-[76px]">
+    <div className="min-h-screen pt-[72px] lg:pt-[76px]" style={{ background: 'linear-gradient(160deg, #F5E6F2 0%, #F4E4BA 60%, #FDF8F3 100%)' }}>
       <div className="bg-white border-b border-[#EDE8E3] px-4 py-3 flex items-center gap-3">
         <Link href={`/dashboard/chat/${connectionId}`} className="text-[#5C5C5C] hover:text-[#1A1A1A] transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
