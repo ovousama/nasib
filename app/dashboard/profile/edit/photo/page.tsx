@@ -3,9 +3,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
+import { PAGE_BG } from '../EditHelpers'
 
 type PhotoSlot = {
   file: File | null
@@ -252,7 +252,7 @@ export default function EditPhotoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: PAGE_BG }}>
         <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -263,20 +263,33 @@ export default function EditPhotoPage() {
   const canSave = uploadedCount >= 3 && allUploaded
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3]">
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard/profile" className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-              <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
-            </svg>
-          </Link>
-          <h1 className="text-base font-medium text-[#1A1A1A]">My Photos</h1>
+    <div className="min-h-screen pt-[72px] lg:pt-[76px]" style={{ background: PAGE_BG }}>
+      <div style={{ maxWidth: '560px', margin: '0 auto', padding: '24px 20px 80px' }}>
+        <div style={{ marginBottom: '28px' }}>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              background: 'transparent', border: 'none',
+              color: '#9B7090', fontSize: '13px', cursor: 'pointer',
+              padding: 0, marginBottom: '12px',
+            }}
+          >
+            ← Back to profile
+          </button>
+          <h1 style={{
+            fontFamily: 'Cormorant Garamond, serif',
+            fontSize: '26px', fontWeight: 400,
+            color: '#1A1A1A', letterSpacing: '-0.01em', margin: 0,
+          }}>
+            My Photos
+          </h1>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">
-            {error}
+          <div style={{ background: '#FDECEA', border: '1px solid #F5C6C6', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', color: '#C13515', margin: 0 }}>{error}</p>
           </div>
         )}
 
@@ -331,9 +344,17 @@ export default function EditPhotoPage() {
             : `Add ${Math.max(0, 3 - uploadedCount)} more photo${3 - uploadedCount !== 1 ? 's' : ''} to save`}
         </button>
 
-        <Link href="/dashboard/profile" className="block text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors mt-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          style={{
+            width: '100%', background: 'transparent', border: 'none',
+            color: '#9B9B9B', fontSize: '14px', cursor: 'pointer',
+            padding: '12px', marginTop: '4px', textAlign: 'center',
+          }}
+        >
           Cancel
-        </Link>
+        </button>
       </div>
 
       {toast && (

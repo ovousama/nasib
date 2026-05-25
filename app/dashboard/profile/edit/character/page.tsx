@@ -1,9 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
+import {
+  PAGE_BG, EditSpinner, EditPageHeader, ErrorAlert,
+  SaveButton, EditToast,
+} from '../EditHelpers'
 
 export default function EditCharacterPage() {
   const router = useRouter()
@@ -65,81 +68,65 @@ export default function EditCharacterPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+  if (loading) return <EditSpinner />
+
+  const taStyle = {
+    width: '100%', padding: '12px 14px',
+    border: '1px solid #EDE8E3', borderRadius: '12px',
+    fontSize: '14px', color: '#1A1A1A', background: 'white',
+    outline: 'none', resize: 'vertical' as const, minHeight: '100px',
+    fontFamily: 'inherit', lineHeight: '1.6', boxSizing: 'border-box' as const,
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3]">
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard/profile" className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-              <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
-            </svg>
-          </Link>
-          <h1 className="text-base font-medium text-[#1A1A1A]">Edit Character</h1>
-        </div>
+    <div className="min-h-screen pt-[72px] lg:pt-[76px]" style={{ background: PAGE_BG }}>
+      <div style={{ maxWidth: '560px', margin: '0 auto', padding: '24px 20px 80px' }}>
+        <EditPageHeader title="Edit Character" />
 
-        {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">
-            {error}
-          </div>
-        )}
+        {error && <ErrorAlert message={error} />}
 
-        <form onSubmit={handleSave} className="flex flex-col gap-4">
+        <form onSubmit={handleSave} className="flex flex-col gap-6">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-              Describe yourself — your character, values, and what makes you who you are <span className="text-red-500">*</span>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>
+              Describe yourself — your character, values, and what makes you who you are{' '}
+              <span style={{ color: '#AF4D98' }}>*</span>
             </label>
             <textarea
               value={characterDescription}
               onChange={e => setCharacterDescription(e.target.value)}
               rows={5}
               maxLength={500}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white resize-none"
+              style={taStyle}
               placeholder="Describe your character, values, and what makes you who you are..."
+              onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
+              onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
             />
-            <div className="flex justify-between items-center mt-1">
-              <p className="text-xs text-[#9B9B9B]">Minimum 30 characters</p>
-              <p className="text-xs text-[#9B9B9B]">{characterDescription.length} / 500</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+              <p style={{ fontSize: '12px', color: '#9B9B9B', margin: 0 }}>Minimum 30 characters</p>
+              <p style={{ fontSize: '12px', color: '#9B9B9B', margin: 0 }}>{characterDescription.length} / 500</p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">What are your goals in life and marriage?</label>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>
+              What are your goals in life and marriage?
+              <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span>
+            </label>
             <textarea
               value={goals}
               onChange={e => setGoals(e.target.value)}
               rows={4}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white resize-none"
-              placeholder="Your goals in life and marriage (optional)"
+              style={taStyle}
+              placeholder="Your goals in life and marriage"
+              onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
+              onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60 transition-opacity"
-          >
-            {saving ? 'Saving...' : 'Save changes'}
-          </button>
-
-          <Link href="/dashboard/profile" className="text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
-            Cancel
-          </Link>
+          <SaveButton saving={saving} />
         </form>
       </div>
-
-      {toast && (
-        <div className={`fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center ${toast === 'success' ? 'bg-[#AF4D98] text-white' : 'bg-red-600 text-white'}`}>
-          {toast === 'success' ? 'Changes saved' : 'Something went wrong'}
-        </div>
-      )}
+      <EditToast toast={toast} />
     </div>
   )
 }

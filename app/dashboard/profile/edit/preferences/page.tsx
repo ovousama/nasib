@@ -1,9 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
+import {
+  PAGE_BG, EditSpinner, EditPageHeader, ErrorAlert,
+  SaveButton, EditToast,
+} from '../EditHelpers'
 
 export default function EditPreferencesPage() {
   const router = useRouter()
@@ -75,100 +78,100 @@ export default function EditPreferencesPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#FDF8F3] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#AF4D98] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+  if (loading) return <EditSpinner />
+
+  const inputStyle = {
+    width: '100%', padding: '12px 14px',
+    border: '1px solid #EDE8E3', borderRadius: '12px',
+    fontSize: '14px', color: '#1A1A1A', background: 'white',
+    outline: 'none', boxSizing: 'border-box' as const,
+  }
+
+  const labelStyle = {
+    display: 'block', fontSize: '14px', fontWeight: 500,
+    color: '#1A1A1A', marginBottom: '10px',
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3]">
-      <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard/profile" className="text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-              <path fillRule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clipRule="evenodd" />
-            </svg>
-          </Link>
-          <h1 className="text-base font-medium text-[#1A1A1A]">Edit Preferences</h1>
-        </div>
+    <div className="min-h-screen pt-[72px] lg:pt-[76px]" style={{ background: PAGE_BG }}>
+      <div style={{ maxWidth: '560px', margin: '0 auto', padding: '24px 20px 80px' }}>
+        <EditPageHeader title="Edit Preferences" />
 
-        {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3 mb-4">
-            {error}
-          </div>
-        )}
+        {error && <ErrorAlert message={error} />}
 
-        <form onSubmit={handleSave} className="flex flex-col gap-4">
+        <form onSubmit={handleSave} className="flex flex-col gap-6">
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">What is your preferred level of religiosity in a spouse?</label>
+            <label style={labelStyle}>
+              What is your preferred level of religiosity in a spouse?
+              <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span>
+            </label>
             <input
               type="text"
               value={spouseReligiosityPreference}
               onChange={e => setSpouseReligiosityPreference(e.target.value)}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
-              placeholder="Optional"
+              style={inputStyle}
+              placeholder="e.g. Practicing, moderately practicing..."
+              onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
+              onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
             />
           </div>
 
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Min Age</label>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Min Age <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span></label>
               <input
                 type="number"
                 value={spouseAgeMin}
                 onChange={e => setSpouseAgeMin(e.target.value === '' ? '' : Number(e.target.value))}
                 min={18}
-                className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
+                style={inputStyle}
                 placeholder="e.g. 22"
+                onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
+                onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
               />
             </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Max Age</label>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Max Age <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span></label>
               <input
                 type="number"
                 value={spouseAgeMax}
                 onChange={e => setSpouseAgeMax(e.target.value === '' ? '' : Number(e.target.value))}
                 min={18}
-                className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white"
+                style={inputStyle}
                 placeholder="e.g. 35"
+                onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
+                onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">What are your dealbreakers?</label>
+            <label style={labelStyle}>
+              What are your dealbreakers?
+              <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span>
+            </label>
             <textarea
               value={dealbreakers}
               onChange={e => setDealbreakers(e.target.value)}
               rows={3}
-              className="w-full px-4 py-3 rounded-[10px] border border-[#EDE8E3] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 text-[#1A1A1A] text-[15px] bg-white resize-none"
+              style={{
+                width: '100%', padding: '12px 14px',
+                border: '1px solid #EDE8E3', borderRadius: '12px',
+                fontSize: '14px', color: '#1A1A1A', background: 'white',
+                outline: 'none', resize: 'vertical', minHeight: '100px',
+                fontFamily: 'inherit', lineHeight: '1.6', boxSizing: 'border-box',
+              }}
               placeholder="e.g. Smoking, not practising, different values"
+              onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
+              onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
             />
-            <p className="text-xs text-[#9B9B9B] mt-1">Separate with commas</p>
+            <p style={{ fontSize: '12px', color: '#9B9B9B', marginTop: '4px' }}>Separate with commas</p>
           </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full bg-[#AF4D98] text-white font-medium rounded-full py-3.5 mt-2 disabled:opacity-60 transition-opacity"
-          >
-            {saving ? 'Saving...' : 'Save changes'}
-          </button>
-
-          <Link href="/dashboard/profile" className="text-center text-sm text-[#9B9B9B] hover:text-[#1A1A1A] transition-colors">
-            Cancel
-          </Link>
+          <SaveButton saving={saving} />
         </form>
       </div>
-
-      {toast && (
-        <div className={`fixed bottom-20 left-4 right-4 max-w-lg mx-auto rounded-[10px] px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-sm font-medium text-center ${toast === 'success' ? 'bg-[#AF4D98] text-white' : 'bg-red-600 text-white'}`}>
-          {toast === 'success' ? 'Changes saved' : 'Something went wrong'}
-        </div>
-      )}
+      <EditToast toast={toast} />
     </div>
   )
 }
