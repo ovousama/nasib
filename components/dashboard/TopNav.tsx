@@ -21,6 +21,7 @@ const NAV_ITEMS = [
 const MENU_ITEMS = [
   { label: 'Verify identity', href: '/dashboard/verify' },
   { label: 'How it works', href: '/dashboard/how-it-works' },
+  { label: 'Privacy & data', href: '/dashboard/privacy' },
   { label: 'Settings', href: '/dashboard/settings' },
 ]
 
