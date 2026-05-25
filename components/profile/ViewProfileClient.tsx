@@ -24,7 +24,7 @@ type Props = {
   matchReason?: string | null
 }
 
-const PAGE_BG = 'linear-gradient(160deg, #F5E6F2 0%, #F4E4BA 60%, #FDF8F3 100%)'
+const PAGE_BG = 'linear-gradient(160deg, #FDF6EE 0%, #F4E4BA 60%, #FDF8F3 100%)'
 
 export default function ViewProfileClient({
   profileData,
