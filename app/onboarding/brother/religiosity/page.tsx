@@ -12,8 +12,9 @@ const LEVELS: { value: Religiosity; label: string; sub: string }[] = [
   { value: 'learning',              label: 'Learning',              sub: 'Growing in my deen' },
 ]
 
+const MADHAB_OPTIONS = ["Hanafi", "Shafi'i", "Maliki", "Hanbali", "No specific madhab", "Salafi"]
+
 const selectCls = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors appearance-none'
-const inputCls  = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors'
 
 export default function BrotherReligiosity() {
   const router = useRouter()
@@ -68,35 +69,23 @@ export default function BrotherReligiosity() {
       .from('brother_profiles')
       .update({
         religiosity_level:       religiosity,
-        madhab:                  madhab.trim() || null,
+        madhab:                  madhab || null,
         prayer_frequency:        prayerFreq,
         islamic_knowledge_level: islamicKnowledge,
         has_beard:               hasBeard,
       })
       .eq('id', userId)
     if (saveErr) { setError(saveErr.message); setSaving(false); return }
-    const { data: fullProfile } = await supabase
-      .from('brother_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-
+    const { data: fullProfile } = await supabase.from('brother_profiles').select('*').eq('id', userId).single()
     if (fullProfile) {
       const { calculateCompletion } = await import('@/lib/profile-completion')
       const { percentage, isComplete } = calculateCompletion(fullProfile as Record<string, unknown>, 'brother')
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('status, profile_complete')
-        .eq('id', userId)
-        .single()
-      await supabase
-        .from('profiles')
-        .update({
-          profile_completion_percentage: percentage,
-          profile_complete: currentProfile?.profile_complete || isComplete,
-          status: currentProfile?.status === 'active' ? 'active' : (isComplete ? 'active' : 'pending_verification'),
-        })
-        .eq('id', userId)
+      const { data: currentProfile } = await supabase.from('profiles').select('status, profile_complete').eq('id', userId).single()
+      await supabase.from('profiles').update({
+        profile_completion_percentage: percentage,
+        profile_complete: currentProfile?.profile_complete || isComplete,
+        status: currentProfile?.status === 'active' ? 'active' : (isComplete ? 'active' : 'pending_verification'),
+      }).eq('id', userId)
     }
     router.push('/onboarding/brother/lifestyle')
   }
@@ -135,21 +124,35 @@ export default function BrotherReligiosity() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-3">
               Madhab <span className="text-[#9B9B9B] font-normal">(optional)</span>
             </label>
-            <input type="text" value={madhab} onChange={e => setMadhab(e.target.value)}
-              placeholder="e.g. Hanafi, Shafi'i, Maliki, Hanbali" className={inputCls} />
+            <div className="flex flex-wrap gap-2">
+              {MADHAB_OPTIONS.map(opt => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => setMadhab(madhab === opt ? '' : opt)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                    madhab === opt
+                      ? 'bg-[#AF4D98] text-white border-[#AF4D98]'
+                      : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#D4CBC4]'
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Prayer Frequency</label>
             <select value={prayerFreq} onChange={e => setPrayerFreq(e.target.value)} className={selectCls}>
               <option value="">Select...</option>
-              <option value="5 times daily">5 times daily, alhamdulillah</option>
-              <option value="mostly">Mostly — occasional missed prayers</option>
-              <option value="sometimes">Sometimes — working on it</option>
-              <option value="working on it">Just getting started</option>
+              <option value="five_times_daily">5 times daily, alhamdulillah</option>
+              <option value="most_prayers">Mostly — occasional missed prayers</option>
+              <option value="some_prayers">Sometimes — working on it</option>
+              <option value="not_currently">Just getting started</option>
             </select>
           </div>
 
@@ -157,9 +160,9 @@ export default function BrotherReligiosity() {
             <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Islamic Knowledge Level</label>
             <select value={islamicKnowledge} onChange={e => setIslamicKnowledge(e.target.value)} className={selectCls}>
               <option value="">Select...</option>
-              <option value="strong">Strong — studied formally or extensively</option>
-              <option value="moderate">Moderate — good general knowledge</option>
-              <option value="beginner">Beginner — learning the basics</option>
+              <option value="advanced">Strong — studied formally or extensively</option>
+              <option value="intermediate">Moderate — good general knowledge</option>
+              <option value="basic">Beginner — learning the basics</option>
             </select>
           </div>
 

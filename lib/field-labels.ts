@@ -5,7 +5,7 @@ export const BROTHER_FIELD_LABELS: Record<string, string> = {
   location: 'Location',
   ethnicity: 'Ethnicity',
   languages: 'Languages spoken',
-  willing_to_relocate: 'Willing to relocate',
+  willing_to_relocate: 'Would you be willing to relocate for marriage?',
 
   // Deen & Practice
   religiosity_level: 'Level of Islamic practice',
@@ -13,118 +13,56 @@ export const BROTHER_FIELD_LABELS: Record<string, string> = {
   madhab: 'Madhab',
   islamic_knowledge_level: 'Islamic knowledge level',
   has_beard: 'Has a beard',
-  quran_listening: 'Listens to Quran regularly',
-  quran_memorisation: 'Quran memorisation',
   traditional_vs_reformist: 'Islamic approach (Traditional ↔ Reformist)',
-  zakah_sadaqah: 'Gives zakah and sadaqah',
-  mawlid_view: 'View on celebrating Mawlid',
-  madhab_consistency: 'Madhab consistency in household',
-  spouse_islamic_knowledge: 'Importance of Islamic knowledge in spouse',
-  wife_niqab_preference: 'Preference for wife covering beyond hijab',
-  missed_prayer_approach: 'Approach to missed prayers',
-  jumuah_attendance: "Jumu'ah attendance",
-  deen_growth: 'How they grow in their deen daily',
-  differing_islamic_opinions: 'View on differing Islamic opinions',
-
-  // Family Dynamics
-  parent_relationship: 'Relationship with parents',
-  wife_family_interaction: 'Expected wife interaction with his family',
-  eldest_responsibilities: 'Eldest child responsibilities',
-  family_conflict_style: 'How conflict was handled growing up',
-  child_caregiving: 'Preferred child caregiving arrangement',
-  wife_family_relationship: "View on wife's relationship with her family",
-  living_near_parents: 'Open to living near parents long term',
-  family_spouse_disagreement: 'How he handles family vs spouse disagreements',
-  inlaws_living_together: 'Open to in-laws living together',
+  do_you_listen_to_music: 'Listens to music',
 
   // Lifestyle
   occupation: 'Occupation',
   education_level: 'Education level',
   living_situation: 'Current living situation',
-  exercise_frequency: 'Exercise frequency',
-  social_media_view: 'View on social media in marriage',
-  home_organisation: 'Importance of home organisation',
-  pets_view: 'View on pets',
-  healthy_eating_importance: 'Importance of healthy eating',
-  ramadan_routine: 'Ramadan routine',
-  political_views: 'Political views',
-  cultural_background_importance: 'Importance of shared cultural background',
-  weekend_lifestyle: 'Typical weekend lifestyle',
-  mixed_gender_social_circle: 'Has mixed gender social circle',
-  travel_frequency: 'Travel frequency',
-  strict_halal_diet: 'Follows strict halal diet',
-  smoking: 'Smokes or uses tobacco',
-  do_you_listen_to_music: 'Listens to music',
-  celebrate_non_islamic_holidays: 'Celebrates non-Islamic holidays',
+  smoking: 'Do you smoke or use tobacco/vape products?',
+  strict_halal_diet: 'How strictly do you follow a halal diet?',
+  financial_readiness: 'Financial readiness for marriage',
 
-  // Marriage Goals
+  // Marriage
   previously_married: 'Previously married',
   has_children: 'Has children',
-  wants_children: 'Wants children',
+  wants_children: 'Do you want children?',
   number_of_children_wanted: 'Number of children wanted',
   timeline_to_marry: 'Timeline to marry',
-  polygamy_openness: 'Open to polygamy',
-  polygamy_own_marriage: 'View on polygamy in own marriage',
-  wife_working_openness: 'Open to wife working after marriage',
-  household_management: 'Expected household management',
-  islamic_schooling_importance: 'Importance of Islamic schooling for children',
-  wife_hijab_importance: 'Importance of wife wearing hijab',
+  polygamy_openness: 'What is your view on polygamy?',
 
   // Spouse Preferences
   spouse_age_min: 'Preferred minimum age',
   spouse_age_max: 'Preferred maximum age',
-  spouse_religiosity_preference: 'Preferred religiosity in spouse',
+  spouse_religiosity_preference: 'What level of practice do you prefer in a spouse?',
   dealbreakers: 'Dealbreakers',
 
   // Financial
-  annual_income_range: 'Annual income range',
-  own_or_rent: 'Owns or rents home',
   has_significant_debt: 'Has significant debt',
-  supporting_family_financially: 'Financially supporting family',
-  savings_plan: 'Has a savings plan',
-  financial_planning_approach: 'Financial planning approach as a couple',
-  wife_financial_independence: "View on wife's financial independence",
-  hajj_status: 'Hajj status',
-  financial_stress_approach: 'How they handle financial stress',
-  wife_earning_more: 'Comfortable with wife earning more',
-  financial_readiness: 'Financial readiness for marriage',
   mahr_approach: 'Approach to mahr',
 
-  // Emotional & Mental Health
-  stress_management: 'How they manage stress',
-  therapy_experience: 'Therapy or counselling experience',
-  couples_therapy_view: 'View on couples therapy',
-  mental_health_challenges: 'Mental health challenges',
-  emotional_support_style: 'How they support a partner emotionally',
-  emotional_availability: 'Emotional availability',
-  significant_hardship: 'Significant hardship or trauma',
-  emotional_expression_view: 'View on vulnerability in marriage',
-  health_background_disclosure: 'Health background disclosure',
-
-  // Conflict & Communication
-  conflict_style: 'Conflict style',
-  healthy_argument_view: 'What a healthy argument looks like',
-  friendship_ended: 'Ended relationship due to poor communication',
-  apology_speed: 'How quickly they apologise',
-  husband_final_say: 'View on husband having final say',
-  communication_when_upset: 'How they communicate when upset',
-  wife_opinion_importance: 'Importance of wife voicing her opinion',
-  introvert_extrovert: 'Introvert or extrovert',
-  love_language: 'Love language',
-  alone_time_importance: 'Importance of alone time',
-
   // Character & Goals
-  character_description: 'How their imam would describe them',
-  goals: 'What they hope to build in marriage',
+  character_description: 'How would those closest to you describe you?',
+  goals: 'What do you hope to build together in a marriage?',
+  conflict_style: 'Conflict style',
+  love_language: 'Love language',
+  introvert_extrovert: 'Introvert or extrovert',
+  emotional_availability: 'Emotional availability',
+  stress_management: 'How they manage stress',
+
+  // Family
+  parent_relationship: 'Relationship with parents',
+  inlaws_living_together: 'Open to in-laws living together',
+  family_spouse_disagreement: 'How he handles family vs spouse disagreements',
+  wife_working_openness: 'Open to wife working after marriage',
 
   // Marriage Vision
   marriage_vision_10_years: 'Marriage vision in 10 years',
-  first_year_vision: 'Vision for the first year of marriage',
-  physical_intimacy_importance: 'Importance of physical intimacy',
-  spouse_friendships_view: "View on spouse's outside friendships",
   romance_view: 'Role of romance in long-term marriage',
   marriage_fear: 'Biggest fear about marriage',
   unique_contribution: 'What they uniquely bring to a marriage',
+  health_background_disclosure: 'Health background disclosure',
 }
 
 export const SISTER_FIELD_LABELS: Record<string, string> = {
@@ -134,7 +72,7 @@ export const SISTER_FIELD_LABELS: Record<string, string> = {
   location: 'Location',
   ethnicity: 'Ethnicity',
   languages: 'Languages spoken',
-  willing_to_relocate: 'Willing to relocate',
+  willing_to_relocate: 'Would you be willing to relocate for marriage?',
 
   // Deen & Practice
   religiosity_level: 'Level of Islamic practice',
@@ -142,116 +80,55 @@ export const SISTER_FIELD_LABELS: Record<string, string> = {
   madhab: 'Madhab',
   islamic_knowledge_level: 'Islamic knowledge level',
   wears_hijab: 'Wears hijab',
-  hijab_outside_home: 'Wears hijab outside the home',
-  islamic_classes_attendance: 'Attends Islamic classes or halaqas',
-  quran_listening: 'Listens to Quran regularly',
-  quran_memorisation: 'Quran memorisation',
   traditional_vs_reformist: 'Islamic approach (Traditional ↔ Reformist)',
-  zakah_sadaqah: 'Gives zakah and sadaqah',
-  mawlid_view: 'View on celebrating Mawlid',
-  madhab_consistency: 'Madhab consistency in household',
-  spouse_islamic_knowledge: 'Importance of Islamic knowledge in spouse',
-  deen_growth: 'How they grow in their deen daily',
-  deen_when_busy: 'How they handle deen when life gets busy',
-  islamic_home_importance: 'Importance of an Islamic home environment',
-  differing_islamic_opinions: 'View on differing Islamic opinions',
-
-  // Family Dynamics
-  parent_relationship: 'Relationship with parents',
-  family_balance_after_marriage: 'Balancing family after marriage',
-  family_financial_responsibility: 'Family financial responsibilities',
-  family_conflict_style: 'How conflict was handled growing up',
-  inlaws_comfort: 'Comfort with in-laws',
-  husband_family_relationship: "Importance of husband's relationship with her family",
-  family_traditional_vs_modern: 'Family values (Modern ↔ Traditional)',
-  family_spouse_disagreement: 'How she handles family vs spouse disagreements',
-  inlaws_living_together: 'Open to in-laws living together',
+  do_you_listen_to_music: 'Listens to music',
 
   // Lifestyle
   occupation: 'Occupation',
   education_level: 'Education level',
   living_situation: 'Current living situation',
-  exercise_frequency: 'Exercise frequency',
-  social_media_view: 'View on social media in marriage',
-  home_organisation: 'Importance of home organisation',
-  pets_view: 'View on pets',
-  healthy_eating_importance: 'Importance of healthy eating',
-  ramadan_routine: 'Ramadan routine',
-  political_views: 'Political views',
-  cultural_background_importance: 'Importance of shared cultural background',
-  weekend_lifestyle: 'Typical weekend lifestyle',
-  mixed_gender_social_circle: 'Has mixed gender social circle',
-  travel_importance: 'Importance of travel',
-  strict_halal_diet: 'Follows strict halal diet',
-  smoking: 'Smokes or uses tobacco',
-  do_you_listen_to_music: 'Listens to music',
-  celebrate_non_islamic_holidays: 'Celebrates non-Islamic holidays',
+  smoking: 'Do you smoke or use tobacco/vape products?',
+  strict_halal_diet: 'How strictly do you follow a halal diet?',
 
-  // Marriage Goals
+  // Marriage
   previously_married: 'Previously married',
   has_children: 'Has children',
-  wants_children: 'Wants children',
+  wants_children: 'Do you want children?',
   number_of_children_wanted: 'Number of children wanted',
   timeline_to_marry: 'Timeline to marry',
-  primary_caregiver_comfort: 'Comfort as primary caregiver',
-  household_responsibilities_vision: 'Vision for household responsibilities',
-  islamic_schooling_importance: 'Importance of Islamic schooling for children',
+  polygamy_openness: 'What is your view on polygamy?',
 
   // Spouse Preferences
   spouse_age_min: 'Preferred minimum age',
   spouse_age_max: 'Preferred maximum age',
-  spouse_religiosity_preference: 'Preferred religiosity in spouse',
+  spouse_religiosity_preference: 'What level of practice do you prefer in a spouse?',
   dealbreakers: 'Dealbreakers',
 
-  // Career & Financial
-  plan_to_work_after_marriage: 'Plans to work after marriage',
-  career_five_years: 'Career vision in 5 years',
-  career_identity_importance: 'Importance of career to identity',
-  career_pause_for_children: 'Would pause career for children',
-  financial_dependence_view: 'View on financial dependence on husband',
-  financial_independence_importance: 'Importance of financial independence',
-  career_ambitions: 'Career ambitions',
+  // Financial
   has_significant_debt: 'Has significant debt',
-  supporting_family_financially: 'Financially supporting family',
-  savings_plan: 'Has a savings plan',
-  financial_stress_approach: 'How they handle financial stress',
-
-  // Emotional & Mental Health
-  stress_management: 'How they manage stress',
-  therapy_experience: 'Therapy or counselling experience',
-  couples_therapy_view: 'View on couples therapy',
-  mental_health_challenges: 'Mental health challenges',
-  emotional_support_style: 'How they support a partner emotionally',
-  emotional_availability: 'Emotional availability',
-  significant_hardship: 'Significant hardship or trauma',
-  emotional_expression_view: 'View on vulnerability in marriage',
-  health_background_disclosure: 'Health background disclosure',
-
-  // Conflict & Communication
-  conflict_style: 'Conflict style',
-  healthy_argument_view: 'What a healthy argument looks like',
-  apology_speed: 'How quickly they apologise',
-  communication_when_upset: 'How they communicate when upset',
-  husband_opinion_importance: 'Importance of husband valuing her opinion',
-  receiving_love_language: 'Love language for receiving appreciation',
-  qawwam_view: 'View on husband as qawwam',
-  introvert_extrovert: 'Introvert or extrovert',
-  love_language: 'Love language',
-  alone_time_importance: 'Importance of alone time',
+  plan_to_work_after_marriage: 'Plans to work after marriage',
+  financial_independence_importance: 'Importance of financial independence',
 
   // Character & Goals
-  character_description: 'How their family would describe them',
-  goals: 'What they hope to build in marriage',
+  character_description: 'How would your family or close friends describe you?',
+  goals: 'What do you hope to build together in a marriage?',
+  conflict_style: 'Conflict style',
+  love_language: 'Love language',
+  introvert_extrovert: 'Introvert or extrovert',
+  emotional_availability: 'Emotional availability',
+  stress_management: 'How they manage stress',
+
+  // Family
+  parent_relationship: 'Relationship with parents',
+  inlaws_living_together: 'Open to in-laws living together',
+  family_spouse_disagreement: 'How she handles family vs spouse disagreements',
 
   // Marriage Vision
   marriage_vision_10_years: 'Marriage vision in 10 years',
-  first_year_vision: 'Vision for the first year of marriage',
-  physical_intimacy_importance: 'Importance of physical intimacy',
-  spouse_friendships_view: "View on spouse's outside friendships",
   romance_view: 'Role of romance in long-term marriage',
   marriage_fear: 'Biggest fear about marriage',
   unique_contribution: 'What they uniquely bring to a marriage',
-  ideal_husband_description: 'What they are looking for in a husband',
+  health_background_disclosure: 'Health background disclosure',
 }
 
 export function getFieldLabel(field: string, gender: 'brother' | 'sister'): string {
@@ -266,19 +143,11 @@ export function getFieldLabel(field: string, gender: 'brother' | 'sister'): stri
 export const SLIDER_FIELDS = [
   'traditional_vs_reformist',
   'emotional_availability',
-  'cultural_background_importance',
-  'home_organisation',
-  'career_identity_importance',
-  'family_traditional_vs_modern',
 ]
 
 export const SLIDER_LABELS: Record<string, { left: string; right: string }> = {
   traditional_vs_reformist: { left: 'Traditional', right: 'Reformist' },
   emotional_availability: { left: 'Reserved', right: 'Open' },
-  cultural_background_importance: { left: 'Not important', right: 'Very important' },
-  home_organisation: { left: 'Relaxed', right: 'Organised' },
-  career_identity_importance: { left: 'Not important', right: 'Core identity' },
-  family_traditional_vs_modern: { left: 'Traditional', right: 'Modern' },
 }
 
 export const VALUE_LABELS: Record<string, Record<string, string>> = {
@@ -287,6 +156,7 @@ export const VALUE_LABELS: Record<string, Record<string, string>> = {
     moderately_practicing: 'Moderately practicing',
     spiritually_inclined: 'Spiritually inclined',
     still_growing: 'Still growing in faith',
+    learning: 'Still learning',
   },
   prayer_frequency: {
     five_times_daily: 'Five times daily',
@@ -301,12 +171,7 @@ export const VALUE_LABELS: Record<string, Record<string, string>> = {
     maliki: 'Maliki',
     hanbali: 'Hanbali',
     no_specific_madhab: 'No specific madhab',
-  },
-  marriage_timeline: {
-    within_3_months: 'Within 3 months',
-    within_6_months: 'Within 6 months',
-    within_a_year: 'Within a year',
-    flexible: 'Flexible',
+    salafi: 'Salafi',
   },
   timeline_to_marry: {
     within_3_months: 'Within 3 months',
@@ -334,78 +199,88 @@ export const VALUE_LABELS: Record<string, Record<string, string>> = {
     advanced: 'Advanced',
     scholar: 'Scholar-level',
   },
+  willing_to_relocate: {
+    yes: 'Yes',
+    no: 'No',
+    depends: 'Depends on circumstances',
+  },
+  wants_children: {
+    yes: 'Yes',
+    no: 'No',
+    open: 'Open to whatever Allah wills',
+  },
+  polygamy_openness: {
+    open: 'Open to it',
+    not_for_me: 'Not for me but I respect it Islamically',
+    against: 'Firmly against',
+    undecided: 'Have not decided',
+  },
+  spouse_religiosity_preference: {
+    more_practicing: 'More practicing than me',
+    similar: 'Similar to me',
+    less_is_fine: 'Less practicing is fine',
+    open: 'Open',
+  },
   conflict_style: {
     avoidant: 'Avoidant',
     direct: 'Direct',
     collaborative: 'Collaborative',
     emotional: 'Emotional',
   },
-  apology_speed: {
-    quickly: 'Quickly',
-    after_reflection: 'After reflection',
-    rarely: 'Rarely',
-    depends: 'Depends on situation',
-  },
   introvert_extrovert: {
     introvert: 'Introvert',
     extrovert: 'Extrovert',
     ambivert: 'Ambivert',
   },
-  annual_income_range: {
-    under_25k: 'Under $25,000',
-    '25_50k': '$25,000–$50,000',
-    '50_75k': '$50,000–$75,000',
-    '75_100k': '$75,000–$100,000',
-    '100_150k': '$100,000–$150,000',
-    over_150k: 'Over $150,000',
-    prefer_not_to_say: 'Prefer not to say',
+  smoking: {
+    never: 'No, never',
+    occasionally: 'Occasionally',
+    trying_to_quit: 'Trying to quit',
+    yes: 'Yes',
   },
-  savings_plan: {
-    actively_saving: 'Actively saving',
-    occasional_saving: 'Occasional saving',
-    not_saving: 'Not currently saving',
-    no_plan: 'No savings plan',
+  strict_halal_diet: {
+    strictly: 'Strictly halal',
+    mostly: 'Mostly halal',
+    not_strict: 'Not strict',
+    prefer_not_to_say: 'Prefer not to say',
   },
   plan_to_work_after_marriage: {
     yes_full_time: 'Yes — full time',
     yes_part_time: 'Yes — part time',
-    part_time_after_children: 'Part-time after children',
     flexible: 'Flexible',
-    no: 'No, prefer not to',
+    no: 'No, prefer to focus on family',
     undecided: 'Undecided',
   },
-  primary_caregiver_comfort: {
-    happy_to_be_primary: 'Happy to be primary caregiver',
-    shared: 'Prefer shared caregiving',
-    not_primary: 'Prefer not to be primary',
+  financial_independence_importance: {
+    very_important: 'Very important',
+    somewhat_important: 'Somewhat important',
+    not_important: 'Not important',
     undecided: 'Undecided',
   },
-  career_pause_for_children: {
-    yes: 'Yes, would pause',
-    no: 'No, would not pause',
-    partial: 'Partial pause',
-    depends: 'Depends on circumstances',
-  },
-  hajj_status: {
-    completed: 'Completed Hajj',
-    saving: 'Saving for Hajj',
-    planning: 'Planning to perform Hajj',
-    not_yet: 'Not yet planned',
-  },
-  willing_to_relocate: {
-    yes: 'Yes, willing',
-    no: 'Not willing',
+  wife_working_openness: {
+    yes: 'Yes, fully supportive',
+    part_time: 'Part-time is fine',
     depends: 'Depends on the situation',
+    prefer_home: 'Prefer she focuses on home',
   },
-  spouse_age_min: {},
-  spouse_age_max: {},
-  spouse_religiosity_preference: {
-    practicing: 'Practicing',
-    moderately_practicing: 'Moderately practicing',
-    slightly_more_practicing: 'Slightly more practicing',
-    similarly_practicing: 'Similarly practicing',
-    spiritually_inclined: 'Spiritually inclined',
-    open: 'Open to any level',
+  inlaws_living_together: {
+    yes: 'Yes, open to it',
+    no: 'No, prefer separate',
+    temporarily: 'Temporarily if needed',
+    undecided: 'Undecided',
+  },
+  number_of_children_wanted: {
+    '1': '1',
+    '2': '2',
+    '3': '3',
+    '4': '4',
+    '5_plus': '5 or more',
+    open: 'Open to whatever Allah wills',
+  },
+  financial_readiness: {
+    fully_ready: 'Fully ready',
+    almost_ready: 'Almost ready',
+    working_towards_it: 'Working towards it',
   },
   ethnicity: {
     arab: 'Arab',
@@ -418,6 +293,8 @@ export const VALUE_LABELS: Record<string, Record<string, string>> = {
     mixed: 'Mixed heritage',
     other: 'Other',
   },
+  spouse_age_min: {},
+  spouse_age_max: {},
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

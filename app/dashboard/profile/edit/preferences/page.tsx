@@ -5,8 +5,38 @@ import { createClient } from '@/lib/supabase'
 import { recalculateProfileCompletion } from '../recalculate-action'
 import {
   PAGE_BG, EditSpinner, EditPageHeader, ErrorAlert,
-  SaveButton, EditToast,
+  PillGroupKV, MultiPillGroupKV, SaveButton, EditToast,
 } from '../EditHelpers'
+
+const RELIGIOSITY_OPTIONS = [
+  { value: 'more_practicing', label: 'More practicing than me' },
+  { value: 'similar',         label: 'Similar level' },
+  { value: 'less_is_fine',    label: "Less strict is fine" },
+  { value: 'open',            label: 'Open' },
+]
+
+const BROTHER_DEALBREAKER_OPTIONS = [
+  { value: 'Smoking',              label: 'Smoking' },
+  { value: 'Drinking',             label: 'Drinking' },
+  { value: 'Not practicing',       label: 'Not practicing' },
+  { value: 'No hijab',             label: 'No hijab' },
+  { value: 'Previously married',   label: 'Previously married' },
+  { value: 'Has children',         label: 'Has children' },
+  { value: 'Unwilling to relocate', label: 'Unwilling to relocate' },
+  { value: 'Other',                label: 'Other' },
+]
+
+const SISTER_DEALBREAKER_OPTIONS = [
+  { value: 'Smoking',              label: 'Smoking' },
+  { value: 'Drinking',             label: 'Drinking' },
+  { value: 'Not practicing',       label: 'Not practicing' },
+  { value: 'Not praying',          label: 'Not praying' },
+  { value: 'Previously married',   label: 'Previously married' },
+  { value: 'Has children',         label: 'Has children' },
+  { value: 'Unwilling to relocate', label: 'Unwilling to relocate' },
+  { value: 'Different madhab',     label: 'Different madhab' },
+  { value: 'Other',                label: 'Other' },
+]
 
 export default function EditPreferencesPage() {
   const router = useRouter()
@@ -21,7 +51,7 @@ export default function EditPreferencesPage() {
   const [spouseReligiosityPreference, setSpouseReligiosityPreference] = useState('')
   const [spouseAgeMin, setSpouseAgeMin] = useState<number | ''>('')
   const [spouseAgeMax, setSpouseAgeMax] = useState<number | ''>('')
-  const [dealbreakers, setDealbreakers] = useState('')
+  const [dealbreakers, setDealbreakers] = useState<string[]>([])
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -39,7 +69,7 @@ export default function EditPreferencesPage() {
         setSpouseReligiosityPreference(data.spouse_religiosity_preference ?? '')
         setSpouseAgeMin(data.spouse_age_min ?? '')
         setSpouseAgeMax(data.spouse_age_max ?? '')
-        setDealbreakers(Array.isArray(data.dealbreakers) ? data.dealbreakers.join(', ') : (data.dealbreakers ?? ''))
+        setDealbreakers(Array.isArray(data.dealbreakers) ? data.dealbreakers : [])
       }
       setLoading(false)
     }
@@ -57,14 +87,13 @@ export default function EditPreferencesPage() {
     try {
       const supabase = createClient()
       const table = gender === 'brother' ? 'brother_profiles' : 'sister_profiles'
-      const dealbreakersArr = dealbreakers.split(',').map(d => d.trim()).filter(Boolean)
       const { error: updateError } = await supabase
         .from(table)
         .update({
-          spouse_religiosity_preference: spouseReligiosityPreference.trim() || null,
+          spouse_religiosity_preference: spouseReligiosityPreference || null,
           spouse_age_min: spouseAgeMin === '' ? null : Number(spouseAgeMin),
           spouse_age_max: spouseAgeMax === '' ? null : Number(spouseAgeMax),
-          dealbreakers: dealbreakersArr,
+          dealbreakers,
         })
         .eq('id', userId)
       if (updateError) throw updateError
@@ -100,21 +129,13 @@ export default function EditPreferencesPage() {
         {error && <ErrorAlert message={error} />}
 
         <form onSubmit={handleSave} className="flex flex-col gap-6">
-          <div>
-            <label style={labelStyle}>
-              What is your preferred level of religiosity in a spouse?
-              <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span>
-            </label>
-            <input
-              type="text"
-              value={spouseReligiosityPreference}
-              onChange={e => setSpouseReligiosityPreference(e.target.value)}
-              style={inputStyle}
-              placeholder="e.g. Practicing, moderately practicing..."
-              onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
-              onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
-            />
-          </div>
+          <PillGroupKV
+            label="What level of practice do you prefer in a spouse?"
+            options={RELIGIOSITY_OPTIONS}
+            value={spouseReligiosityPreference}
+            onChange={setSpouseReligiosityPreference}
+            optional
+          />
 
           <div style={{ display: 'flex', gap: '12px' }}>
             <div style={{ flex: 1 }}>
@@ -145,28 +166,13 @@ export default function EditPreferencesPage() {
             </div>
           </div>
 
-          <div>
-            <label style={labelStyle}>
-              What are your dealbreakers?
-              <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span>
-            </label>
-            <textarea
-              value={dealbreakers}
-              onChange={e => setDealbreakers(e.target.value)}
-              rows={3}
-              style={{
-                width: '100%', padding: '12px 14px',
-                border: '1px solid #EDE8E3', borderRadius: '12px',
-                fontSize: '14px', color: '#1A1A1A', background: 'white',
-                outline: 'none', resize: 'vertical', minHeight: '100px',
-                fontFamily: 'inherit', lineHeight: '1.6', boxSizing: 'border-box',
-              }}
-              placeholder="e.g. Smoking, not practising, different values"
-              onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
-              onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
-            />
-            <p style={{ fontSize: '12px', color: '#9B9B9B', marginTop: '4px' }}>Separate with commas</p>
-          </div>
+          <MultiPillGroupKV
+            label="Dealbreakers (select all that apply)"
+            options={gender === 'sister' ? SISTER_DEALBREAKER_OPTIONS : BROTHER_DEALBREAKER_OPTIONS}
+            value={dealbreakers}
+            onChange={setDealbreakers}
+            optional
+          />
 
           <SaveButton saving={saving} />
         </form>

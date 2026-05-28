@@ -6,30 +6,50 @@ import { recalculateProfileCompletion } from '../recalculate-action'
 import Slider from '@/components/ui/Slider'
 import {
   PAGE_BG, EditSpinner, EditPageHeader, ErrorAlert,
-  PillGroup, YesNo, TA, SimpleDropdown, RadioCard, SaveButton, EditToast,
+  PillGroupKV, RadioCard, SaveButton, EditToast,
 } from '../EditHelpers'
 
 const LEVELS = [
-  { value: 'practicing', label: 'Practicing', sub: 'Actively following the Sunnah' },
+  { value: 'practicing',            label: 'Practicing',            sub: 'Actively following the Sunnah' },
   { value: 'moderately_practicing', label: 'Moderately Practicing', sub: 'Working on consistency' },
-  { value: 'learning', label: 'Learning', sub: 'Growing in my deen' },
+  { value: 'learning',              label: 'Learning',              sub: 'Growing in my deen' },
 ]
 
-const PRAYER_OPTIONS = ['5 times daily', 'mostly', 'sometimes', 'working on it']
-const KNOWLEDGE_OPTIONS = ['strong', 'moderate', 'beginner']
-const HIJAB_OPTIONS = ['Always', 'Usually', 'Sometimes', 'No', 'Prefer not to say']
-const QURAN_LISTENING = ['Daily', 'A few times a week', 'Occasionally', 'Rarely']
-const QURAN_MEMORISATION = ['Hafiz/Hafiza', 'Several juz', 'A few surahs', 'Working on it', 'None yet']
-const ZAKAH_SADAQAH = ['Very regularly', 'Regularly', 'Occasionally', 'Working on it']
-const MAWLID_VIEW = ["Celebrate", "Permissible but don't celebrate", 'Avoid', 'Impermissible']
-const MADHAB_CONSISTENCY = ['Strictly one madhab', 'Mostly one madhab', 'Follow evidence', 'No preference']
-const SPOUSE_KNOWLEDGE = ['Very important', 'Important', 'Somewhat important', 'Not a priority']
-const MISSED_PRAYER = ['Rarely miss', 'Make up immediately', 'Make up same day', 'Make tawbah and move forward']
-const WIFE_NIQAB = ['Prefer', 'Not a condition', 'No preference']
-const DEEN_WHEN_BUSY = ['Prayer never slips', 'Mostly consistent', 'Struggle sometimes', 'Working on balance']
-const ISLAMIC_HOME = ['Extremely important', 'Very important', 'Important', 'Somewhat important']
-const HIJAB_OUTSIDE_OPTS = ['Always', 'Usually', 'Sometimes', 'No', 'Prefer not to say']
-const ISLAMIC_CLASSES_OPTS = ['Regularly', 'Occasionally', 'Rarely', 'Not currently but interested', 'Online only']
+const PRAYER_OPTIONS = [
+  { value: 'five_times_daily', label: '5 times daily, alhamdulillah' },
+  { value: 'most_prayers',     label: 'Mostly — occasional missed prayers' },
+  { value: 'some_prayers',     label: 'Sometimes — working on it' },
+  { value: 'not_currently',    label: 'Just getting started' },
+]
+
+const KNOWLEDGE_OPTIONS = [
+  { value: 'advanced',      label: 'Strong — studied formally or extensively' },
+  { value: 'intermediate',  label: 'Moderate — good general knowledge' },
+  { value: 'basic',         label: 'Beginner — learning the basics' },
+]
+
+const MADHAB_OPTIONS = [
+  { value: 'Hanafi',           label: 'Hanafi' },
+  { value: "Shafi'i",          label: "Shafi'i" },
+  { value: 'Maliki',           label: 'Maliki' },
+  { value: 'Hanbali',          label: 'Hanbali' },
+  { value: 'Salafi',           label: 'Salafi' },
+  { value: 'No specific madhab', label: 'No specific madhab' },
+]
+
+const HIJAB_OPTIONS = [
+  { value: 'always',           label: 'Yes, always' },
+  { value: 'sometimes',        label: 'Sometimes' },
+  { value: 'no',               label: 'No' },
+  { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+]
+
+const MUSIC_OPTIONS = [
+  { value: 'yes',           label: 'Yes' },
+  { value: 'no',            label: 'No' },
+  { value: 'nasheeds_only', label: 'Nasheeds only' },
+  { value: 'occasionally',  label: 'Occasionally' },
+]
 
 export default function EditDeenPage() {
   const router = useRouter()
@@ -45,22 +65,10 @@ export default function EditDeenPage() {
   const [madhab, setMadhab] = useState('')
   const [prayerFreq, setPrayerFreq] = useState('')
   const [knowledgeLevel, setKnowledgeLevel] = useState('')
-  const [hasBeard, setHasBeard] = useState<boolean | null>(null)
+  const [hasBeard, setHasBeard] = useState<string>('')
   const [wearsHijab, setWearsHijab] = useState('')
-  const [quranListening, setQuranListening] = useState('')
-  const [quranMemorisation, setQuranMemorisation] = useState('')
   const [traditionalVsReformist, setTraditionalVsReformist] = useState(50)
-  const [zakahSadaqah, setZakahSadaqah] = useState('')
-  const [mawlidView, setMawlidView] = useState('')
-  const [madhabConsistency, setMadhabConsistency] = useState('')
-  const [spouseIslamicKnowledge, setSpouseIslamicKnowledge] = useState('')
-  const [deenGrowth, setDeenGrowth] = useState('')
-  const [missedPrayerApproach, setMissedPrayerApproach] = useState('')
-  const [wifeNiqabPreference, setWifeNiqabPreference] = useState('')
-  const [deenWhenBusy, setDeenWhenBusy] = useState('')
-  const [islamicHomeImportance, setIslamicHomeImportance] = useState('')
-  const [hijabOutsideHome, setHijabOutsideHome] = useState('')
-  const [islamicClassesAttendance, setIslamicClassesAttendance] = useState('')
+  const [doYouListenToMusic, setDoYouListenToMusic] = useState('')
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -80,24 +88,12 @@ export default function EditDeenPage() {
         setMadhab(data.madhab ?? '')
         setPrayerFreq(data.prayer_frequency ?? '')
         setKnowledgeLevel(data.islamic_knowledge_level ?? '')
-        setQuranListening(data.quran_listening ?? '')
-        setQuranMemorisation(data.quran_memorisation ?? '')
         setTraditionalVsReformist(data.traditional_vs_reformist ?? 50)
-        setZakahSadaqah(data.zakah_sadaqah ?? '')
-        setMawlidView(data.mawlid_view ?? '')
-        setMadhabConsistency(data.madhab_consistency ?? '')
-        setSpouseIslamicKnowledge(data.spouse_islamic_knowledge ?? '')
-        setDeenGrowth(data.deen_growth ?? '')
+        setDoYouListenToMusic(data.do_you_listen_to_music ?? '')
         if (profile.gender === 'brother') {
-          setHasBeard(data.has_beard ?? null)
-          setMissedPrayerApproach(data.missed_prayer_approach ?? '')
-          setWifeNiqabPreference(data.wife_niqab_preference ?? '')
+          setHasBeard(data.has_beard === true ? 'yes' : data.has_beard === false ? 'no' : '')
         } else {
           setWearsHijab(data.wears_hijab ?? '')
-          setDeenWhenBusy(data.deen_when_busy ?? '')
-          setIslamicHomeImportance(data.islamic_home_importance ?? '')
-          setHijabOutsideHome(data.hijab_outside_home ?? '')
-          setIslamicClassesAttendance(data.islamic_classes_attendance ?? '')
         }
       }
       setLoading(false)
@@ -116,32 +112,22 @@ export default function EditDeenPage() {
       const supabase = createClient()
       const shared = {
         religiosity_level: religiosity,
-        madhab: madhab.trim() || null,
+        madhab: madhab || null,
         prayer_frequency: prayerFreq,
         islamic_knowledge_level: knowledgeLevel,
-        quran_listening: quranListening || null,
-        quran_memorisation: quranMemorisation || null,
         traditional_vs_reformist: traditionalVsReformist,
-        zakah_sadaqah: zakahSadaqah || null,
-        mawlid_view: mawlidView || null,
-        madhab_consistency: madhabConsistency || null,
-        spouse_islamic_knowledge: spouseIslamicKnowledge || null,
-        deen_growth: deenGrowth || null,
+        do_you_listen_to_music: doYouListenToMusic || null,
       }
       if (gender === 'brother') {
         const { error: e2 } = await supabase.from('brother_profiles').update({
-          ...shared, has_beard: hasBeard,
-          missed_prayer_approach: missedPrayerApproach || null,
-          wife_niqab_preference: wifeNiqabPreference || null,
+          ...shared,
+          has_beard: hasBeard === 'yes' ? true : hasBeard === 'no' ? false : null,
         }).eq('id', userId)
         if (e2) throw e2
       } else {
         const { error: e2 } = await supabase.from('sister_profiles').update({
-          ...shared, wears_hijab: wearsHijab || null,
-          deen_when_busy: deenWhenBusy || null,
-          islamic_home_importance: islamicHomeImportance || null,
-          hijab_outside_home: hijabOutsideHome || null,
-          islamic_classes_attendance: islamicClassesAttendance || null,
+          ...shared,
+          wears_hijab: wearsHijab || null,
         }).eq('id', userId)
         if (e2) throw e2
       }
@@ -156,6 +142,8 @@ export default function EditDeenPage() {
   }
 
   if (loading) return <EditSpinner />
+
+  const BEARD_OPTIONS = [{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]
 
   return (
     <div className="min-h-screen pt-[72px] lg:pt-[76px]" style={{ background: PAGE_BG }}>
@@ -182,48 +170,15 @@ export default function EditDeenPage() {
             </div>
           </div>
 
-          <SimpleDropdown
-            label="Prayer Frequency"
-            value={prayerFreq}
-            onChange={setPrayerFreq}
-            options={PRAYER_OPTIONS}
-          />
-
-          <SimpleDropdown
-            label="Islamic Knowledge Level"
-            value={knowledgeLevel}
-            onChange={setKnowledgeLevel}
-            options={KNOWLEDGE_OPTIONS}
-          />
-
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>
-              Madhab <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span>
-            </label>
-            <input
-              type="text"
-              value={madhab}
-              onChange={e => setMadhab(e.target.value)}
-              placeholder="e.g. Hanafi, Shafi'i"
-              style={{
-                width: '100%', padding: '12px 14px',
-                border: '1px solid #EDE8E3', borderRadius: '12px',
-                fontSize: '14px', color: '#1A1A1A', background: 'white',
-                outline: 'none', boxSizing: 'border-box',
-              }}
-              onFocus={e => { e.currentTarget.style.border = '1.5px solid #AF4D98' }}
-              onBlur={e => { e.currentTarget.style.border = '1px solid #EDE8E3' }}
-            />
-          </div>
+          <PillGroupKV label="Prayer Frequency *" options={PRAYER_OPTIONS} value={prayerFreq} onChange={setPrayerFreq} />
+          <PillGroupKV label="Islamic Knowledge Level *" options={KNOWLEDGE_OPTIONS} value={knowledgeLevel} onChange={setKnowledgeLevel} />
+          <PillGroupKV label="Madhab" options={MADHAB_OPTIONS} value={madhab} onChange={setMadhab} optional />
 
           {gender === 'brother' ? (
-            <YesNo label="Do you have a beard?" value={hasBeard} onChange={setHasBeard} />
+            <PillGroupKV label="Do you have a beard?" options={BEARD_OPTIONS} value={hasBeard} onChange={setHasBeard} optional />
           ) : (
-            <SimpleDropdown label="Wears Hijab" value={wearsHijab} onChange={setWearsHijab} options={HIJAB_OPTIONS} />
+            <PillGroupKV label="Do you wear hijab?" options={HIJAB_OPTIONS} value={wearsHijab} onChange={setWearsHijab} optional />
           )}
-
-          <PillGroup label="How often do you listen to Quran?" options={QURAN_LISTENING} value={quranListening} onChange={setQuranListening} optional />
-          <PillGroup label="How much of the Quran have you memorised?" options={QURAN_MEMORISATION} value={quranMemorisation} onChange={setQuranMemorisation} optional />
 
           <Slider
             value={traditionalVsReformist}
@@ -233,28 +188,7 @@ export default function EditDeenPage() {
             rightLabel="Reformist"
           />
 
-          <PillGroup label="Do you give zakah and sadaqah regularly?" options={ZAKAH_SADAQAH} value={zakahSadaqah} onChange={setZakahSadaqah} optional />
-          <PillGroup label="How important is following a consistent madhab to you?" options={MADHAB_CONSISTENCY} value={madhabConsistency} onChange={setMadhabConsistency} optional />
-          <PillGroup label="What is your view on celebrating Mawlid an-Nabi?" options={MAWLID_VIEW} value={mawlidView} onChange={setMawlidView} optional />
-          <PillGroup label="How important is your spouse's Islamic knowledge to you?" options={SPOUSE_KNOWLEDGE} value={spouseIslamicKnowledge} onChange={setSpouseIslamicKnowledge} optional />
-
-          {gender === 'brother' && (
-            <>
-              <PillGroup label="How do you approach a missed prayer?" options={MISSED_PRAYER} value={missedPrayerApproach} onChange={setMissedPrayerApproach} optional />
-              <PillGroup label="Do you have a preference for whether your wife wears niqab?" options={WIFE_NIQAB} value={wifeNiqabPreference} onChange={setWifeNiqabPreference} optional />
-            </>
-          )}
-
-          {gender === 'sister' && (
-            <>
-              <PillGroup label="How do you maintain your deen when life gets busy?" options={DEEN_WHEN_BUSY} value={deenWhenBusy} onChange={setDeenWhenBusy} optional />
-              <PillGroup label="How important is having an Islamic home environment?" options={ISLAMIC_HOME} value={islamicHomeImportance} onChange={setIslamicHomeImportance} optional />
-              <PillGroup label="Do you wear hijab outside the home?" options={HIJAB_OUTSIDE_OPTS} value={hijabOutsideHome} onChange={setHijabOutsideHome} optional />
-              <PillGroup label="How often do you attend Islamic classes or talks?" options={ISLAMIC_CLASSES_OPTS} value={islamicClassesAttendance} onChange={setIslamicClassesAttendance} optional />
-            </>
-          )}
-
-          <TA label="How do you actively grow in your deen?" value={deenGrowth} onChange={setDeenGrowth} placeholder="e.g. Currently studying tafsir, attending halaqas, working on consistency..." optional />
+          <PillGroupKV label="Do you listen to music?" options={MUSIC_OPTIONS} value={doYouListenToMusic} onChange={setDoYouListenToMusic} optional />
 
           <SaveButton saving={saving} />
         </form>

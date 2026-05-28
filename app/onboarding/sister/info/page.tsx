@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { saveProfileSection, recalculateProfileCompletion } from '@/lib/profile-utils'
 
-const inputCls = 'w-full px-4 py-3 rounded-xl border border-[#EDE8E3] focus:outline-none focus:ring-2 focus:ring-[#AF4D98] focus:border-transparent text-[#1A1A1A] placeholder-gray-400 text-sm'
+const inputCls = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors'
+
+const LANGUAGE_OPTIONS = ['English', 'Arabic', 'Urdu', 'Bengali', 'Somali', 'French', 'Turkish', 'Malay', 'Other']
 
 export default function SisterBasicInfo() {
   const router = useRouter()
@@ -16,7 +18,7 @@ export default function SisterBasicInfo() {
   const [age,       setAge]       = useState('')
   const [location,  setLocation]  = useState('')
   const [ethnicity, setEthnicity] = useState('')
-  const [languages, setLanguages] = useState('')
+  const [languages, setLanguages] = useState<string[]>([])
   const [error,     setError]     = useState<string | null>(null)
 
   useEffect(() => {
@@ -35,13 +37,19 @@ export default function SisterBasicInfo() {
         if (data.age)        setAge(String(data.age))
         if (data.location)   setLocation(data.location)
         if (data.ethnicity)  setEthnicity(data.ethnicity)
-        if (data.languages && Array.isArray(data.languages)) setLanguages(data.languages.join(', '))
+        if (data.languages && Array.isArray(data.languages)) setLanguages(data.languages)
       }
       setLoading(false)
     }
     load()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  function toggleLanguage(lang: string) {
+    setLanguages(prev =>
+      prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang]
+    )
+  }
 
   async function handleNext(e: React.FormEvent) {
     e.preventDefault()
@@ -55,7 +63,7 @@ export default function SisterBasicInfo() {
         age:       ageNum,
         location:  location.trim() || null,
         ethnicity: ethnicity.trim() || null,
-        languages: languages.split(',').map(l => l.trim()).filter(Boolean),
+        languages,
       })
       await recalculateProfileCompletion(userId, 'sister')
       router.push('/onboarding/sister/religiosity')
@@ -72,53 +80,68 @@ export default function SisterBasicInfo() {
   )
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8">
-      <h2 className="text-xl font-medium text-[#1A1A1A] mb-1">Basic Information</h2>
-      <p className="text-[#9B9B9B] text-sm mb-8">Tell us a little about yourself</p>
+    <div className="min-h-screen bg-[#FDF8F3]">
+      <div className="max-w-[480px] mx-auto px-5 py-8 pb-28">
+        <h2 className="text-2xl font-medium text-[#1A1A1A] tracking-[-0.02em] mb-1">Basic Information</h2>
+        <p className="text-[15px] text-[#9B9B9B] mb-8">Tell us a little about yourself</p>
 
-      <form onSubmit={handleNext} className="space-y-5">
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Full Name</label>
-          <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
-            placeholder="e.g. Fatima Ahmed" className={inputCls} />
-        </div>
+        <form onSubmit={handleNext} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Full Name</label>
+            <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
+              placeholder="e.g. Fatima Ahmed" className={inputCls} />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Age</label>
-          <input type="number" required min={18} max={99} value={age} onChange={e => setAge(e.target.value)}
-            placeholder="e.g. 25" className={inputCls} />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Age</label>
+            <input type="number" required min={18} max={99} value={age} onChange={e => setAge(e.target.value)}
+              placeholder="e.g. 25" className={inputCls} />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Location</label>
-          <input type="text" required value={location} onChange={e => setLocation(e.target.value)}
-            placeholder="e.g. Birmingham, UK" className={inputCls} />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Location</label>
+            <input type="text" required value={location} onChange={e => setLocation(e.target.value)}
+              placeholder="e.g. Birmingham, UK" className={inputCls} />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-            Ethnicity <span className="text-[#9B9B9B] font-normal">(optional)</span>
-          </label>
-          <input type="text" value={ethnicity} onChange={e => setEthnicity(e.target.value)}
-            placeholder="e.g. British Bangladeshi" className={inputCls} />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
+              Ethnicity <span className="text-[#9B9B9B] font-normal">(optional)</span>
+            </label>
+            <input type="text" value={ethnicity} onChange={e => setEthnicity(e.target.value)}
+              placeholder="e.g. British Bangladeshi" className={inputCls} />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Languages Spoken</label>
-          <input type="text" value={languages} onChange={e => setLanguages(e.target.value)}
-            placeholder="e.g. English, Bengali, Arabic" className={inputCls} />
-          <p className="text-xs text-[#9B9B9B] mt-1">Separate with commas</p>
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-3">Languages Spoken</label>
+            <div className="flex flex-wrap gap-2">
+              {LANGUAGE_OPTIONS.map(lang => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => toggleLanguage(lang)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                    languages.includes(lang)
+                      ? 'bg-[#AF4D98] text-white border-[#AF4D98]'
+                      : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#D4CBC4]'
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
-        )}
+          {error && (
+            <div className="border border-[#C13515]/20 bg-[#FDECEA] text-[#C13515] text-sm rounded-[10px] px-4 py-3">{error}</div>
+          )}
 
-        <button type="submit" disabled={saving}
-          className="w-full py-3 bg-[#AF4D98] text-white font-medium rounded-full hover:bg-[#9B3D85] transition-colors text-sm disabled:opacity-50">
-          {saving ? 'Saving...' : 'Next →'}
-        </button>
-      </form>
+          <button type="submit" disabled={saving}
+            className="w-full py-3.5 bg-[#AF4D98] text-white font-medium rounded-full text-[15px] hover:bg-[#9B3D85] transition-colors mt-2 disabled:opacity-50">
+            {saving ? 'Saving...' : 'Next →'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

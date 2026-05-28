@@ -192,6 +192,62 @@ export function SimpleDropdown({ label, value, onChange, options, optional, plac
   )
 }
 
+// ─── Pill group (key-value, stores value not label) ──────────────────────────
+
+export function PillGroupKV({ label, options, value, onChange, optional }: {
+  label: string
+  options: { value: string; label: string }[]
+  value: string
+  onChange: (v: string) => void
+  optional?: boolean
+}) {
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>
+        {label}
+        {optional && <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span>}
+      </label>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        {options.map(o => (
+          <Pill key={o.value} label={o.label} selected={value === o.value} onClick={() => onChange(o.value)} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Multi-select pill group (key-value, stores value array) ──────────────────
+
+export function MultiPillGroupKV({ label, options, value, onChange, optional, max }: {
+  label: string
+  options: { value: string; label: string }[]
+  value: string[]
+  onChange: (v: string[]) => void
+  optional?: boolean
+  max?: number
+}) {
+  function toggle(v: string) {
+    if (value.includes(v)) {
+      onChange(value.filter(x => x !== v))
+    } else if (!max || value.length < max) {
+      onChange([...value, v])
+    }
+  }
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#1A1A1A', marginBottom: '10px' }}>
+        {label}
+        {optional && <span style={{ fontSize: '12px', color: '#9B9B9B', fontWeight: 400, marginLeft: '6px' }}>(optional)</span>}
+      </label>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        {options.map(o => (
+          <Pill key={o.value} label={o.label} selected={value.includes(o.value)} onClick={() => toggle(o.value)} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Radio card (Practicing / Moderately / Learning style) ───────────────────
 
 export function RadioCard({ selected, label, sublabel, onClick }: {

@@ -12,7 +12,6 @@ export default function BrotherReference() {
   const [refName,         setRefName]         = useState('')
   const [refRelationship, setRefRelationship] = useState('')
   const [refEmail,        setRefEmail]        = useState('')
-  const [refPhone,        setRefPhone]        = useState('')
   const [loading,         setLoading]         = useState(false)
   const [error,           setError]           = useState<string | null>(null)
 
@@ -24,14 +23,13 @@ export default function BrotherReference() {
       setUserId(user.id)
       const { data } = await supabase
         .from('references')
-        .select('referee_name,referee_relationship,referee_email,referee_phone')
+        .select('referee_name,referee_relationship,referee_email')
         .eq('profile_id', user.id)
         .single()
       if (data) {
         if (data.referee_name)         setRefName(data.referee_name)
         if (data.referee_relationship) setRefRelationship(data.referee_relationship)
         if (data.referee_email)        setRefEmail(data.referee_email)
-        if (data.referee_phone)        setRefPhone(data.referee_phone)
       }
     }
     load()
@@ -48,7 +46,6 @@ export default function BrotherReference() {
       referee_name:         refName.trim(),
       referee_relationship: refRelationship.trim(),
       referee_email:        refEmail.trim(),
-      referee_phone:        refPhone.trim() || null,
       status:               'pending',
     }
     const { data: existingRef } = await supabase
@@ -103,14 +100,6 @@ export default function BrotherReference() {
             <label className="block text-sm font-medium text-[#1A1A1A] mb-1">{"Referee's"} Email</label>
             <input type="email" required value={refEmail} onChange={e => setRefEmail(e.target.value)}
               placeholder="referee@example.com" className={inputCls} />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-              {"Referee's"} Phone <span className="text-[#9B9B9B] font-normal">(optional)</span>
-            </label>
-            <input type="tel" value={refPhone} onChange={e => setRefPhone(e.target.value)}
-              placeholder="+44 7700 000000" className={inputCls} />
           </div>
 
           {error && (

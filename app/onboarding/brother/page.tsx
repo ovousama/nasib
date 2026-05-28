@@ -7,6 +7,8 @@ import { saveProfileSection, recalculateProfileCompletion } from '@/lib/profile-
 
 const inputCls = 'w-full px-4 py-3.5 rounded-[10px] border border-[#EDE8E3] bg-white text-[#1A1A1A] placeholder-[#9B9B9B] text-[15px] focus:outline-none focus:border-[#AF4D98] focus:ring-2 focus:ring-[#AF4D98]/8 transition-colors'
 
+const LANGUAGE_OPTIONS = ['English', 'Arabic', 'Urdu', 'Bengali', 'Somali', 'French', 'Turkish', 'Malay', 'Other']
+
 export default function BrotherBasicInfo() {
   const router = useRouter()
   const [userId,    setUserId]    = useState('')
@@ -16,7 +18,7 @@ export default function BrotherBasicInfo() {
   const [age,       setAge]       = useState('')
   const [location,  setLocation]  = useState('')
   const [ethnicity, setEthnicity] = useState('')
-  const [languages, setLanguages] = useState('')
+  const [languages, setLanguages] = useState<string[]>([])
   const [error,     setError]     = useState<string | null>(null)
 
   useEffect(() => {
@@ -35,13 +37,19 @@ export default function BrotherBasicInfo() {
         if (data.age)        setAge(String(data.age))
         if (data.location)   setLocation(data.location)
         if (data.ethnicity)  setEthnicity(data.ethnicity)
-        if (data.languages && Array.isArray(data.languages)) setLanguages(data.languages.join(', '))
+        if (data.languages && Array.isArray(data.languages)) setLanguages(data.languages)
       }
       setLoading(false)
     }
     load()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  function toggleLanguage(lang: string) {
+    setLanguages(prev =>
+      prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang]
+    )
+  }
 
   async function handleNext(e: React.FormEvent) {
     e.preventDefault()
@@ -55,7 +63,7 @@ export default function BrotherBasicInfo() {
         age:       ageNum,
         location:  location.trim() || null,
         ethnicity: ethnicity.trim() || null,
-        languages: languages.split(',').map(l => l.trim()).filter(Boolean),
+        languages,
       })
       await recalculateProfileCompletion(userId, 'brother')
       router.push('/onboarding/brother/religiosity')
@@ -105,10 +113,23 @@ export default function BrotherBasicInfo() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A1A1A] mb-1">Languages Spoken</label>
-            <input type="text" value={languages} onChange={e => setLanguages(e.target.value)}
-              placeholder="e.g. English, Urdu, Arabic" className={inputCls} />
-            <p className="text-xs text-[#9B9B9B] mt-1">Separate with commas</p>
+            <label className="block text-sm font-medium text-[#1A1A1A] mb-3">Languages Spoken</label>
+            <div className="flex flex-wrap gap-2">
+              {LANGUAGE_OPTIONS.map(lang => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => toggleLanguage(lang)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                    languages.includes(lang)
+                      ? 'bg-[#AF4D98] text-white border-[#AF4D98]'
+                      : 'bg-white text-[#1A1A1A] border-[#EDE8E3] hover:border-[#D4CBC4]'
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
           </div>
 
           {error && (
