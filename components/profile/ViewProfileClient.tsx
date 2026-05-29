@@ -9,9 +9,8 @@ import {
   FieldRow,
   MatchReasonCard,
   QuickFacts,
-  CharacterBio,
-  buildProfileSections,
 } from './shared'
+import ProfileSections, { BioCard, GoalsCard } from './ProfileSections'
 
 type Props = {
   profileData: Record<string, any>
@@ -39,7 +38,6 @@ export default function ViewProfileClient({
   const router = useRouter()
   const p = profileData
   const firstName = String(p.full_name ?? '').split(' ')[0] || 'Profile'
-  const sections = buildProfileSections(p, gender)
 
   const ref = p.reference as any
   const hasVerifiedRef = ref && typeof ref === 'object' && ref.status === 'completed'
@@ -100,11 +98,11 @@ export default function ViewProfileClient({
 
         <QuickFacts profileData={p} />
 
-        <CharacterBio description={p.character_description} />
+        <BioCard description={p.character_description} />
 
-        {sections.map(section => (
-          <SectionCard key={section.key} title={section.title} fields={section.fields} />
-        ))}
+        <GoalsCard goals={p.goals} />
+
+        <ProfileSections profileData={p} gender={gender} />
 
         {hasVerifiedRef && (
           <SectionCard title="Character Reference">

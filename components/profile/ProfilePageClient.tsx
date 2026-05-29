@@ -7,7 +7,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import ProfileHeader from './ProfileHeader'
-import { SectionCard, FieldRow, buildProfileSections } from './shared'
+import { SectionCard, FieldRow } from './shared'
+import ProfileSections, { BioCard, GoalsCard } from './ProfileSections'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 function toBrotherPhotoUrl(path: string | null | undefined): string | null {
@@ -32,13 +33,13 @@ const PAGE_BG = 'linear-gradient(160deg, #F5E6F2 0%, #F4E4BA 60%, #FDF8F3 100%)'
 
 const EDIT_PATHS: Record<string, string> = {
   deen: '/dashboard/profile/edit/deen',
-  family: '/dashboard/profile/edit/family',
   lifestyle: '/dashboard/profile/edit/lifestyle',
   marriage: '/dashboard/profile/edit/marriage',
-  preferences: '/dashboard/profile/edit/preferences',
   financial: '/dashboard/profile/edit/financial',
-  emotional: '/dashboard/profile/edit/emotional',
   character: '/dashboard/profile/edit/character',
+  emotional: '/dashboard/profile/edit/emotional',
+  family: '/dashboard/profile/edit/family',
+  preferences: '/dashboard/profile/edit/preferences',
 }
 
 function CompletionBanner({ percentage }: { percentage: number }) {
@@ -104,7 +105,6 @@ export default function ProfilePageClient({
         : p?.photo_url ? [toBrotherPhotoUrl(p.photo_url)!] : [])
     : sisterSignedUrls
 
-  const sections = buildProfileSections(p ?? {}, gender, EDIT_PATHS)
   const photoEditHref = isBrother ? '/dashboard/profile/edit/photo' : '/dashboard/profile/edit/photos'
 
   return (
@@ -124,7 +124,7 @@ export default function ProfilePageClient({
 
         <CompletionBanner percentage={completionPercentage} />
 
-        {/* ── Account (own profile only) ─────────────────────────────────── */}
+        {/* ── Account ────────────────────────────────────────────────────── */}
         <SectionCard title="Account" editHref="/auth/reset-password">
           <FieldRow label="Email" value={userEmail} />
           <FieldRow label="Gender" value={isBrother ? 'Brother' : 'Sister'} />
@@ -168,12 +168,14 @@ export default function ProfilePageClient({
           )
         )}
 
-        {/* ── Profile sections ───────────────────────────────────────────── */}
-        {sections.map(section => (
-          <SectionCard key={section.key} title={section.title} fields={section.fields} editHref={section.editHref} />
-        ))}
+        {/* ── Bio & Goals ────────────────────────────────────────────────── */}
+        <BioCard description={p?.character_description} editHref="/dashboard/profile/edit/character" />
+        <GoalsCard goals={p?.goals} editHref="/dashboard/profile/edit/character" />
 
-        {/* ── Photos (own profile, with upload link) ─────────────────────── */}
+        {/* ── Profile sections ───────────────────────────────────────────── */}
+        <ProfileSections profileData={p ?? {}} gender={gender} editPaths={EDIT_PATHS} />
+
+        {/* ── Photos ─────────────────────────────────────────────────────── */}
         <SectionCard title="Photos" editHref={photoEditHref}>
           <div style={{ padding: '14px 18px' }}>
             {photoUrls.length > 0 ? (
